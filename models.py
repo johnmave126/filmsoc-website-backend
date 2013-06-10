@@ -14,6 +14,9 @@ from settings import Settings
 
 #custom auth model
 class CustomAuth(Auth):
+    def get_user_model(self):
+        return User
+
     def test_user(self, test_fn):
         def decorator(fn):
             @functools.wraps(fn)
