@@ -17,4 +17,4 @@ def create_tables():
 
 @app.route('/')
 def only_test():
-    print url_for('login')
+    return "url_for('login')"

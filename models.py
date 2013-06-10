@@ -31,7 +31,9 @@ class CustomAuth(Auth):
 
     def login(self):
         if request.method == 'GET':
-            status, username, cookie = pycas.login(Settings.AUTH_SERVER, url_for('login'))
+            return url_for('%s.login' % self.blueprint.name)
+
+            status, username, cookie = pycas.login(Settings.AUTH_SERVER, url_for('%s.login' % self.blueprint.name))
             if status == CAS_OK:
                 try:
                     user = User.get(User.itsc == username)

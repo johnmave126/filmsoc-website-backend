@@ -385,7 +385,7 @@ def login(cas_host, service_url, lifetime=None, secure=1, protocol=2, path="/", 
 if __name__=="__main__":
 
 	CAS_SERVER  = "https://login.uconn.edu"
-    SERVICE_URL = "http://bluet.ucc.uconn.edu/~jon/cgi-bin/pycas.py"
+	SERVICE_URL = "http://bluet.ucc.uconn.edu/~jon/cgi-bin/pycas.py"
 
 	status, id, cookie = login(CAS_SERVER, SERVICE_URL, secure=0, opt="gateway")
 
