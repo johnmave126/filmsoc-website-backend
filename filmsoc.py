@@ -2,7 +2,7 @@
 from flask import Flask
 
 #database
-from flask_peewee import Database
+from flask_peewee.db import Database
 
 #app and database
 app = Flask(__name__)
