@@ -1,5 +1,5 @@
 #framework
-from flask import Flask
+from flask import Flask, url_for
 
 #database
 from flask_peewee.db import Database
@@ -13,6 +13,11 @@ db = Database(app)
 
 def create_tables():
     pass
+
+
+@app.route('/')
+def only_test():
+    print url_for('login')
 
 if __name__ == '__main__':
     app.run()

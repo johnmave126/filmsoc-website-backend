@@ -1,18 +1,48 @@
+# Python modules
+import functools
+import pycas
 
-#framework related
-from flask_peewee.auth import Auth, BaseUser
+# framework related
+from flask import request, abort, url_for, redirect
 from peewee import *
+from flask_peewee.auth import Auth, BaseUser
 
+# custom related
 from filmsoc import db
+from settings import Settings
 
 
 #custom auth model
 class CustomAuth(Auth):
-    def login(self):
-        error = None
+    def test_user(self, test_fn):
+        def decorator(fn):
+            @functools.wraps(fn)
+            def inner(*args, **kwargs):
+                user = self.get_logged_in_user()
 
-        if request.method == 'POST':
-            pass
+                if not user or not test_fn(user):
+                    abort(403)
+                return fn(*args, **kwargs)
+            return inner
+        return decorator
+
+    def login(self):
+        if request.method == 'GET':
+            status, username, cookie = pycas.login(Settings.AUTH_SERVER, url_for('login'))
+            if status == CAS_OK:
+                try:
+                    user = User.get(User.itsc == username)
+                    self.login_user(user)
+                    return redirect(Settings.FRONT_SERVER + '/#!' + request.args.get('next'))
+                except User.DoesNotExist:
+                    pass
+            abort(403)
+        else:
+            abort(405)
+
+    def logout(self):
+        self.logout_user(self.get_logged_in_user())
+        return redirect(Settings.FRONT_SERVER + '/#!' + request.args.get('next'))
 
 
 # user model

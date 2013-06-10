@@ -8,3 +8,5 @@ class Settings(object):
     }
     DEBUG = True
     SECRET_KEY = 'ssshhhh'
+    AUTH_SERVER = 'https://cas.ust.hk'
+    FRONT_SERVER = 'http://ihome.ust.hk/~su_film'
