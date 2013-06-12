@@ -1,6 +1,6 @@
 # Python modules
 import functools
-import pycas
+import flask_cas
 
 # framework related
 from flask import request, abort, url_for, redirect
@@ -8,8 +8,9 @@ from peewee import *
 from flask_peewee.auth import Auth, BaseUser
 
 # custom related
-from filmsoc import db
+from app import app, db
 from settings import Settings
+from helpers import after_this_request
 
 
 #custom auth model
@@ -31,17 +32,29 @@ class CustomAuth(Auth):
 
     def login(self):
         if request.method == 'GET':
+            next_url = request.args.get('next') or ""
             login_url = 'http://' + Settings.SERVER_NAME + url_for('%s.login' % self.blueprint.name)
-            status, username, cookie = pycas.login(Settings.AUTH_SERVER, login_url)
-            if status == CAS_OK:
+            status, username, cookie = flask_cas.login(Settings.AUTH_SERVER, login_url)
+            if status == flask_cas.CAS_OK:
                 try:
                     user = User.get(User.itsc == username)
                     self.login_user(user)
-                    return redirect(Settings.FRONT_SERVER + '/#!' + request.args.get('next'))
+                    # set cookie for cas auth
+                    if cookie:
+                        @after_this_request
+                        def store_cookie(response):
+                            response.set_cookie(flask_cas.FLASK_CAS_NAME, cookie, path=request.url_root, httponly=True)
+
+                    # redirect to front server
+                    return redirect(Settings.FRONT_SERVER + '/#!' + next_url)
                 except User.DoesNotExist:
                     pass
+
+            # not authorized
             abort(403)
         else:
+
+            # method not allowed
             abort(405)
 
     def logout(self):
@@ -126,6 +139,8 @@ class Disk(db.Model):
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
     avail_type = CharField()  # Available, Borrowed, Reserved, Voting
 
+    is_draft = BooleanField()
+
     def callNumber(self):
         return self.diskType + str(self.diskID)
 
@@ -153,3 +168,9 @@ class Disk(db.Model):
 
         # save the change
         self.save()
+
+
+class RegularFilmShow(db.Model):
+    state = CharField()  # Draft, Closed, Open, Pending, Passed
+
+    film_1 = ForeignKeyField(Disk, related_name='onshow_1', null=True)
