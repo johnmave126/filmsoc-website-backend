@@ -43,6 +43,7 @@ class CustomAuth(Auth):
                     if cookie:
                         @after_this_request
                         def store_cookie(response):
+                            print request.url_root
                             response.set_cookie(flask_cas.FLASK_CAS_NAME, cookie, path=request.url_root, httponly=True)
 
                     # redirect to front server
