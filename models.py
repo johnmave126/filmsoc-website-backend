@@ -37,8 +37,8 @@ class CustomAuth(Auth):
             status, username, cookie = flask_cas.login(Settings.AUTH_SERVER, login_url)
             if status == flask_cas.CAS_OK:
                 try:
-                    user = User.get(User.itsc == username)
-                    self.login_user(user)
+                    #user = User.get(User.itsc == username)
+                    #self.login_user(user)
                     # set cookie for cas auth
                     if cookie:
                         @after_this_request
