@@ -1,4 +1,4 @@
-from flask.json import dumps, loads
+from flask import json
 from peewee import TextField
 from string import split, join
 
@@ -13,7 +13,7 @@ class SimpleListField(TextField):
 
 class JSONField(TextField):
     def db_value(self, value):
-        return dumps(value)
+        return json.dumps(value)
 
     def python_value(self, value):
-        return loads(value)
+        return json.loads(value)
