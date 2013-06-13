@@ -9,8 +9,8 @@ from flask_peewee.auth import Auth, BaseUser
 
 # custom related
 from app import app, db
-from settings import Settings
 from helpers import after_this_request
+from db_ext import JSONField, SimpleListField
 
 
 #custom auth model
@@ -33,21 +33,20 @@ class CustomAuth(Auth):
     def login(self):
         if request.method == 'GET':
             next_url = request.args.get('next') or ""
-            login_url = 'http://' + Settings.SERVER_NAME + url_for('%s.login' % self.blueprint.name)
-            status, username, cookie = flask_cas.login(Settings.AUTH_SERVER, login_url)
+            login_url = 'http://' + self.app.config['SERVER_NAME'] + url_for('%s.login' % self.blueprint.name)
+            status, username, cookie = flask_cas.login(self.app.config['AUTH_SERVER'], login_url)
             if status == flask_cas.CAS_OK:
                 try:
-                    #user = User.get(User.itsc == username)
-                    #self.login_user(user)
+                    user = User.get(User.itsc == username, User.expired == False)
+                    self.login_user(user)
                     # set cookie for cas auth
                     if cookie:
                         @after_this_request
                         def store_cookie(response):
-                            print url_for('index')
                             response.set_cookie(flask_cas.FLASK_CAS_NAME, cookie, path=url_for('index'), httponly=True)
 
                     # redirect to front server
-                    return redirect(Settings.FRONT_SERVER + '/#!' + next_url)
+                    return redirect(self.app.config['FRONT_SERVER'] + '/#!' + next_url)
                 except User.DoesNotExist:
                     pass
 
@@ -60,12 +59,14 @@ class CustomAuth(Auth):
 
     def logout(self):
         self.logout_user(self.get_logged_in_user())
-        return redirect(Settings.FRONT_SERVER + '/#!' + request.args.get('next'))
+        return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
 
 
 # user model
 class User(db.Model, BaseUser):
-    itsc = CharField(unique=True, primary_key=True)
+    id = PrimaryKeyField()
+
+    itsc = CharField(unique=True)
     student_id = CharField(max_length=8, unique=True)  # max length is 8
     university_id = CharField(max_length=9, null=True, unique=True)
     mobile = CharField(max_length=8, null=True)
@@ -84,27 +85,12 @@ class User(db.Model, BaseUser):
 
     admin = BooleanField()
 
-    def __unicode__(self):
-        return self.full_name
-
-    def dvd_borrowed(self):
-        return self.borrowed
-
-    def dvd_borrow_count(self):
-        return self.borrowed.count()
-
-    def dvd_reserved(self):
-        return self.reserved
-
-    def dvd_reserved_count(self):
-        return self.reserved.count()
-
     def rfs_vote(self):
         active_rfs = RegularFilmShow.getRecent()
         return Log.select().where(
             Log.model == 'RegularFilmShow',
             Log.type == 'vote',
-            Log.model_refer == active_rfs,
+            Log.model_refer == active_rfs.id,
             Log.user_affected == self
         )
 
@@ -113,7 +99,7 @@ class User(db.Model, BaseUser):
         return Log.select().where(
             Log.model == 'RegularFilmShow',
             Log.type == 'vote',
-            Log.model_refer == active_rfs,
+            Log.model_refer == active_rfs.id,
             Log.user_affected == self
         ).count()
 
@@ -128,11 +114,11 @@ class Disk(db.Model):
     desc_ch = TextField()
     director_en = TextField(null=True)
     director_ch = TextField(null=True)
-    actors = TextField(null=True)  # actors, json
+    actors = SimpleListField(null=True)  # actors, simmple list
 
     show_year = IntegerField()
     cover_url = CharField()
-    tags = TextField()  # tags, json
+    tags = SimpleListField()  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)
 
@@ -172,6 +158,141 @@ class Disk(db.Model):
 
 
 class RegularFilmShow(db.Model):
+    id = PrimaryKeyField()
+
     state = CharField()  # Draft, Closed, Open, Pending, Passed
 
     film_1 = ForeignKeyField(Disk, related_name='onshow_1', null=True)
+    film_2 = ForeignKeyField(Disk, related_name='onshow_2', null=True)
+    film_3 = ForeignKeyField(Disk, related_name='onshow_3', null=True)
+
+    vote_cnt_1 = IntegerField()
+    vote_cnt_2 = IntegerField()
+    vote_cnt_3 = IntegerField()
+
+    participant_list = SimpleListField(null=True)
+
+    created_at = DateField()
+
+    @classmethod
+    def getRecent():
+        return RegularFilmShow.select().where(
+            RegularFilmShow.state == 'Open'
+        ).order_by(RegularFilmShow.created_at.desc()).limit(1)
+
+
+class PreviewShowTicket(db.Model):
+    id = PrimaryKeyField()
+    state = CharField()  # Draft, Open, Closed
+
+    title_en = TextField()
+    title_ch = TextField()
+    desc_en = TextField()
+    desc_ch = TextField()
+    director_en = TextField(null=True)
+    director_ch = TextField(null=True)
+    actors = SimpleListField(null=True)  # actors, simmple list
+
+    cover_url = CharField()
+    length = IntegerField(null=True)
+    language = CharField(null=True)
+    subtitle = CharField(null=True)
+    quantity = IntegerField()
+    venue = TextField()
+
+    apply_deadline = DateTimeField()
+    show_time = DateTimeField(null=True)
+    remarks = TextField(null=True)
+
+    applicant = SimpleListField(null=True)
+    successful_applicant = SimpleListField(null=True)
+
+
+class DiskReview(db.Model):
+    id = PrimaryKeyField()
+
+    poster = ForeignKeyField(User, related_name='reviews')
+    disk = ForeignKeyField(Disk, related_name='reviews')
+
+    created_at = DateTimeField()
+    content = TextField()
+
+
+class News(db.Model):
+    id = PrimaryKeyField()
+
+    title = TextField()
+    content = TextField()
+    created_at = DateTimeField()
+
+
+class Document(db.Model):
+    id = PrimaryKeyField()
+
+    title = TextField()
+    doc_url = CharField()
+
+
+class Publication(db.Model):
+    id = PrimaryKeyField()
+
+    title = TextField()
+    doc_url = CharField()
+    cover_url = CharField()
+
+    uploaded_at = DateField()
+    type = CharField()  # Magazine, MicroMagazine
+
+
+class Sponsor(db.Model):
+    id = PrimaryKeyField()
+
+    name = TextField()
+    img_url = CharField()
+
+    x = IntegerField()
+    y = IntegerField()
+    w = IntegerField()
+    h = IntegerField()
+
+
+class Exco(db.Model):
+    id = PrimaryKeyField()
+
+    name_en = CharField()
+    name_ch = CharField()
+    position = CharField()
+    desc = TextField()
+
+    img_url = CharField()
+    email = CharField()
+
+    hall_allocate = IntegerField(null=True)
+
+
+class SiteSettings(db.Model):
+    key = CharField()
+    value = CharField()
+
+
+class Log(db.Model):
+    id = PrimaryKeyField()
+
+    model = CharField()
+    type = CharField()
+    model_refer = IntegerField()
+    user_affected = ForeignKeyField(User, related_name)
+
+
+def creaate_tables():
+    User.create_table()
+    Disk.create_table()
+    RegularFilmShow.create_table()
+    PreviewShowTicket.create_table()
+    DiskReview.create_table()
+    News.create_table()
+    Document.create_table()
+    Sponsor.create_table()
+    Exco.create_table()
+    SiteSettings.create_table()
+    Log.create_table()
