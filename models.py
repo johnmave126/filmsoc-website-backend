@@ -84,6 +84,7 @@ class User(db.Model, BaseUser):
     rfs_count = IntegerField()  # for regular film show
 
     admin = BooleanField()
+    create_log = ForeignKeyField(Log)
 
     def rfs_vote(self):
         active_rfs = RegularFilmShow.getRecent()
@@ -117,7 +118,7 @@ class Disk(db.Model):
     actors = SimpleListField(null=True)  # actors, simmple list
 
     show_year = IntegerField()
-    cover_url = CharField()
+    cover_url = ForeignKeyField(File)
     tags = SimpleListField()  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)
@@ -127,6 +128,7 @@ class Disk(db.Model):
     avail_type = CharField()  # Available, Borrowed, Reserved, Voting
 
     is_draft = BooleanField()
+    create_log = ForeignKeyField(Log)
 
     def callNumber(self):
         return self.diskType + str(self.diskID)
@@ -162,9 +164,9 @@ class RegularFilmShow(db.Model):
 
     state = CharField()  # Draft, Closed, Open, Pending, Passed
 
-    film_1 = ForeignKeyField(Disk, related_name='onshow_1', null=True)
-    film_2 = ForeignKeyField(Disk, related_name='onshow_2', null=True)
-    film_3 = ForeignKeyField(Disk, related_name='onshow_3', null=True)
+    film_1 = ForeignKeyField(Disk, null=True)
+    film_2 = ForeignKeyField(Disk, null=True)
+    film_3 = ForeignKeyField(Disk, null=True)
 
     vote_cnt_1 = IntegerField()
     vote_cnt_2 = IntegerField()
@@ -172,7 +174,7 @@ class RegularFilmShow(db.Model):
 
     participant_list = SimpleListField(null=True)
 
-    created_at = DateField()
+    create_log = ForeignKeyField(Log)
 
     @classmethod
     def getRecent():
@@ -193,7 +195,7 @@ class PreviewShowTicket(db.Model):
     director_ch = TextField(null=True)
     actors = SimpleListField(null=True)  # actors, simmple list
 
-    cover_url = CharField()
+    cover_url = ForeignKeyField(File)
     length = IntegerField(null=True)
     language = CharField(null=True)
     subtitle = CharField(null=True)
@@ -207,14 +209,16 @@ class PreviewShowTicket(db.Model):
     applicant = SimpleListField(null=True)
     successful_applicant = SimpleListField(null=True)
 
+    create_log = ForeignKeyField(Log)
+
 
 class DiskReview(db.Model):
     id = PrimaryKeyField()
 
-    poster = ForeignKeyField(User, related_name='reviews')
+    poster = ForeignKeyField(User)
     disk = ForeignKeyField(Disk, related_name='reviews')
 
-    created_at = DateTimeField()
+    create_log = ForeignKeyField(Log)
     content = TextField()
 
 
@@ -223,24 +227,26 @@ class News(db.Model):
 
     title = TextField()
     content = TextField()
-    created_at = DateTimeField()
+    create_log = ForeignKeyField(Log)
 
 
 class Document(db.Model):
     id = PrimaryKeyField()
 
     title = TextField()
-    doc_url = CharField()
+    doc_url = ForeignKeyField(File)
+
+    create_log = ForeignKeyField(Log)
 
 
 class Publication(db.Model):
     id = PrimaryKeyField()
 
     title = TextField()
-    doc_url = CharField()
-    cover_url = CharField()
+    doc_url = ForeignKeyField(File)
+    cover_url = ForeignKeyField(File)
 
-    uploaded_at = DateField()
+    create_log = ForeignKeyField(Log)
     type = CharField()  # Magazine, MicroMagazine
 
 
@@ -248,12 +254,14 @@ class Sponsor(db.Model):
     id = PrimaryKeyField()
 
     name = TextField()
-    img_url = CharField()
+    img_url = ForeignKeyField(File)
 
     x = IntegerField()
     y = IntegerField()
     w = IntegerField()
     h = IntegerField()
+
+    create_log = ForeignKeyField(Log)
 
 
 class Exco(db.Model):
@@ -264,7 +272,7 @@ class Exco(db.Model):
     position = CharField()
     desc = TextField()
 
-    img_url = CharField()
+    img_url = ForeignKeyField(File)
     email = CharField()
 
     hall_allocate = IntegerField(null=True)
@@ -288,6 +296,22 @@ class Log(db.Model):
     created_at = DateTimeField()
 
 
+class File(db.Model):
+    id = PrimaryKeyField()
+
+    url = CharField()
+    create_log = ForeignKeyField(Log)
+
+
+class OneSentence(db.Model):
+    id = PrimaryKeyField()
+
+    film = TextField()
+    content = TextField()
+
+    create_log = ForeignKeyField(Log)
+
+
 def create_tables():
     User.create_table()
     Disk.create_table()
@@ -300,3 +324,5 @@ def create_tables():
     Exco.create_table()
     SiteSettings.create_table()
     Log.create_table()
+    File.create_table()
+    OneSentence.create_table()
