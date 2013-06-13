@@ -62,6 +62,26 @@ class CustomAuth(Auth):
         return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
 
 
+#log model
+class Log(db.Model):
+    id = PrimaryKeyField()
+
+    model = CharField()
+    type = CharField()
+    model_refer = IntegerField()
+    user_affected = ForeignKeyField(User)
+    admin_involved = ForeignKeyField(User)
+    content = TextField()
+
+    created_at = DateTimeField()
+
+
+class File(db.Model):
+    id = PrimaryKeyField()
+
+    url = CharField()
+
+
 # user model
 class User(db.Model, BaseUser):
     id = PrimaryKeyField()
@@ -283,26 +303,6 @@ class SiteSettings(db.Model):
     value = CharField()
 
 
-class Log(db.Model):
-    id = PrimaryKeyField()
-
-    model = CharField()
-    type = CharField()
-    model_refer = IntegerField()
-    user_affected = ForeignKeyField(User)
-    admin_involved = ForeignKeyField(User)
-    content = TextField()
-
-    created_at = DateTimeField()
-
-
-class File(db.Model):
-    id = PrimaryKeyField()
-
-    url = CharField()
-    create_log = ForeignKeyField(Log)
-
-
 class OneSentence(db.Model):
     id = PrimaryKeyField()
 
@@ -313,6 +313,8 @@ class OneSentence(db.Model):
 
 
 def create_tables():
+    Log.create_table()
+    File.create_table()
     User.create_table()
     Disk.create_table()
     RegularFilmShow.create_table()
@@ -323,6 +325,4 @@ def create_tables():
     Sponsor.create_table()
     Exco.create_table()
     SiteSettings.create_table()
-    Log.create_table()
-    File.create_table()
     OneSentence.create_table()
