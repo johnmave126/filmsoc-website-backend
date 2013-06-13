@@ -281,10 +281,14 @@ class Log(db.Model):
     model = CharField()
     type = CharField()
     model_refer = IntegerField()
-    user_affected = ForeignKeyField(User, related_name)
+    user_affected = ForeignKeyField(User)
+    admin_involved = ForeignKeyField(User)
+    content = TextField()
+
+    created_at = DateTimeField()
 
 
-def creaate_tables():
+def create_tables():
     User.create_table()
     Disk.create_table()
     RegularFilmShow.create_table()
