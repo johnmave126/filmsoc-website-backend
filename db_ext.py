@@ -4,8 +4,6 @@ from string import split, join
 
 
 class SimpleListField(TextField):
-    db_field = 'simplelist'
-
     def db_value(self, value):
         return join(value, ',')
 
@@ -14,8 +12,6 @@ class SimpleListField(TextField):
 
 
 class JSONField(TextField):
-    db_filed = 'json'
-
     def db_value(self, value):
         return dumps(value)
 
