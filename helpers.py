@@ -3,6 +3,10 @@ from flask import g
 from app import app
 import ldap
 from ldap.filter import escape_filter_chars
+import urllib2
+import datetime
+from urllib import urlencode
+from BeautifulSoup import BeautifulStoneSoup
 
 
 def after_this_request(f):
@@ -56,3 +60,22 @@ def query_user(itsc):
         return None
     except ldap.LDAPError:
         return None
+
+
+def update_mailing_list(new_list):
+    auth_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    auth_mgr.add_password(None, "https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/", app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
+    auth_handler = urllib2.HTTPBasicAuthHandler(auth_mgr)
+
+    opener = urllib2.build_opener(auth_handler)
+
+    # get whotime
+    url = 'https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/listadmin_majorcool'
+    payload = {
+        'action': 'edit',
+        'list': 'su-film-list',
+        'view': 'list'
+    }
+    data = urlencode(payload)
+    response = opener.open(url, data).read()
+    print response
