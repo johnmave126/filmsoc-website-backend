@@ -2,6 +2,7 @@ from math import sqrt
 from flask import g
 from app import app
 import ldap
+from ldap.filter import escape_filter_chars
 
 
 def after_this_request(f):
@@ -37,7 +38,7 @@ def query_user(itsc):
         conn.simple_bind_s('HKUST\\' + app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
 
         base_dn = 'CN=Users,DC=ust,DC=hk'
-        filter = '(CN=' + ldap.filter.escape_filter_chars(itsc) + ')'
+        filter = '(CN=' + escape_filter_chars(itsc) + ')'
         attrs = ['displayName', 'whenCreated']
 
         r = conn.search(base_dn, ldap.SCOPE_BASE, filter, attrs)
