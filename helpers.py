@@ -34,7 +34,6 @@ def query_user(itsc):
     conn.set_option(ldap.OPT_REFERRALS, 0)
     conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
     try:
-        conn.start_tls_s()
         print conn.simple_bind_s('HKUST\\' + app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
     except ldap.LDAPError, e:
         print e
