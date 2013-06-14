@@ -1,6 +1,7 @@
 from math import sqrt
 from flask import g
 from app import app
+
 import ldap
 from ldap.filter import escape_filter_chars
 import urllib2
@@ -8,6 +9,11 @@ import datetime
 from urllib import urlencode
 import re
 from string import join
+from ftplib import FTP
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
+import smtplib
 
 
 def after_this_request(f):
@@ -55,6 +61,7 @@ def query_user(itsc):
         r_dict = {}
         for key, value in r_attrs.iteritems():
             r_dict[key] = value[0]
+        conn.unbind()
         return r_dict
     except ldap.INVALID_CREDENTIALS:
         pass  # send email here
@@ -80,7 +87,7 @@ def update_mailing_list(new_list):
     data = urlencode(payload)
     response = opener.open(url, data).read()
     regexp = re.compile('NAME="whotime"\s+VALUE="(\d+)"', re.I)
-    whotime_match = regexp.match(response)
+    whotime_match = regexp.search(response)
     if whotime_match is None:
         raise IOError('Cannot find whotime')
     whotime = whotime_match.group(1)
@@ -93,7 +100,32 @@ def update_mailing_list(new_list):
         'list': 'su-film-list',
         'passwd': 'su-film-list.admin',
         'whotime': whotime,
-        'who': join(new_list)
+        'who': join(new_list, '\n')
     }
     data = urlencode(payload)
-    opener.open(url, data)
+    opener.open(url, data).read()
+
+
+def upload_file(filename, file_handler):
+    conn = FTP('ihome.ust.hk', app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
+    conn.cwd('/asset/upload')
+    conn.storbinary("STOR " + filename, file_handler)
+    conn.quit()
+
+
+def send_email(receiver, bcc, subject, body):
+    from_address = app.config['SOCIETY_USERNAME'] + '@ust.hk'
+
+    msg = MIMEMultipart()
+    msg['From'] = msg['Reply-To'] = from_address
+    msg['To'] = COMMASPACE.join(receiver)
+    msg['Subject'] = '[Film Society]' + subject
+    msg['Date'] = formatdate(localtime=True)
+    msg.attach(MIMEText(body, 'html'))
+
+    smtp = smtplib.SMTP('smtp.ust.hk')
+    smtp.login(app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
+    to_list = list(set(receiver + bcc + [from_address]))
+    print(to_list)
+    smtp.sendmail(from_address, to_list, msg.as_string())
+    smtp.quit()
