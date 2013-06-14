@@ -34,7 +34,18 @@ def query_user(itsc):
     conn.set_option(ldap.OPT_REFERRALS, 0)
     conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
     try:
-        print conn.simple_bind_s('HKUST\\' + app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
-    except ldap.LDAPError, e:
-        print e
+        conn.simple_bind_s('HKUST\\' + app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
+
+        base_dn = 'CN=Users,DC=ust,DC=hk'
+        filter = '(CN=' + ldap.filter.escape_filter_chars(itsc) + ')'
+        attrs = ['displayName', 'whenCreated']
+
+        r = conn.search(base_dn, ldap.SCOPE_BASE, filter, attrs)
+        type, data = conn.result(r, timeout=10)
+        entry_dn, r_attrs = data[0]
+        print type(r_attrs)
+    except ldap.INVALID_CREDENTIALS:
+        pass  # send email here
+        return None
+    except ldap.LDAPError:
         return None
