@@ -47,7 +47,10 @@ def query_user(itsc):
             #  not found or something weird
             return None
         entry_dn, r_attrs = data[0]
-        print type(r_attrs)
+        r_dict = {}
+        for key, value in r_attrs.iteritems():
+            r_dict[key] = value[0]
+        return r_dict
     except ldap.INVALID_CREDENTIALS:
         pass  # send email here
         return None
