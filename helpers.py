@@ -38,11 +38,14 @@ def query_user(itsc):
         conn.simple_bind_s('HKUST\\' + app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
 
         base_dn = 'CN=Users,DC=ust,DC=hk'
-        filter = '(CN=' + escape_filter_chars(itsc) + ')'
+        Filter = '(CN=' + escape_filter_chars(itsc) + ')'
         attrs = ['displayName', 'whenCreated']
 
-        r = conn.search(base_dn, ldap.SCOPE_BASE, filter, attrs)
-        type, data = conn.result(r, timeout=10)
+        r = conn.search(base_dn, ldap.SCOPE_BASE, Filter, attrs)
+        Type, data = conn.result(r, timeout=10)
+        if len(data) != 1:
+            #  not found or something weird
+            return None
         entry_dn, r_attrs = data[0]
         print type(r_attrs)
     except ldap.INVALID_CREDENTIALS:
