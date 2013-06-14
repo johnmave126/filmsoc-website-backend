@@ -6,7 +6,8 @@ from ldap.filter import escape_filter_chars
 import urllib2
 import datetime
 from urllib import urlencode
-from BeautifulSoup import BeautifulStoneSoup
+import re
+from string import join
 
 
 def after_this_request(f):
@@ -78,4 +79,21 @@ def update_mailing_list(new_list):
     }
     data = urlencode(payload)
     response = opener.open(url, data).read()
-    print response
+    regexp = re.compile('NAME="whotime"\s+VALUE="(\d+)"', re.I)
+    whotime_match = regexp.match(response)
+    if whotime_match is None:
+        raise IOError('Cannot find whotime')
+    whotime = whotime_match.group(1)
+
+    # modify list
+    url = 'https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/listadmin_majorcool'
+    payload = {
+        'submit_as': 'owner-su-film-list',
+        'action': 'do_approve',
+        'list': 'su-film-list',
+        'passwd': 'su-film-list.admin',
+        'whotime': whotime,
+        'who': join(new_list)
+    }
+    data = urlencode(payload)
+    opener.open(url, data)
