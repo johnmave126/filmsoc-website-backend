@@ -62,20 +62,6 @@ class CustomAuth(Auth):
         return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
 
 
-#log model
-class Log(db.Model):
-    id = PrimaryKeyField()
-
-    model = CharField()
-    type = CharField()
-    model_refer = IntegerField()
-    user_affected = ForeignKeyField(User)
-    admin_involved = ForeignKeyField(User)
-    content = TextField()
-
-    created_at = DateTimeField()
-
-
 class File(db.Model):
     id = PrimaryKeyField()
 
@@ -104,7 +90,6 @@ class User(db.Model, BaseUser):
     rfs_count = IntegerField()  # for regular film show
 
     admin = BooleanField()
-    create_log = ForeignKeyField(Log)
 
     def rfs_vote(self):
         active_rfs = RegularFilmShow.getRecent()
@@ -123,6 +108,20 @@ class User(db.Model, BaseUser):
             Log.model_refer == active_rfs.id,
             Log.user_affected == self
         ).count()
+
+
+#log model
+class Log(db.Model):
+    id = PrimaryKeyField()
+
+    model = CharField()
+    type = CharField()
+    model_refer = IntegerField()
+    user_affected = ForeignKeyField(User)
+    admin_involved = ForeignKeyField(User)
+    content = TextField()
+
+    created_at = DateTimeField()
 
 
 class Disk(db.Model):
