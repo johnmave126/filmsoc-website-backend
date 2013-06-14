@@ -3,3 +3,6 @@ peewee>=2.1.2
 flask-peewee>=0.6.4
 python-ldap>=2.4.12
 MySQL-python>=1.2.4
+lxml>=3.2.1
+html5lib>=1.0b1
+beautifulsoup4>=4.2.1
