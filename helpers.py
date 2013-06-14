@@ -41,7 +41,7 @@ def query_user(itsc):
         Filter = '(CN=' + escape_filter_chars(itsc) + ')'
         attrs = ['displayName', 'whenCreated']
 
-        r = conn.search(base_dn, ldap.SCOPE_BASE, Filter, attrs)
+        r = conn.search(base_dn, ldap.SCOPE_ONELEVEL, Filter, attrs)
         Type, data = conn.result(r, timeout=10)
         if len(data) != 1:
             #  not found or something weird
