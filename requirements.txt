@@ -1,0 +1,5 @@
+Flask>=0.9
+peewee>=2.1.2
+flask-peewee>=0.6.4
+python-ldap>=2.4.12
+MySQL-python>=1.2.4
