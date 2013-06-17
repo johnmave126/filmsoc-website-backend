@@ -1,6 +1,6 @@
 from string import join
 
-from flask import request, g, json, make_response
+from flask import request, g, json, make_response, jsonify
 from flask_peewee.rest import RestAPI, RestResource, RestrictOwnerResource, Authentication
 
 from app import app
@@ -12,7 +12,7 @@ from helpers import query_user
 
 class CustomRestAPI(RestAPI):
     def response_auth_failed(self):
-        return json.jsonify(errno=403, error="User not login")
+        return jsonify(errno=403, error="User not login")
 
 
 class CustomAuthentication(Authentication):
@@ -67,13 +67,13 @@ class CustomResource(RestResource):
         return (g.user and g.user.admin)
 
     def response_forbidden(self):
-        return json.jsonify(errno=403, error="Authorization Forbidden")
+        return jsonify(errno=403, error="Authorization Forbidden")
 
     def response_bad_method(self):
-        return json.jsonify(errno=403, error='Unsupported method "%s"' % (request.method))
+        return jsonify(errno=403, error='Unsupported method "%s"' % (request.method))
 
     def response_bad_request(self):
-        return json.jsonify(errno=400, error='Bad request')
+        return jsonify(errno=400, error='Bad request')
 
     def validate_data(self, data):
         return True, ""
@@ -95,7 +95,7 @@ class CustomResource(RestResource):
         g.modify_flag = 'create'
         valid, error = self.validate_data(data)
         if not valid:
-            return json.jsonify(errno=1, error=error)
+            return jsonify(errno=1, error=error)
 
         instance, models = self.deserialize_object(data, self.model())
 
@@ -116,7 +116,7 @@ class CustomResource(RestResource):
         g.modify_flag = 'edit'
         valid, error = self.validate_data(data)
         if not valid:
-            return json.jsonify(errno=1, error=error)
+            return jsonify(errno=1, error=error)
 
         for key in self._readonly:
             data.pop(key, None)
