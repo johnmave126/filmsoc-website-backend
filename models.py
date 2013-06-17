@@ -4,7 +4,7 @@ import flask_cas
 import datetime
 
 # framework related
-from flask import request, abort, url_for, redirect, session
+from flask import request, abort, url_for, redirect, session, g
 from peewee import *
 from peewee import QueryResultWrapper
 from flask_peewee.auth import Auth, BaseUser
