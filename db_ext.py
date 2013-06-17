@@ -2,6 +2,11 @@ from flask import json
 from peewee import TextField
 from string import split, join
 
+__all__ = [
+    'SimpleListField',
+    'JSONField',
+]
+
 
 class SimpleListField(TextField):
     def db_value(self, value):
