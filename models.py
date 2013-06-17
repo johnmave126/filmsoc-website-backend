@@ -70,7 +70,6 @@ class CustomAuth(Auth):
         session['user_pk'] = user.get_id()
         session.permanent = True
         g.user = user
-        flash('You are logged in as %s' % user.itsc, 'success')
 
 
 class CustomBaseModel(db.Model):
