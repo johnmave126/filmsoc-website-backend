@@ -5,7 +5,6 @@ from app import app
 import ldap
 from ldap.filter import escape_filter_chars
 import urllib2
-import datetime
 from urllib import urlencode
 import re
 from string import join
@@ -14,6 +13,16 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE, formatdate
 import smtplib
+
+
+__all__ = [
+    'after_this_request',
+    'confidence',
+    'query_user',
+    'update_mailing_list',
+    'upload_file',
+    'send_email',
+]
 
 
 def after_this_request(f):
@@ -64,7 +73,7 @@ def query_user(itsc):
         conn.unbind()
         return r_dict
     except ldap.INVALID_CREDENTIALS:
-        pass  # send email here
+        send_email(['stanab@ust.hk'], [], '[Warning]Failed to verify crendential in website app', 'LDAP authentication failed.')
         return None
     except ldap.LDAPError:
         return None
