@@ -45,7 +45,7 @@ CAS_MSG = (
     "CAS server returned without ticket while in gateway mode.",
 )
 
-from flask import redirect, request
+from flask import request
 import md5
 import time
 import urllib
@@ -125,9 +125,9 @@ def validate_cas_2(cas_host, service_url, ticket, opt):
 
 #  Check pycas cookie
 def get_cookie_status():
-    cookie_val = request.cookies.get(FLASK_CAS_NAME)
+    cookie_val = request.cookies.get('FLASK_CAS_NAME', None)
 
-    if cookie_val is None:
+    if not cookie_val:
         return COOKIE_NONE, ""
 
     old_hash = cookie_val[0: 8]
@@ -191,7 +191,6 @@ def login(cas_host, service_url, protocol=2, opt=""):
         timestr = str(int(time.time()))
         hash = makehash(timestr + ":" + id)
         cookie_val = hash + timestr + ":" + id
-        domain = urlparse.urlparse(service_url)[1]
         return CAS_OK, id, cookie_val
 
     else:
