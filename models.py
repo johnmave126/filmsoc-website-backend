@@ -32,6 +32,19 @@ class CustomAuth(Auth):
             return inner
         return decorator
 
+    def get_logged_in_user(self):
+        if session.get('logged_in'):
+            if getattr(g, 'user', None):
+                return g.user
+
+            try:
+                return self.User.select().where(
+                    self.User.expired == False,
+                    self.User.id == session.get('user_pk')
+                ).get()
+            except self.User.DoesNotExist:
+                pass
+
     def login(self):
         if request.method == 'GET':
             next_url = request.args.get('next') or ""
