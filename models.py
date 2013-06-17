@@ -1,10 +1,12 @@
 # Python modules
 import functools
 import flask_cas
+import datetime
 
 # framework related
 from flask import request, abort, url_for, redirect
 from peewee import *
+from peewee import QueryResultWrapper
 from flask_peewee.auth import Auth, BaseUser
 
 # custom related
@@ -39,6 +41,8 @@ class CustomAuth(Auth):
                 try:
                     user = User.get(User.itsc == username, User.expired == False)
                     self.login_user(user)
+                    user.last_login = user.this_login
+                    user.this_login = datetime.datetime.now()
                     # set cookie for cas auth
                     if cookie:
                         @after_this_request
@@ -62,14 +66,28 @@ class CustomAuth(Auth):
         return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
 
 
-class File(db.Model):
+class CustomBaseModel(db.Model):
+    @classmethod
+    def next_primary_key(cls):
+        tb_name = cls._meta.db_table
+        cls_db = cls._meta.database
+        cursor = cls_db.execute_sql("SELECT  `AUTO_INCREMENT` "
+                                    "FROM information_schema.`TABLES` "
+                                    "WHERE TABLE_SCHEMA =  '" + cls_db.database + "' "
+                                    "AND TABLE_NAME =  '" + tb_name + "'")
+        sq = QueryResultWrapper(None, cursor)
+        return next(sq)[0]
+
+
+class File(CustomBaseModel):
     id = PrimaryKeyField()
 
+    name = CharField()
     url = CharField()
 
 
 # user model
-class User(db.Model, BaseUser):
+class User(CustomBaseModel, BaseUser):
     id = PrimaryKeyField()
 
     itsc = CharField(unique=True)
@@ -78,18 +96,19 @@ class User(db.Model, BaseUser):
     mobile = CharField(max_length=8, null=True)
     full_name = CharField()
 
-    member_type = CharField()
-    join_at = DateField()
+    member_type = CharField()  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honor, Assoc
+    join_at = DateField(default=datetime.datetime.now)
     expire_at = DateField()
-    expired = BooleanField()
-    pennalized = BooleanField()
+    expired = BooleanField(default=False)
+    pennalized = BooleanField(default=False)
 
-    last_login = DateTimeField()
-    login_count = IntegerField()
+    last_login = DateTimeField(null=True, default=None)
+    this_login = DateTimeField(null=True, default=None)
+    login_count = IntegerField(default=0)
 
-    rfs_count = IntegerField()  # for regular film show
+    rfs_count = IntegerField(default=0)  # for regular film show
 
-    admin = BooleanField()
+    admin = BooleanField(default=False)
 
     def rfs_vote(self):
         active_rfs = RegularFilmShow.getRecent()
@@ -111,46 +130,48 @@ class User(db.Model, BaseUser):
 
 
 #log model
-class Log(db.Model):
+class Log(CustomBaseModel):
     id = PrimaryKeyField()
 
     model = CharField()
-    type = CharField()
+    Type = CharField()
     model_refer = IntegerField()
     user_affected = ForeignKeyField(User)
     admin_involved = ForeignKeyField(User)
-    content = TextField()
+    content = TextField(null=True)
 
-    created_at = DateTimeField()
+    created_at = DateTimeField(default=datetime.datetime.now)
 
 
-class Disk(db.Model):
-    diskID = PrimaryKeyField(primary_key=True)
-    diskType = CharField(max_length=1)  # A for VCD, B for DVD, maybe C for Blueray
+class Disk(CustomBaseModel):
+    id = PrimaryKeyField(primary_key=True)
+    disk_type = CharField(max_length=1)  # A for VCD, B for DVD, maybe C for Blueray
 
     title_en = TextField()
     title_ch = TextField()
-    desc_en = TextField()
-    desc_ch = TextField()
+    desc_en = TextField(null=True)
+    desc_ch = TextField(null=True)
     director_en = TextField(null=True)
     director_ch = TextField(null=True)
     actors = SimpleListField(null=True)  # actors, simmple list
 
     show_year = IntegerField()
     cover_url = ForeignKeyField(File)
-    tags = SimpleListField()  # tags, json
+    tags = SimpleListField(null=True)  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)
 
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
-    avail_type = CharField()  # Available, Borrowed, Reserved, Voting
+    avail_type = CharField()  # Draft, Available, Borrowed, Reserved, Voting
 
-    is_draft = BooleanField()
+    borrow_cnt = IntegerField(default=0)
+    rank = DecimalField(default=0)
+
     create_log = ForeignKeyField(Log)
 
     def callNumber(self):
-        return self.diskType + str(self.diskID)
+        return self.disk_type + str(self.id)
 
     def check_out(self, user):
         if self.avail_type == "Borrowed":
@@ -178,7 +199,7 @@ class Disk(db.Model):
         self.save()
 
 
-class RegularFilmShow(db.Model):
+class RegularFilmShow(CustomBaseModel):
     id = PrimaryKeyField()
 
     state = CharField()  # Draft, Closed, Open, Pending, Passed
@@ -187,29 +208,29 @@ class RegularFilmShow(db.Model):
     film_2 = ForeignKeyField(Disk, null=True)
     film_3 = ForeignKeyField(Disk, null=True)
 
-    vote_cnt_1 = IntegerField()
-    vote_cnt_2 = IntegerField()
-    vote_cnt_3 = IntegerField()
+    vote_cnt_1 = IntegerField(default=0)
+    vote_cnt_2 = IntegerField(default=0)
+    vote_cnt_3 = IntegerField(default=0)
 
     participant_list = SimpleListField(null=True)
 
     create_log = ForeignKeyField(Log)
 
     @classmethod
-    def getRecent():
-        return RegularFilmShow.select().where(
+    def getRecent(cls):
+        return cls.select().where(
             RegularFilmShow.state == 'Open'
         ).order_by(RegularFilmShow.created_at.desc()).limit(1)
 
 
-class PreviewShowTicket(db.Model):
+class PreviewShowTicket(CustomBaseModel):
     id = PrimaryKeyField()
     state = CharField()  # Draft, Open, Closed
 
     title_en = TextField()
     title_ch = TextField()
-    desc_en = TextField()
-    desc_ch = TextField()
+    desc_en = TextField(null=True)
+    desc_ch = TextField(null=True)
     director_en = TextField(null=True)
     director_ch = TextField(null=True)
     actors = SimpleListField(null=True)  # actors, simmple list
@@ -218,8 +239,8 @@ class PreviewShowTicket(db.Model):
     length = IntegerField(null=True)
     language = CharField(null=True)
     subtitle = CharField(null=True)
-    quantity = IntegerField()
-    venue = TextField()
+    quantity = TextField(null=True)
+    venue = TextField(null=True)
 
     apply_deadline = DateTimeField()
     show_time = DateTimeField(null=True)
@@ -231,7 +252,7 @@ class PreviewShowTicket(db.Model):
     create_log = ForeignKeyField(Log)
 
 
-class DiskReview(db.Model):
+class DiskReview(CustomBaseModel):
     id = PrimaryKeyField()
 
     poster = ForeignKeyField(User)
@@ -241,7 +262,7 @@ class DiskReview(db.Model):
     content = TextField()
 
 
-class News(db.Model):
+class News(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
@@ -249,7 +270,7 @@ class News(db.Model):
     create_log = ForeignKeyField(Log)
 
 
-class Document(db.Model):
+class Document(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
@@ -258,7 +279,7 @@ class Document(db.Model):
     create_log = ForeignKeyField(Log)
 
 
-class Publication(db.Model):
+class Publication(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
@@ -266,30 +287,30 @@ class Publication(db.Model):
     cover_url = ForeignKeyField(File)
 
     create_log = ForeignKeyField(Log)
-    type = CharField()  # Magazine, MicroMagazine
+    Type = CharField()  # Magazine, MicroMagazine
 
 
-class Sponsor(db.Model):
+class Sponsor(CustomBaseModel):
     id = PrimaryKeyField()
 
     name = TextField()
     img_url = ForeignKeyField(File)
 
-    x = IntegerField()
-    y = IntegerField()
-    w = IntegerField()
-    h = IntegerField()
+    x = DecimalField()
+    y = DecimalField()
+    w = DecimalField()
+    h = DecimalField()
 
     create_log = ForeignKeyField(Log)
 
 
-class Exco(db.Model):
+class Exco(CustomBaseModel):
     id = PrimaryKeyField()
 
     name_en = CharField()
     name_ch = CharField()
     position = CharField()
-    desc = TextField()
+    desc = TextField(null=True)
 
     img_url = ForeignKeyField(File)
     email = CharField()
@@ -297,12 +318,12 @@ class Exco(db.Model):
     hall_allocate = IntegerField(null=True)
 
 
-class SiteSettings(db.Model):
+class SiteSettings(CustomBaseModel):
     key = CharField()
     value = CharField()
 
 
-class OneSentence(db.Model):
+class OneSentence(CustomBaseModel):
     id = PrimaryKeyField()
 
     film = TextField()
@@ -312,9 +333,9 @@ class OneSentence(db.Model):
 
 
 def create_tables():
-    Log.create_table()
     File.create_table()
     User.create_table()
+    Log.create_table()
     Disk.create_table()
     RegularFilmShow.create_table()
     PreviewShowTicket.create_table()
