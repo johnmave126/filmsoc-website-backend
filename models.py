@@ -65,6 +65,13 @@ class CustomAuth(Auth):
         self.logout_user(self.get_logged_in_user())
         return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
 
+    def login_user(self, user):
+        session['logged_in'] = True
+        session['user_pk'] = user.get_id()
+        session.permanent = True
+        g.user = user
+        flash('You are logged in as %s' % user.itsc, 'success')
+
 
 class CustomBaseModel(db.Model):
     @classmethod
