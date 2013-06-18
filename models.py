@@ -1,101 +1,12 @@
 # Python modules
-import functools
-import flask_cas
 import datetime
 
 # framework related
-from flask import request, abort, url_for, redirect, session, g
 from peewee import *
-from peewee import QueryResultWrapper
-from flask_peewee.auth import Auth, BaseUser
 
 # custom related
-from app import app, db
-from helpers import after_this_request
+from frame_ext import CustomBaseModel
 from db_ext import JSONField, SimpleListField
-
-
-#custom auth model
-class CustomAuth(Auth):
-    def get_user_model(self):
-        return User
-
-    def test_user(self, test_fn):
-        def decorator(fn):
-            @functools.wraps(fn)
-            def inner(*args, **kwargs):
-                user = self.get_logged_in_user()
-
-                if not user or not test_fn(user):
-                    abort(403)
-                return fn(*args, **kwargs)
-            return inner
-        return decorator
-
-    def get_logged_in_user(self):
-        if session.get('logged_in'):
-            if getattr(g, 'user', None):
-                return g.user
-
-            try:
-                return self.User.select().where(
-                    self.User.expired == False,
-                    self.User.id == session.get('user_pk')
-                ).get()
-            except self.User.DoesNotExist:
-                pass
-
-    def login(self):
-        if request.method == 'GET':
-            next_url = request.args.get('next') or ""
-            login_url = 'http://' + self.app.config['SERVER_NAME'] + url_for('%s.login' % self.blueprint.name)
-            status, username, cookie = flask_cas.login(self.app.config['AUTH_SERVER'], login_url)
-            if status == flask_cas.CAS_OK:
-                try:
-                    user = User.get(User.itsc == username, User.expired == False)
-                    self.login_user(user)
-                    user.last_login = user.this_login
-                    user.this_login = datetime.datetime.now()
-                    # set cookie for cas auth
-                    if cookie:
-                        @after_this_request
-                        def store_cookie(response):
-                            response.set_cookie(flask_cas.FLASK_CAS_NAME, cookie, path=url_for('index'), httponly=True)
-
-                    # redirect to front server
-                    return redirect(self.app.config['FRONT_SERVER'] + '/#!' + next_url)
-                except User.DoesNotExist:
-                    pass
-
-            # not authorized
-            abort(403)
-        else:
-
-            # method not allowed
-            abort(405)
-
-    def logout(self):
-        self.logout_user(self.get_logged_in_user())
-        return redirect(self.app.config['FRONT_SERVER'] + '/#!' + request.args.get('next'))
-
-    def login_user(self, user):
-        session['logged_in'] = True
-        session['user_pk'] = user.get_id()
-        session.permanent = True
-        g.user = user
-
-
-class CustomBaseModel(db.Model):
-    @classmethod
-    def next_primary_key(cls):
-        tb_name = cls._meta.db_table
-        cls_db = cls._meta.database
-        cursor = cls_db.execute_sql("SELECT  `AUTO_INCREMENT` "
-                                    "FROM information_schema.`TABLES` "
-                                    "WHERE TABLE_SCHEMA =  '" + cls_db.database + "' "
-                                    "AND TABLE_NAME =  '" + tb_name + "'")
-        sq = QueryResultWrapper(None, cursor)
-        return next(sq)[0]
 
 
 class File(CustomBaseModel):
@@ -106,7 +17,7 @@ class File(CustomBaseModel):
 
 
 # user model
-class User(CustomBaseModel, BaseUser):
+class User(CustomBaseModel):
     id = PrimaryKeyField()
 
     itsc = CharField(unique=True)

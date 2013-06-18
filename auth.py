@@ -1,4 +1,5 @@
 from app import app, db
-from models import CustomAuth, User
+from frame_ext import CustomAuth
+from models import User
 
 auth = CustomAuth(app, db, user_model=User, prefix='/member')
