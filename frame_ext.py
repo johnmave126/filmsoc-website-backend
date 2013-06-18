@@ -63,6 +63,7 @@ class CustomAuth(Auth):
                     self.login_user(user)
                     user.last_login = user.this_login
                     user.this_login = datetime.datetime.now()
+                    user.login_count = user.login_count + 1
                     user.save()
                     # set cookie for cas auth
                     if cookie:
