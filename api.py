@@ -19,6 +19,8 @@ class UserResource(CustomResource):
     readonly = ['join_at', 'last_login', 'this_login', 'login_count', 'rfs_count']
     delete_recursive = False
 
+    list_fields = ['id', 'full_name', 'student_id', 'itsc', 'pennalized', 'member_type']
+
     def validate_data(self, data):
         form = UserForm(**data)
         if not form.validate():
