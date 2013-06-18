@@ -2,6 +2,12 @@ import datetime
 import functools
 import flask_cas
 
+from peewee import *
+from wtfpeewee.fields import WPDateField
+from wtfpeewee.fields import WPDateTimeField
+from wtfpeewee.fields import WPTimeField
+from wtforms import fields as f
+from wtfpeewee.orm import ModelConverter
 from flask import request, g, json, jsonify, abort, url_for, redirect, session, Response
 from peewee import QueryResultWrapper
 from flask_peewee.auth import Auth
@@ -10,7 +16,7 @@ from flask_peewee.filters import make_field_tree
 
 from app import db
 from helpers import after_this_request
-
+from db_ext import JSONField, SimpleListField
 
 __all__ = [
     'CustomAuth',
@@ -19,6 +25,7 @@ __all__ = [
     'CustomAuthentication',
     'CustomAdminAuthentication',
     'CustomResource',
+    'CustomConverter',
 ]
 
 
@@ -298,3 +305,30 @@ class CustomResource(RestResource):
         obj = self.before_save(obj)
         res = obj.delete_instance(recursive=self.delete_recursive)
         return self.response({'deleted': res})
+
+
+class CustomConverter(ModelConverter):
+    defaults = {
+        BlobField: f.TextAreaField,
+        BooleanField: f.BooleanField,
+        CharField: f.TextField,
+        DateField: WPDateField,
+        DateTimeField: WPDateTimeField,
+        DecimalField: f.DecimalField,
+        DoubleField: f.FloatField,
+        FloatField: f.FloatField,
+        IntegerField: f.IntegerField,
+        PrimaryKeyField: f.HiddenField,
+        TextField: f.TextAreaField,
+        TimeField: WPTimeField,
+        SimpleListField: f.TextField,
+        JSONField: f.TextAreaField,
+    }
+    coerce_defaults = {
+        IntegerField: int,
+        FloatField: float,
+        CharField: unicode,
+        TextField: unicode,
+        SimpleListField: unicode,
+        JSONField: unicode,
+    }

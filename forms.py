@@ -1,45 +1,14 @@
 import datetime
 
-from peewee import *
-from wtfpeewee.fields import WPDateField
-from wtfpeewee.fields import WPDateTimeField
-from wtfpeewee.fields import WPTimeField
-from wtforms import fields as f
 from wtforms.validators import AnyOf, NumberRange, Regexp, DataRequired
-from wtfpeewee.orm import model_form, ModelConverter
+from wtfpeewee.orm import model_form
 
 from models import *
 from db_ext import *
+from frame_ext import CustomConverter
 
 
-class CustomConverter(ModelConverter):
-    defaults = {
-        BlobField: f.TextAreaField,
-        BooleanField: f.BooleanField,
-        CharField: f.TextField,
-        DateField: WPDateField,
-        DateTimeField: WPDateTimeField,
-        DecimalField: f.DecimalField,
-        DoubleField: f.FloatField,
-        FloatField: f.FloatField,
-        IntegerField: f.IntegerField,
-        PrimaryKeyField: f.HiddenField,
-        TextField: f.TextAreaField,
-        TimeField: WPTimeField,
-        SimpleListField: f.TextField,
-        JSONField: f.TextAreaField,
-    }
-    coerce_defaults = {
-        IntegerField: int,
-        FloatField: float,
-        CharField: unicode,
-        TextField: unicode,
-        SimpleListField: unicode,
-        JSONField: unicode,
-    }
-
-
-UserFormAdmin = model_form(User, field_args={
+UserForm = model_form(User, field_args={
     'itsc': dict(validators=[
         DataRequired(message="ITSC required")
     ]),

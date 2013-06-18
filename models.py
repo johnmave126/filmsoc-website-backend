@@ -40,6 +40,15 @@ class User(CustomBaseModel):
 
     admin = BooleanField(default=False)
 
+    class Meta:
+        indexes = (
+            (('student_id'), True),
+            (('university_id'), True),
+            (('itsc'), True),
+            (('full_name'), False),
+        )
+        order_by = ('full_name', 'itsc',)
+
     def rfs_vote(self):
         active_rfs = RegularFilmShow.getRecent()
         return Log.select().where(
@@ -72,9 +81,17 @@ class Log(CustomBaseModel):
 
     created_at = DateTimeField(default=datetime.datetime.now)
 
+    class Meta:
+        indexes = (
+            (('model'), False),
+            (('model', 'Type'), False),
+            (('created_at'), False),
+        )
+        order_by = ('-created_at',)
+
 
 class Disk(CustomBaseModel):
-    id = PrimaryKeyField(primary_key=True)
+    id = PrimaryKeyField()
     disk_type = CharField(max_length=1)  # A for VCD, B for DVD, maybe C for Blueray
 
     title_en = TextField()
@@ -99,6 +116,14 @@ class Disk(CustomBaseModel):
     rank = DecimalField(default=0)
 
     create_log = ForeignKeyField(Log)
+
+    class Meta:
+        indexes = (
+            (('id'), True),
+            (('title_en', 'title_ch'), False),
+            (('title_en', 'title_ch', 'director_en', 'director_ch', 'actors'), False),
+        )
+        order_by = ('-id',)
 
     def callNumber(self):
         return self.disk_type + str(self.id)
@@ -146,6 +171,12 @@ class RegularFilmShow(CustomBaseModel):
 
     create_log = ForeignKeyField(Log)
 
+    class Meta:
+        indexes = (
+            (('id'), True),
+        )
+        order_by = ('-id',)
+
     @classmethod
     def getRecent(cls):
         return cls.select().where(
@@ -181,6 +212,9 @@ class PreviewShowTicket(CustomBaseModel):
 
     create_log = ForeignKeyField(Log)
 
+    class Meta:
+        order_by = ('-id',)
+
 
 class DiskReview(CustomBaseModel):
     id = PrimaryKeyField()
@@ -191,6 +225,13 @@ class DiskReview(CustomBaseModel):
     create_log = ForeignKeyField(Log)
     content = TextField()
 
+    class Meta:
+        indexes = (
+            (('disk'), False),
+            (('disk', 'id'), True),
+        )
+        order_by = ('id',)
+
 
 class News(CustomBaseModel):
     id = PrimaryKeyField()
@@ -198,6 +239,9 @@ class News(CustomBaseModel):
     title = TextField()
     content = TextField()
     create_log = ForeignKeyField(Log)
+
+    class Meta:
+        order_by = ('-id',)
 
 
 class Document(CustomBaseModel):
@@ -207,6 +251,9 @@ class Document(CustomBaseModel):
     doc_url = ForeignKeyField(File)
 
     create_log = ForeignKeyField(Log)
+
+    class Meta:
+        order_by = ('-id',)
 
 
 class Publication(CustomBaseModel):
@@ -218,6 +265,12 @@ class Publication(CustomBaseModel):
 
     create_log = ForeignKeyField(Log)
     Type = CharField()  # Magazine, MicroMagazine
+
+    class Meta:
+        indexes = (
+            (('Type', 'id'), True),
+        )
+        order_by = ('-id',)
 
 
 class Sponsor(CustomBaseModel):
