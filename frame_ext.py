@@ -173,7 +173,7 @@ class CustomResource(RestResource):
         if self.list_exclude:
             self._list_exclude = {self.model: self.list_exclude}
         else:
-            self._exclude = {}
+            self._list_exclude = {}
 
         self._filter_fields = self.filter_fields or self.model._meta.get_field_names()
         self._filter_exclude = self.filter_exclude or []
@@ -191,7 +191,7 @@ class CustomResource(RestResource):
                 self._fields.update(resource_obj._fields)
                 self._exclude.update(resource_obj._exclude)
                 self._list_fields.update(resource_obj._list_fields)
-                self.__list_exclude.update(resource_obj._list_exclude)
+                self._list_exclude.update(resource_obj._list_exclude)
 
                 self._filter_fields.extend(['%s__%s' % (field_name, ff) for ff in resource_obj._filter_fields])
                 self._filter_exclude.extend(['%s__%s' % (field_name, ff) for ff in resource_obj._filter_exclude])
