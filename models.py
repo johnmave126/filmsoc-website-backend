@@ -26,7 +26,7 @@ class User(CustomBaseModel):
     mobile = CharField(max_length=8, null=True)
     full_name = CharField()
 
-    member_type = CharField()  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honor, Assoc
+    member_type = CharField(max_length=16)  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honor, Assoc
     join_at = DateField(default=datetime.datetime.now)
     expire_at = DateField()
     expired = BooleanField(default=False)
@@ -42,9 +42,6 @@ class User(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('student_id',), True),
-            (('university_id',), True),
-            (('itsc',), True),
             (('full_name',), False),
         )
         order_by = ('full_name', 'itsc',)
@@ -72,8 +69,8 @@ class User(CustomBaseModel):
 class Log(CustomBaseModel):
     id = PrimaryKeyField()
 
-    model = CharField()
-    Type = CharField()
+    model = CharField(max_length=16)
+    Type = CharField(max_length=16)
     model_refer = IntegerField()
     user_affected = ForeignKeyField(User)
     admin_involved = ForeignKeyField(User)
@@ -85,7 +82,6 @@ class Log(CustomBaseModel):
         indexes = (
             (('model',), False),
             (('model', 'Type'), False),
-            (('created_at',), False),
         )
         order_by = ('-created_at',)
 
@@ -110,7 +106,7 @@ class Disk(CustomBaseModel):
 
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
-    avail_type = CharField()  # Draft, Available, Borrowed, Reserved, Voting
+    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, Voting
 
     borrow_cnt = IntegerField(default=0)
     rank = DecimalField(default=0)
@@ -118,11 +114,6 @@ class Disk(CustomBaseModel):
     create_log = ForeignKeyField(Log)
 
     class Meta:
-        indexes = (
-            (('id',), True),
-            (('title_en', 'title_ch'), False),
-            (('title_en', 'title_ch', 'director_en', 'director_ch', 'actors'), False),
-        )
         order_by = ('-id',)
 
     def callNumber(self):
@@ -157,7 +148,7 @@ class Disk(CustomBaseModel):
 class RegularFilmShow(CustomBaseModel):
     id = PrimaryKeyField()
 
-    state = CharField()  # Draft, Closed, Open, Pending, Passed
+    state = CharField(max_length=16)  # Draft, Closed, Open, Pending, Passed
 
     film_1 = ForeignKeyField(Disk, null=True)
     film_2 = ForeignKeyField(Disk, null=True)
@@ -172,9 +163,6 @@ class RegularFilmShow(CustomBaseModel):
     create_log = ForeignKeyField(Log)
 
     class Meta:
-        indexes = (
-            (('id',), True),
-        )
         order_by = ('-id',)
 
     @classmethod
@@ -226,10 +214,6 @@ class DiskReview(CustomBaseModel):
     content = TextField()
 
     class Meta:
-        indexes = (
-            (('disk',), False),
-            (('disk', 'id'), True),
-        )
         order_by = ('id',)
 
 
@@ -264,11 +248,11 @@ class Publication(CustomBaseModel):
     cover_url = ForeignKeyField(File)
 
     create_log = ForeignKeyField(Log)
-    Type = CharField()  # Magazine, MicroMagazine
+    Type = CharField(max_length=16)  # Magazine, MicroMagazine
 
     class Meta:
         indexes = (
-            (('Type', 'id'), True),
+            (('Type'), False),
         )
         order_by = ('-id',)
 
