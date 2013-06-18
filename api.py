@@ -29,6 +29,24 @@ class UserResource(CustomResource):
         if not user_info:
             return False, "Wrong ITSC, please check the spelling"
         data['full_name'] = user_info['displayName']
+        # validate uniqueness
+        if g.modify_flag == 'create':
+            if User.select().where(User.itsc == data['itsc']).count() != 0:
+                return False, "ITSC existed"
+            if User.select().where(User.student_id == data['student_id']).count() != 0:
+                return False, "Student ID existed"
+            if User.select().where(User.university_id == data['university_id']).count() != 0:
+                return False, "University ID existed"
+        elif g.modify_flag == 'edit':
+            sq = User.select().where(User.itsc == data['itsc'])
+            if sq.count() != 0 and next(sq).id != data['id']:
+                return False, "ITSC existed"
+            sq = User.select().where(User.student_id == data['student_id'])
+            if sq.count() != 0 and next(sq).id != data['id']:
+                return False, "Student existed"
+            sq = User.select().where(User.university_id == data['university_id'])
+            if sq.count() != 0 and next(sq).id != data['id']:
+                return False, "University ID existed"
         return True, ""
 
     def before_save(self, instance, data):
