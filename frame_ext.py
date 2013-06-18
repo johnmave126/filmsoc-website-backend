@@ -7,7 +7,8 @@ from wtfpeewee.fields import WPDateField
 from wtfpeewee.fields import WPDateTimeField
 from wtfpeewee.fields import WPTimeField
 from wtforms import fields as f
-from wtfpeewee.orm import ModelConverter
+from wtforms import validators
+from wtfpeewee.orm import ModelConverter, FieldInfo, handle_null_filter
 from flask import request, g, json, jsonify, abort, url_for, redirect, session, Response
 from peewee import QueryResultWrapper
 from flask_peewee.auth import Auth
@@ -332,3 +333,51 @@ class CustomConverter(ModelConverter):
         SimpleListField: unicode,
         JSONField: unicode,
     }
+
+    def convert(self, model, field, field_args):
+        kwargs = {
+            'label': field.verbose_name,
+            'validators': [],
+            'filters': [],
+            'default': field.default,
+            'description': field.help_text}
+        if field_args:
+            kwargs.update(field_args)
+
+        if field.null:
+            # Treat empty string as None when converting.
+            kwargs['filters'].append(handle_null_filter)
+
+        if (field.null or (field.default is not None) or (field_args is None)) and not field.choices:
+            # If the field can be empty, or has a default value, do not require
+            # it when submitting a form.
+            kwargs['validators'].append(validators.Optional())
+        else:
+            if isinstance(field, self.required):
+                kwargs['validators'].append(validators.Required())
+
+        field_class = type(field)
+        if field_class in self.converters:
+            return self.converters[field_class](model, field, **kwargs)
+        elif field_class in self.defaults:
+            if issubclass(self.defaults[field_class], f.FormField):
+                # FormField fields (i.e. for nested forms) do not support
+                # filters.
+                kwargs.pop('filters')
+            if field.choices or 'choices' in kwargs:
+                choices = kwargs.pop('choices', field.choices)
+                if field_class in self.coerce_settings or 'coerce' in kwargs:
+                    coerce_fn = kwargs.pop('coerce',
+                                           self.coerce_settings[field_class])
+                    allow_blank = kwargs.pop('allow_blank', field.null)
+                    kwargs.update({
+                        'choices': choices,
+                        'coerce': coerce_fn,
+                        'allow_blank': allow_blank})
+
+                    return FieldInfo(field.name, SelectChoicesField(**kwargs))
+
+            return FieldInfo(field.name, self.defaults[field_class](**kwargs))
+
+        raise AttributeError("There is not possible conversion "
+                             "for '%s'" % field_class)
