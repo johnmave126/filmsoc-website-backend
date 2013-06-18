@@ -1,6 +1,6 @@
 from string import join
 
-from flask import g
+from flask import g, jsonify
 from flask_peewee.rest import Authentication
 
 from frame_ext import CustomRestAPI, CustomResource, CustomAuthentication, CustomAdminAuthentication
@@ -82,7 +82,7 @@ class UserResource(CustomResource):
         obj = auth.get_logged_in_user()
 
         if obj is None:
-            return self.response(self.prepare_data({'login': False}))
+            return jsonify(errno=2, error="Not logged in")
 
         return self.object_detail(obj)
 
