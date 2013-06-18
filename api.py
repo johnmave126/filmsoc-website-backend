@@ -94,11 +94,12 @@ class LogResource(CustomResource):
 
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)
+read_auth = Authentication()
 
 # instantiate api object
 api = CustomRestAPI(app, default_auth=admin_auth)
 
 # register resources
-api.register(File, FileResource, auth=Authentication)
+api.register(File, FileResource, auth=read_auth)
 api.register(User, UserResource)
-api.register(Log, LogResource, auth=Authentication)
+api.register(Log, LogResource, auth=read_auth)
