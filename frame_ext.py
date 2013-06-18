@@ -305,6 +305,7 @@ class CustomResource(RestResource):
 
         obj = self.before_save(obj)
         res = obj.delete_instance(recursive=self.delete_recursive)
+        self.after_save()
         return self.response({'deleted': res})
 
 

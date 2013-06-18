@@ -8,7 +8,7 @@ from app import app
 from auth import auth
 from models import *
 from forms import *
-from helpers import query_user
+from helpers import query_user, update_mailing_list
 
 
 class FileResource(CustomResource):
@@ -37,9 +37,13 @@ class UserResource(CustomResource):
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content="delete member " + instance.itsc)
         return instance
 
-    def after_save(self, instance):
-        ref_id = instance.id
-        Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
+    def after_save(self, instance=None):
+        if instance:
+            ref_id = instance.id
+            Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
+        # update mailing-list
+        # update_mailing_list([x.itsc for x in User.select(User.itsc)])
+        # disable because it is danger
 
     def get_urls(self):
         return (
@@ -62,7 +66,7 @@ class UserResource(CustomResource):
         if obj is None:
             return self.response(self.prepare_data({'login': False}))
 
-        return object_detail(obj)
+        return self.object_detail(obj)
 
 
 class LogResource(CustomResource):
