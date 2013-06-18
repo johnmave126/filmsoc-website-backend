@@ -25,7 +25,7 @@ class UserResource(CustomResource):
         form = UserForm(**data)
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
-        user_info = query_user(data.itsc)
+        user_info = query_user(data.get(itsc, None))
         if not user_info:
             return False, "Wrong ITSC, please check the spelling"
         data['full_name'] = user_info['displayName']
