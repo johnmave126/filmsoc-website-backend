@@ -144,7 +144,7 @@ class CustomAdminAuthentication(CustomAuthentication):
     def authorize(self):
         res = super(CustomAdminAuthentication, self).authorize()
 
-        if res and g.user:
+        if (not res) and g.user:
             return self.verify_user(g.user)
         return res
 
