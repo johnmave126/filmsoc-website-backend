@@ -42,10 +42,10 @@ class User(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('student_id'), True),
-            (('university_id'), True),
-            (('itsc'), True),
-            (('full_name'), False),
+            (('student_id',), True),
+            (('university_id',), True),
+            (('itsc',), True),
+            (('full_name',), False),
         )
         order_by = ('full_name', 'itsc',)
 
@@ -83,9 +83,9 @@ class Log(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('model'), False),
+            (('model',), False),
             (('model', 'Type'), False),
-            (('created_at'), False),
+            (('created_at',), False),
         )
         order_by = ('-created_at',)
 
@@ -119,7 +119,7 @@ class Disk(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('id'), True),
+            (('id',), True),
             (('title_en', 'title_ch'), False),
             (('title_en', 'title_ch', 'director_en', 'director_ch', 'actors'), False),
         )
@@ -173,7 +173,7 @@ class RegularFilmShow(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('id'), True),
+            (('id',), True),
         )
         order_by = ('-id',)
 
@@ -227,7 +227,7 @@ class DiskReview(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('disk'), False),
+            (('disk',), False),
             (('disk', 'id'), True),
         )
         order_by = ('id',)
