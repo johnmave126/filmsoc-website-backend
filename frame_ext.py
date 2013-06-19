@@ -1,7 +1,10 @@
 import datetime
 import functools
 import flask_cas
+import re
+import operator
 
+from werkzeug.datastructures import MultiDict
 from peewee import *
 from wtfpeewee.fields import WPDateField
 from wtfpeewee.fields import WPDateTimeField
@@ -157,6 +160,11 @@ class CustomResource(RestResource):
     list_fields = None
     list_exclude = None
 
+    # search: dictionary of search_engine -> field
+    search = {
+        'default': []
+    }
+
     # override all
     def __init__(self, rest_api, model, authentication, allowed_methods=None):
         self.api = rest_api
@@ -190,6 +198,8 @@ class CustomResource(RestResource):
         self._resources = {}
 
         self._readonly = self.readonly or []
+        self._search = self.search or {'default': []}
+        self._search['default'] = self._search['default'] or []
 
         # recurse into nested resources
         if self.include_resources:
@@ -226,6 +236,11 @@ class CustomResource(RestResource):
             self.prepare_data(obj, s.serialize_object(obj, self._list_fields, self._list_exclude)) \
                 for obj in query
         ]
+
+    def get_urls(self):
+        return (
+            ('/search/', self.require_method(self.api_search, ['GET'])),
+        ) + super(CustomResource, self).get_urls()
 
     def check_post(self, obj=None):
         return (g.user and g.user.admin)
@@ -307,6 +322,51 @@ class CustomResource(RestResource):
         res = obj.delete_instance(recursive=self.delete_recursive)
         self.after_save()
         return self.response({'deleted': res})
+
+    def apply_search_query(self, query, terms, fields):
+        query_clauses = [reduce(operator.or_, [DQ(**{"%s__like" % y: "%%%s%%" % x}) for y in fields]) for x in terms]
+        return query.filter(reduce(operator.and_, query_clauses))
+
+    def api_search(self):
+        search_term = request.args.get('query') or ''
+        engine = request.args.get('engine') or 'default'
+
+        query = self.get_query()
+        query = self.apply_ordering(query)
+
+        if engine == 'default':
+            kw_set = set(re.split(r'\s+', search_term, re.U))
+            kw_set.discard('')
+            if len(kw_set) > 0 and len(self._search['default']) > 0:
+                query = self.apply_search_query(query, list(kw_set), self._search['default'])
+        else:
+            regex = re.compile('((?:\w+:\S+)|[^:\s]+|(?:\w+:\([^)]*\)))', re.U)
+            kw_split_list = regex.findall(search_term)
+            search_kw = MultiDict()
+            for kw in kw_split_list:
+                try:
+                    sp = kw.index(':')
+                    key = kw[0:sp]
+                    val = kw[sp + 1:]
+                    if val[0] == '(' and val[len(val) - 1] == ')':
+                        # expand
+                        for x in re.split(r'\s+', val[1:len(val)-1], re.U):
+                            x and search_kw.add(key, x)
+                    else:
+                        search_kw.add(key, val)
+
+                except ValueError:
+                    # single word
+                    search_kw.add('default', kw)
+
+            for engine, kws in search_kw.iterlists():
+                if engine in self._search:
+                    kw_set = set(kws)
+                    kw_set.discard('')
+                    if len(kw_set) > 0 and len(self._search[query]) > 0:
+                        query = self.apply_search_query(query, list(kw_set), self._search[query])
+
+        return self.response(self.serialize_query(query))
 
 
 class CustomConverter(ModelConverter):

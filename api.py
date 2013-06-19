@@ -21,6 +21,10 @@ class UserResource(CustomResource):
 
     list_fields = ['id', 'full_name', 'student_id', 'itsc', 'pennalized', 'member_type']
 
+    search = {
+        'default': ['full_name', 'student_id', 'itsc']
+    }
+
     def validate_data(self, data):
         form = UserForm(**data)
         if not form.validate():
@@ -65,11 +69,8 @@ class UserResource(CustomResource):
 
     def get_urls(self):
         return (
-            ('/', self.require_method(self.api_list, ['GET', 'POST'])),
-            ('/<pk>/', self.require_method(self.api_detail, ['GET', 'POST', 'PUT', 'DELETE'])),
-            ('/<pk>/delete/', self.require_method(self.post_delete, ['POST', 'DELETE'])),
             ('/current_user/', self.require_method(self.api_current, ['GET'])),
-        )
+        ) + super(UserResource, self).get_urls()
 
     def check_get(self, obj=None):
         if g.user and g.user.admin:
