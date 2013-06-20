@@ -269,6 +269,27 @@ class CustomResource(RestResource):
     def after_save(self, instance):
         pass
 
+    def get_request_metadata(self, paginated_query):
+        var = paginated_query.page_var
+        request_arguments = request.args.copy()
+
+        current_page = paginated_query.get_page()
+        next = previous = ''
+
+        if current_page > 1:
+            request_arguments[var] = current_page - 1
+            previous = url_for(self.get_url_name(g['list_callback']), **request_arguments)
+        if current_page < paginated_query.get_pages():
+            request_arguments[var] = current_page + 1
+            next = url_for(self.get_url_name(g['list_callback']), **request_arguments)
+
+        return {
+            'model': self.get_api_name(),
+            'page': current_page,
+            'previous': previous,
+            'next': next,
+        }
+
     def create(self):
         data = request.data or request.form.get('data') or ''
 
@@ -324,10 +345,16 @@ class CustomResource(RestResource):
         return self.response({'deleted': res})
 
     def apply_search_query(self, query, terms, fields):
-        query_clauses = [reduce(operator.or_, [DQ(**{"%s__ilike" % y: "%%%s%%" % x}) for y in fields]) for x in terms]
+        query_clauses = [reduce(operator.or_, [DQ(**{"%s__like" % y: "%%%s%%" % x}) for y in fields]) for x in terms]
         return query.filter(reduce(operator.and_, query_clauses))
 
+    def api_list(self):
+        g['list_callback'] = 'api_list'
+        return super(CustomResource, self).api_list()
+
     def api_search(self):
+        g['list_callback'] = 'api_search'
+
         search_term = request.args.get('query') or ''
         engine = request.args.get('engine') or 'default'
 
