@@ -355,6 +355,9 @@ class CustomResource(RestResource):
     def api_search(self):
         g.list_callback = 'api_search'
 
+        if not getattr(self, 'check_%s' % request.method.lower())():
+            return self.response_forbidden()
+
         search_term = request.args.get('query') or ''
         engine = request.args.get('engine') or 'default'
 
