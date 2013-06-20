@@ -112,7 +112,8 @@ def update_mailing_list(new_list):
         'who': join(new_list, '\n')
     }
     data = urlencode(payload)
-    opener.open(url, data).read()
+    # send but not read
+    opener.open(url, data)
 
 
 def upload_file(filename, file_handler):
