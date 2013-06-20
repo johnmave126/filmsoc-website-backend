@@ -324,8 +324,7 @@ class CustomResource(RestResource):
         return self.response({'deleted': res})
 
     def apply_search_query(self, query, terms, fields):
-        query_clauses = [reduce(operator.or_, [DQ(**{"%s__like" % y: "%%%s%%" % x}) for y in fields]) for x in terms]
-        raise ValueError(0)
+        query_clauses = [reduce(operator.or_, [DQ(**{"%s__ilike" % y: "%%%s%%" % x}) for y in fields]) for x in terms]
         return query.filter(reduce(operator.and_, query_clauses))
 
     def api_search(self):
