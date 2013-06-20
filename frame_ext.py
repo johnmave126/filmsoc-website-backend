@@ -278,10 +278,10 @@ class CustomResource(RestResource):
 
         if current_page > 1:
             request_arguments[var] = current_page - 1
-            previous = url_for(self.get_url_name(g['list_callback']), **request_arguments)
+            previous = url_for(self.get_url_name(g.list_callback), **request_arguments)
         if current_page < paginated_query.get_pages():
             request_arguments[var] = current_page + 1
-            next = url_for(self.get_url_name(g['list_callback']), **request_arguments)
+            next = url_for(self.get_url_name(g.list_callback), **request_arguments)
 
         return {
             'model': self.get_api_name(),
@@ -349,11 +349,11 @@ class CustomResource(RestResource):
         return query.filter(reduce(operator.and_, query_clauses))
 
     def api_list(self):
-        g['list_callback'] = 'api_list'
+        g.list_callback = 'api_list'
         return super(CustomResource, self).api_list()
 
     def api_search(self):
-        g['list_callback'] = 'api_search'
+        g.list_callback = 'api_search'
 
         search_term = request.args.get('query') or ''
         engine = request.args.get('engine') or 'default'
