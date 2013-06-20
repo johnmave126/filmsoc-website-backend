@@ -396,6 +396,8 @@ class CustomResource(RestResource):
         if self.paginate_by or 'limit' in request.args:
             return self.paginated_object_list(query)
 
+        raise ValueError(0)
+
         return self.response(self.serialize_query(query))
 
 

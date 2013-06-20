@@ -17,7 +17,7 @@ if __name__ == '__main__':
         discard_first_request=True,
         flush_at_shutdown=True,
         path='/__profile__'
-        )
+    )
     app.wsgi_app = wrapped
     #serve(app)
     app.run(host='0.0.0.0', port=5950, debug=True)
