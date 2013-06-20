@@ -393,10 +393,10 @@ class CustomResource(RestResource):
                     if len(kw_set) > 0 and len(self._search[query]) > 0:
                         query = self.apply_search_query(query, list(kw_set), self._search[query])
 
+        raise ValueError(0)
+
         if self.paginate_by or 'limit' in request.args:
             return self.paginated_object_list(query)
-
-        raise ValueError(0)
 
         return self.response(self.serialize_query(query))
 
