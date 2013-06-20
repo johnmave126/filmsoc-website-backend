@@ -10,3 +10,4 @@ wtf-peewee>=0.2.2
 WTForms>=1.0.4
 Jinja2>=2.7
 Werkzeug>=0.9.1
+repoze.profile>=2.0
