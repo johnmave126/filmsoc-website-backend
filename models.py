@@ -298,12 +298,12 @@ class Exco(CustomBaseModel):
     name_en = CharField()
     name_ch = CharField()
     position = CharField()
-    desc = TextField(null=True)
+    descript = TextField(null=True)
 
     img_url = ForeignKeyField(File)
     email = CharField()
 
-    hall_allocate = IntegerField(null=True)
+    hall_allocate = Char(max_length=10, null=True)
 
 
 class SiteSettings(CustomBaseModel):
