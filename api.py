@@ -286,7 +286,7 @@ class DiskResource(CustomResource):
                 try:
                     obj.due_at = SiteSettings.select().where(SiteSettings.key == 'due_date').get().value
                 except DoesNotExist:
-                    obj.due_at = date.today()
+                    obj.due_at = date.today() + timedelta(7)
 
                 new_log.content = "check out disk %s for member %s" % (obj.get_callnumber(), req_user.itsc)
                 new_log.user_affected = req_user
