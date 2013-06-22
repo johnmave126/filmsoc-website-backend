@@ -303,7 +303,7 @@ class Exco(CustomBaseModel):
     img_url = ForeignKeyField(File)
     email = CharField()
 
-    hall_allocate = Char(max_length=10, null=True)
+    hall_allocate = CharField(max_length=10, null=True)
 
 
 class SiteSettings(CustomBaseModel):
