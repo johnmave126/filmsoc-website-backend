@@ -219,6 +219,13 @@ class ReserveForm(Form):
 
 
 class BorrowForm(Form):
-    user_id = f.HiddenField(u'user_id', [
+    id = f.HiddenField(u'id', [
         Required(message="User missing"),
+    ])
+
+
+class RateForm(Form):
+    rate = f.TextField(u'rate', [
+        Required(),
+        AnyOf(['up', 'down'], message="Invalid rate")
     ])

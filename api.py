@@ -299,15 +299,20 @@ class DiskResource(CustomResource):
         return self.response(self.serialize_object(obj))
 
     def api_rate(self, pk):
+        data = request.data or request.form.get('data') or ''
         obj = get_object_or_404(self.get_query(), self.pk == pk)
 
         if request.method == 'GET':
             ups, downs = obj.get_rate()
             rated = g.user and Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
         elif request.method == 'POST':
-            rate == request.form.get('rate')
-            if (not rate) or rate not in ['up', 'down']:
+            try:
+                data = json.loads(data)
+            except ValueError:
                 return self.response_bad_request()
+            # do validation first
+            form = BorrowForm(**data)
+            rate == data['rate']
             rated = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
             if rated:
                 return jsonify(errno=3, error="You have rated this disk before")
