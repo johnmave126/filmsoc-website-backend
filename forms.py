@@ -9,6 +9,22 @@ from models import *
 from db_ext import *
 from frame_ext import CustomConverter
 
+__all__ = [
+    'UserForm',
+    'DiskForm',
+    'RegularFilmShowForm',
+    'PreviewShowTicketForm',
+    'DiskReviewForm',
+    'NewsForm',
+    'DocumentForm',
+    'PublicationForm',
+    'SponsorForm',
+    'OneSentenceForm',
+    'ExcoForm',
+    'ReserveForm',
+    'BorrowForm',
+]
+
 
 UserForm = model_form(User, field_args={
     'itsc': dict(validators=[
