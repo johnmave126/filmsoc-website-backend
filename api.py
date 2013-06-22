@@ -217,7 +217,7 @@ class DiskResource(CustomResource):
                 obj.avail_type = 'Reserved'
                 new_log.content = "member %s reserves disk %s (Hall %d %s). remarks: %s" % (g.user.itsc, obj.get_callnumber(), data.get('hall', ''), data.get('room', ''), data.get('remarks', ''))
                 mail_content = render_template('exco_reserve.html', disk=obj, member=g.user, data=data, time=str(datetime.now()))
-                sq = Exco.select().where(Exco.hall_allocate == int(data.get('hall', '8')))
+                sq = Exco.select().where(Exco.hall_allocate % ("%%%d%%" % int(data.get('hall', '8'))))
                 if sq.count() == 0:
                     send_email(['su_film@ust.hk'], [], "Delivery Request (No Exco available)", mail_content)
                 else:
