@@ -17,6 +17,7 @@ from peewee import QueryResultWrapper
 from flask_peewee.auth import Auth
 from flask_peewee.rest import RestAPI, RestResource, Authentication
 from flask_peewee.filters import make_field_tree
+from flask_peewee.serializer import Serializer
 
 from app import app, db
 from helpers import after_this_request
@@ -152,6 +153,20 @@ class CustomAdminAuthentication(CustomAuthentication):
         return res
 
 
+class CustomSerializer(Serializer):
+    def clean_data(self, data):
+        if not isinstance(data, dict):
+            return data
+        for key, value in data.items():
+            if isinstance(value, dict):
+                self.clean_data(value)
+            elif isinstance(value, (list, tuple)):
+                data[key] = map(self.clean_data, value)
+            else:
+                data[key] = self.convert_value(value)
+        return data
+
+
 class CustomResource(RestResource):
     #  readonly means only can be set on create
     readonly = None
@@ -220,6 +235,9 @@ class CustomResource(RestResource):
             self._include_foreign_keys = True
 
         self._field_tree = make_field_tree(self.model, self._filter_fields, self._filter_exclude, self.filter_recursive)
+
+    def get_serializer(self):
+        return CustomSerializer()
 
     def before_send(self, data):
         data['errno'] = 0
