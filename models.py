@@ -121,6 +121,7 @@ class Disk(CustomBaseModel):
     tags = SimpleListField(null=True)  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)
+    category = CharField(max_length=8, null=True)
 
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
     due_at = DateField(null=True)

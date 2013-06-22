@@ -203,6 +203,8 @@ class DiskResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
+            if g.user.reserved.count() >= 2:
+                return jsonify(errno=3, error="A member can reserve at most 2 disks at the same time")
             if obj.avail_type != 'Available':
                 return jsonify(errno=3, error="Disk not reservable")
             obj.reserved_by = g.user
@@ -272,6 +274,8 @@ class DiskResource(CustomResource):
                 # checkout
                 if not g.user.admin:
                     return self.response_forbidden()
+                if req_user.borrowed.count() >= 2:
+                    return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
                 success, error = Disk.check_out(req_user)
                 if not success:
                     return jsonify(errno=3, error=error)

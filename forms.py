@@ -68,6 +68,9 @@ DiskForm = model_form(Disk, field_args={
     ]),
     'title_ch': dict(validators=[
         Required(message="Chinese Title missing")
+    ]),
+    'category': dict(validators=[
+        AnyOf(['I', 'II A', 'II B', 'III'], message="Invalid Category")
     ])
 }, exclude=(
     'hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log',
