@@ -1,6 +1,8 @@
 import datetime
 
-from wtforms.validators import AnyOf, NumberRange, Regexp, Required
+from wtforms.form import Form
+from wtforms import fields as f
+from wtforms.validators import AnyOf, NumberRange, Regexp, Required, Optional
 from wtfpeewee.orm import model_form
 
 from models import *
@@ -37,7 +39,7 @@ DiskForm = model_form(Disk, field_args={
         AnyOf(['A', 'B'], message="Invalid Disk Type")
     ]),
     'show_year': dict(validators=[
-        NumberRange(max=datetime.datetime.now().year, message="Invalid Show Year")
+        NumberRange(max=datetime.date.today().year, message="Invalid Show Year")
     ]),
     'imdb_url': dict(validators=[
         Regexp('tt\d{7}', message="Invalid IMDB Link")
@@ -173,6 +175,31 @@ OneSentenceForm = model_form(OneSentence, field_args={
 
 ExcoForm = model_form(Exco, field_args={
     'hall_allocate': dict(validators=[
-        IntegerField(min=1, max=9, message="Hall must be 1-9")
+        NumberRange(min=1, max=9, message="Hall must be 1-9")
     ])
 }, converter=CustomConverter())
+
+
+# extra forms
+class ReserveForm(Form):
+    form = f.TextField(u'form', [
+        Required(message="Reserve type missing"),
+        AnyOf(['Hall', 'Counter'], message="Unsupported reserve type")
+    ])
+    hall = f.IntegerField(u'hall', [
+        Optional(),
+        NumberRange(min=1, max=9, message="Hall must be 1-9")
+    ])
+    room = f.TextField(u'room', [
+        Optional(),
+        Regexp('\d{3}[ULRulr]{0,1}', message="Invalid room number")
+    ])
+    remarks = f.TextField(u'remarks', [
+        Optional()
+    ])
+
+
+class BorrowForm(Form):
+    user_id = f.HiddenField(u'user_id', [
+        Required(message="User missing"),
+    ])

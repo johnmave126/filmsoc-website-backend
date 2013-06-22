@@ -18,7 +18,7 @@ from flask_peewee.auth import Auth
 from flask_peewee.rest import RestAPI, RestResource, Authentication
 from flask_peewee.filters import make_field_tree
 
-from app import db
+from app import app, db
 from helpers import after_this_request
 from db_ext import JSONField, SimpleListField
 

@@ -13,7 +13,7 @@ class File(CustomBaseModel):
     id = PrimaryKeyField()
 
     name = CharField()
-    url = CharField()
+    url = CharField(unique=True)
 
 
 # user model
@@ -72,8 +72,8 @@ class Log(CustomBaseModel):
     model = CharField(max_length=16)
     Type = CharField(max_length=16)
     model_refer = IntegerField()
-    user_affected = ForeignKeyField(User)
-    admin_involved = ForeignKeyField(User)
+    user_affected = ForeignKeyField(User, null=True)
+    admin_involved = ForeignKeyField(User, null=True)
     content = TextField(null=True)
 
     created_at = DateTimeField(default=datetime.datetime.now)
@@ -83,7 +83,7 @@ class Log(CustomBaseModel):
             (('model',), False),
             (('model', 'Type'), False),
         )
-        order_by = ('-created_at',)
+        order_by = ('-created_at', '-id')
 
 
 class Disk(CustomBaseModel):
@@ -105,8 +105,9 @@ class Disk(CustomBaseModel):
     length = IntegerField(null=True)
 
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
+    due_at = DateField(null=True)
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
-    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, Voting
+    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, ReservedCounter, Voting
 
     borrow_cnt = IntegerField(default=0)
     rank = DecimalField(default=0)
@@ -116,23 +117,19 @@ class Disk(CustomBaseModel):
     class Meta:
         order_by = ('-id',)
 
-    def callNumber(self):
+    def get_callnumber(self):
         return self.disk_type + str(self.id)
 
     def check_out(self, user):
-        if self.avail_type == "Borrowed":
-            return (False, "The disk has been borrowed")
-        if self.avail_type == "Voting":
-            return (False, "The disk is on voting")
+        if self.avail_type not in ["Available", 'Reserved', 'ReservedCounter']:
+            return (False, "The disk is not borrowable")
 
         if self.reserved_by is not None:
             self.reserved_by = None
 
         self.avail_type = "Borrowed"
         self.hold_by = user
-
-        # save the change
-        self.save()
+        return (True, "")
 
     def check_in(self):
         if self.avail_type != "Borrowed":
@@ -141,8 +138,13 @@ class Disk(CustomBaseModel):
         self.avail_type = "Available"
         self.hold_by = None
 
-        # save the change
-        self.save()
+        return (True, "")
+
+    def get_rate(self):
+        return (
+            Log.select().where(Log.model == 'Disk', Log.model_refer == self.id, Log.Type == 'rate', Log.content ** "member % rate +1 for disk %").count(),
+            Log.select().where(Log.model == 'Disk', Log.model_refer == self.id, Log.Type == 'rate', Log.content ** "member % rate -1 for disk %").count(),
+        )
 
 
 class RegularFilmShow(CustomBaseModel):

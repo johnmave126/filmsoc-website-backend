@@ -135,6 +135,6 @@ def send_email(receiver, bcc, subject, body):
 
     smtp = smtplib.SMTP('smtp.ust.hk')
     smtp.login(app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
-    to_list = list(set(receiver + bcc + [from_address]))
+    to_list = list(set(receiver + bcc))
     smtp.sendmail(from_address, to_list, msg.as_string())
     smtp.quit()
