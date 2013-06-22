@@ -11,6 +11,7 @@ from db_ext import JSONField, SimpleListField
 __all__ = [
     'File',
     'User',
+    'Log',
     'Disk',
     'RegularFilmShow',
     'PreviewShowTicket',
