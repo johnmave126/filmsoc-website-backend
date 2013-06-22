@@ -127,7 +127,7 @@ def send_email(receiver, bcc, subject, body):
     from_address = app.config['SOCIETY_USERNAME'] + '@ust.hk'
 
     msg = MIMEMultipart()
-    msg['From'] = msg['Reply-To'] = from_address
+    msg['From'] = msg['Reply-To'] = "Film Society, HKUSTSU <%s>" % from_address
     msg['To'] = COMMASPACE.join(receiver)
     msg['Subject'] = '[Film Society]' + subject
     msg['Date'] = formatdate(localtime=True)
