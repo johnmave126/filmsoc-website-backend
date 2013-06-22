@@ -23,6 +23,7 @@ __all__ = [
     'ExcoForm',
     'ReserveForm',
     'BorrowForm',
+    'RateForm',
 ]
 
 

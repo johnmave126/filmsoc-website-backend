@@ -320,8 +320,11 @@ class DiskResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = BorrowForm(**data)
-            rate == data['rate']
+            form = RateForm(**data)
+            if not form.validate():
+                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                return jsonify(errno=1, error=error)
+            rate = data['rate']
             rated = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
             if rated:
                 return jsonify(errno=3, error="You have rated this disk before")
