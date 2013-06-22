@@ -124,6 +124,7 @@ class DiskResource(CustomResource):
     readonly = ['hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log']
     delete_recursive = False
 
+    exclude = ['rank']
     list_fields = ['id', 'disk_type', 'title_en', 'title_ch', 'director_en', 'director_ch', 'actors', 'cover_url', 'avail_type']
 
     search = {
@@ -158,15 +159,14 @@ class DiskResource(CustomResource):
         ) + super(DiskResource, self).get_urls()
 
     def before_save(self, instance, data):
-        if g.modify_flag == 'delete':
+        if g.modify_flag == 'create':
+            ref_id = Disk.next_primary_key()
+            log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % instance.get_callnumber())
+            instance.create_log = log
+        else:
             ref_id = instance.id
-            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="delete disk %s%s" % (instance.disk_type, instance.id))
+            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
         return instance
-
-    def after_save(self, instance=None):
-        if instance:
-            ref_id = instance.id
-            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content=("%s disk %s%s") % (g.modify_flag, instance.disk_type, instance.id))
 
     def check_post(self, obj=None):
         return g.user.admin

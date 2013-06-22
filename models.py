@@ -99,7 +99,7 @@ class Disk(CustomBaseModel):
     actors = SimpleListField(null=True)  # actors, simmple list
 
     show_year = IntegerField()
-    cover_url = ForeignKeyField(File)
+    cover_url = ForeignKeyField(File, null=True)
     tags = SimpleListField(null=True)  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)

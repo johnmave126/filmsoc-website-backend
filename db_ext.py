@@ -10,9 +10,13 @@ __all__ = [
 
 class SimpleListField(TextField):
     def db_value(self, value):
+        if value is None:
+            return ''
         return join(value, ',')
 
     def python_value(self, value):
+        if value is None:
+            return []
         return split(value, ',')
 
 
