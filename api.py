@@ -217,9 +217,9 @@ class DiskResource(CustomResource):
                 mail_content = render_template('exco_reserve.html', disk=obj, member=g.user, data=data, time=str(datetime.now()))
                 sq = Exco.select().where(Exco.hall_allocate == int(data.get('hall', '8')))
                 if sq.count() == 0:
-                    send_email(['su_film@ust.hk'], [], "[Film Society]Delivery Request (No Exco available)", mail_content)
+                    send_email(['su_film@ust.hk'], [], "Delivery Request (No Exco available)", mail_content)
                 else:
-                    send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "[Film Society]Delivery Request", mail_content)
+                    send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Delivery Request", mail_content)
 
         elif request.method == 'DELETE':
             if not g.user.admin:
