@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from flask import g, jsonify, render_template, request, json
+from peewee import DoesNotExist
 from flask_peewee.rest import Authentication
 from flask_peewee.utils import get_object_or_404
 
@@ -256,7 +257,10 @@ class DiskResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
-            req_user = User.select().where(User.id == data['id'])
+            try:
+                req_user = User.select().where(User.id == data['id']).get()
+            except DoesNotExist:
+                return jsonify(errno=3, error="User not found")
             if obj.avail_type == 'Borrowed' and (g.user.admin or obj.hold_by == req_user):
                 if (not g.user.admin) and req_user != g.user:
                     return self.response_forbidden()
