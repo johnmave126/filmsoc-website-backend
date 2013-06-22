@@ -261,7 +261,9 @@ class DiskResource(CustomResource):
                 req_user = User.select().where(User.id == data['id']).get()
             except DoesNotExist:
                 return jsonify(errno=3, error="User not found")
-            if obj.avail_type == 'Borrowed' and (g.user.admin or obj.hold_by == req_user):
+            if obj.avail_type == 'Borrowed':
+                if obj.borrowed_by != req_user:
+                    return jsonify(errno=3, error="Disk not borrowed by the user")
                 if (not g.user.admin) and req_user != g.user:
                     return self.response_forbidden()
                 # renew
