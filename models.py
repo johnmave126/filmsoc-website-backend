@@ -8,6 +8,23 @@ from peewee import *
 from frame_ext import CustomBaseModel
 from db_ext import JSONField, SimpleListField
 
+__all__ = [
+    'File',
+    'User',
+    'Disk',
+    'RegularFilmShow',
+    'PreviewShowTicket',
+    'DiskReview',
+    'News',
+    'Document',
+    'Publication',
+    'Sponsor',
+    'Exco',
+    'SiteSettings',
+    'OneSentence',
+    'create_tables',
+]
+
 
 class File(CustomBaseModel):
     id = PrimaryKeyField()
