@@ -280,7 +280,7 @@ class DiskResource(CustomResource):
                     return self.response_forbidden()
                 if req_user.borrowed.count() >= 2:
                     return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
-                success, error = Disk.check_out(req_user)
+                success, error = obj.check_out(req_user)
                 if not success:
                     return jsonify(errno=3, error=error)
                 new_log.content = "check out disk %s for member %s" % (obj.get_callnumber(), req_user.itsc)
@@ -291,7 +291,7 @@ class DiskResource(CustomResource):
             if not g.user.admin:
                 return self.response_forbidden()
 
-            success, error = Disk.check_in()
+            success, error = obj.check_in()
             if not success:
                 return jsonify(errno=3, error=error)
 
