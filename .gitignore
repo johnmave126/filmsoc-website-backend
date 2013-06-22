@@ -9,3 +9,6 @@ local_settings.py
 #database
 *.db
 settings.py
+
+#profiling
+wsgi.prof
