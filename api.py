@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from flask import g, jsonify, render_template
 from flask_peewee.rest import Authentication
+from flask_peewee.utils import get_object_or_404
 
 from frame_ext import CustomRestAPI, CustomResource, CustomAuthentication, CustomAdminAuthentication
 from app import app
