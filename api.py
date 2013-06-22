@@ -336,6 +336,7 @@ class DiskResource(CustomResource):
 
             rated = True
             new_log.save()
+            ups, downs = obj.get_rate()
 
         return self.response({
             'ups': ups,
