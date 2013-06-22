@@ -131,7 +131,7 @@ def send_email(receiver, bcc, subject, body):
     msg['To'] = COMMASPACE.join(receiver)
     msg['Subject'] = '[Film Society]' + subject
     msg['Date'] = formatdate(localtime=True)
-    msg.attach(MIMEText(body, 'html'))
+    msg.attach(MIMEText(body, 'html', 'utf-8'))
 
     smtp = smtplib.SMTP('smtp.ust.hk')
     smtp.login(app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
