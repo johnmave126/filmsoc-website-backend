@@ -490,7 +490,7 @@ class PreviewShowTicketResource(CustomResource):
     def get_urls(self):
         return (
             ('/<pk>/application/', self.require_method(self.api_apply, ['POST'])),
-        ) + super(RegularFilmShowResource, self).get_urls()
+        ) + super(PreviewShowTicketResource, self).get_urls()
 
     def api_apply(self, pk):
         obj = get_object_or_404(self.get_query(), self.pk == pk)
