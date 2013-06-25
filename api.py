@@ -557,9 +557,10 @@ class DiskReviewResource(CustomResource):
             ref_id = DiskReview.next_primary_key()
             log = Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=g.user, content="create disk review of %s" % instance.disk.get_callnumber())
             instance.create_log = log
+            instance.poster = g.user
         else:
             ref_id = instance.id
-            Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=g.user, content="%s disk review of %s" % (g.modify_flag, instance.disk.get_callnumber()))
+            Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=instance.poster, admin_involved=g.user, content="%s disk review of %s" % (g.modify_flag, instance.disk.get_callnumber()))
         return instance
 
     def check_post(self, obj=None):
