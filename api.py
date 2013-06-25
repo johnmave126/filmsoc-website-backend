@@ -127,8 +127,16 @@ class UserResource(CustomResource):
 
 
 class LogResource(CustomResource):
+    search = {
+        'default': ['content']
+    }
+
     def check_get(self, obj=None):
         return g.user and g.user.admin
+
+
+class SimpleLogResource(CustomResource):
+    fields = ['created_at']
 
 
 class DiskResource(CustomResource):
@@ -146,7 +154,8 @@ class DiskResource(CustomResource):
         'director': ['director_ch', 'director_en']
     }
     include_resources = {
-        'cover_url': FileResource
+        'cover_url': FileResource,
+        'create_log': SimpleLogResource,
     }
 
     def prepare_data(self, obj, data):
@@ -253,7 +262,7 @@ class DiskResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = BorrowForm(**data)
+            form = SubmitUserForm(**data)
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -286,7 +295,8 @@ class DiskResource(CustomResource):
                 if not success:
                     return jsonify(errno=3, error=error)
                 try:
-                    obj.due_at = SiteSettings.select().where(SiteSettings.key == 'due_date').get().value
+                    due_date = SiteSettings.select().where(SiteSettings.key == 'due_date').get().value
+                    obj.due_at = datetime.strptime(due_date, '%Y-%m-%d').date()
                 except DoesNotExist:
                     obj.due_at = date.today() + timedelta(7)
 
@@ -347,6 +357,164 @@ class DiskResource(CustomResource):
         })
 
 
+class RegularFilmShowResource(CustomResource):
+    readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
+    delete_recursive = False
+
+    include_resources = {
+        'film_1': DiskResource,
+        'film_2': DiskResource,
+        'film_3': DiskResource,
+        'create_log': LogResource,
+    }
+
+    def validate_data(self, data):
+        form = RegularFilmShowForm(**data)
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def prepare_data(self, obj, data):
+        if not g.user.admin:
+            data.discard('participant_list')
+        return data
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = RegularFilmShow.next_primary_key()
+            log = Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create rfs id=%d" % ref_id)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
+        return instance
+
+    def check_post(self, obj=None):
+        return g.user.admin
+
+    def check_put(self, obj):
+        return g.user.admin
+
+    def check_delete(self, obj):
+        return g.user.admin
+
+    def get_urls(self):
+        return (
+            ('/<pk>/vote/', self.require_method(self.api_vote, ['POST'])),
+            ('/<pk>/participant/', self.require_method(self.api_particip, ['POST'])),
+        ) + super(RegularFilmShowResource, self).get_urls()
+
+    def api_vote(self, pk):
+        obj = get_object_or_404(self.get_query(), self.pk == pk)
+        data = request.data or request.form.get("data") or ''
+
+        if request.method == 'POST':
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return self.response_bad_request()
+            # do validation first
+            form = VoteForm(**data)
+            if not form.validate():
+                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                return jsonify(errno=1, error=error)
+            vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user)]
+            if len(vote_log) >= 2:
+                return jsonify(errno=3, error="A member can vote at most twice")
+            if data['film_id'] in vote_log:
+                return jsonify(errno=3, error="You have voted before")
+            setattr(obj, "vote_cnt_%d" % data['film_id'], getattr(obj, "vote_cnt_%d" % data['film_id']) + 1)
+            obj.save()
+            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user, content="member %s vote for film No. %d" % data['film_id'])
+
+        return self.response(self.serialize_object(obj))
+
+    def api_particip(self, pk):
+        obj = get_object_or_404(self.get_query(), self.pk == pk)
+        data = request.data or request.form.get("data") or ''
+
+        if not getattr(self, 'check_%s' % request.method.lower())(obj):
+            return self.response_forbidden()
+
+        if request.method == 'POST':
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return self.response_bad_request()
+            # do validation first
+            form = SubmitUserForm(**data)
+            if not form.validate():
+                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                return jsonify(errno=1, error=error)
+            if data['id'] in obj.participant_list:
+                return jsonify(errno=3, error="Recorded before")
+            try:
+                user = User.select().where(User.id == data['id']).get()
+            except DoesNotExist:
+                return jsonify(errno=3, error="User not found")
+            user.rfs_count += 1
+            obj.participant_list.append(data['id'])
+            user.save()
+            obj.save()
+            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="entry", user_affected=user, admin_involved=g.user, content="member %s enter RFS" % user.itsc)
+
+        return self.response(self.serialize_object(obj))
+
+
+class PreviewShowTicketResource(CustomResource):
+    readonly = ['create_log']
+    delete_recursive = False
+
+    include_resources = {
+        'create_log': LogResource,
+    }
+
+    def validate_data(self, data):
+        form = PreviewShowTicketForm(**data)
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = PreviewShowTicket.next_primary_key()
+            log = Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create ticket id=%d" % ref_id)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id))
+        return instance
+
+    def check_post(self, obj=None):
+        return g.user.admin
+
+    def check_put(self, obj):
+        return g.user.admin
+
+    def check_delete(self, obj):
+        return g.user.admin
+
+    def get_urls(self):
+        return (
+            ('/<pk>/application/', self.require_method(self.api_apply, ['POST'])),
+        ) + super(RegularFilmShowResource, self).get_urls()
+
+    def api_apply(self, pk):
+        obj = get_object_or_404(self.get_query(), self.pk == pk)
+        data = request.data or request.form.get("data") or ''
+
+        if request.method == 'POST':
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return self.response_bad_request()
+            # do validation first
+            form = ApplyTicketForm(**data)
+            if not form.validate():
+                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                return jsonify(errno=1, error=error)
+            pass
+
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)
 read_auth = Authentication()
@@ -359,3 +527,5 @@ api.register(File, FileResource, auth=read_auth)
 api.register(User, UserResource)
 api.register(Log, LogResource, auth=read_auth)
 api.register(Disk, DiskResource, auth=user_auth)
+api.register(RegularFilmShow, RegularFilmShowResource, auth=user_auth)
+api.register(PreviewShowTicket, PreviewShowTicketResource, auth=user_auth)

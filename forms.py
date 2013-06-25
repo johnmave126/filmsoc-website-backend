@@ -109,7 +109,7 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
         Required(message="Apply Deadline missing")
     ])
 }, exclude=(
-    'applicant', 'create_log',
+    'create_log',
 ), converter=CustomConverter())
 
 
@@ -219,8 +219,8 @@ class ReserveForm(Form):
     ])
 
 
-class BorrowForm(Form):
-    id = f.HiddenField(u'id', [
+class SubmitUserForm(Form):
+    id = f.IntegerField(u'id', [
         Required(message="User missing"),
     ])
 
@@ -229,4 +229,18 @@ class RateForm(Form):
     rate = f.TextField(u'rate', [
         Required(),
         AnyOf(['up', 'down'], message="Invalid rate")
+    ])
+
+
+class VoteForm(Form):
+    film_id = f.IntegerField(u'rfs_id', [
+        Required(),
+        AnyOf([1, 2, 3], message="Invalid Choice")
+    ])
+
+
+class ApplyTicketForm(Form):
+    number = f.IntegerField(u'number', [
+        Required(),
+        AnyOf([1, 2], message="Invalid choice of number")
     ])

@@ -216,7 +216,6 @@ class PreviewShowTicket(CustomBaseModel):
     show_time = DateTimeField(null=True)
     remarks = TextField(null=True)
 
-    applicant = SimpleListField(null=True)
     successful_applicant = SimpleListField(null=True)
 
     create_log = ForeignKeyField(Log)
