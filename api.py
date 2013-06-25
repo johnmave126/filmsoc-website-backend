@@ -160,6 +160,9 @@ class DiskResource(CustomResource):
             data['user_held'] = True
         else:
             data['user_held'] = False
+        if not (g.user and g.user.admin):
+            data.pop('hold_by', None)
+            data.pop('reserved_by', None)
         return super(DiskResource, self).prepare_data(obj, data)
 
     def validate_data(self, data):
