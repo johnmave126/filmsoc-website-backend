@@ -2,6 +2,7 @@ from string import join
 import uuid
 from datetime import datetime, timedelta, date
 
+from werkzeug.datastructures import MultiDict
 from flask import g, jsonify, render_template, request, json
 from peewee import DoesNotExist
 from flask_peewee.rest import Authentication
@@ -60,7 +61,7 @@ class UserResource(CustomResource):
     }
 
     def validate_data(self, data):
-        form = UserForm(**data)
+        form = UserForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         user_info = query_user(data.get('itsc', None))
@@ -162,7 +163,7 @@ class DiskResource(CustomResource):
         return super(DiskResource, self).prepare_data(obj, data)
 
     def validate_data(self, data):
-        form = DiskForm(**data)
+        form = DiskForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
@@ -205,7 +206,7 @@ class DiskResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = ReserveForm(**data)
+            form = ReserveForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -255,7 +256,7 @@ class DiskResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = SubmitUserForm(**data)
+            form = SubmitUserForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -325,7 +326,7 @@ class DiskResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = RateForm(**data)
+            form = RateForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -362,7 +363,7 @@ class RegularFilmShowResource(CustomResource):
     }
 
     def validate_data(self, data):
-        form = RegularFilmShowForm(**data)
+        form = RegularFilmShowForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
@@ -426,7 +427,7 @@ class RegularFilmShowResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = VoteForm(**data)
+            form = VoteForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -456,7 +457,7 @@ class RegularFilmShowResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = SubmitUserForm(**data)
+            form = SubmitUserForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
@@ -486,7 +487,7 @@ class PreviewShowTicketResource(CustomResource):
     }
 
     def validate_data(self, data):
-        form = PreviewShowTicketForm(**data)
+        form = PreviewShowTicketForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
@@ -525,7 +526,7 @@ class PreviewShowTicketResource(CustomResource):
             except ValueError:
                 return self.response_bad_request()
             # do validation first
-            form = ApplyTicketForm(**data)
+            form = ApplyTicketForm(MultiDict(data))
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
