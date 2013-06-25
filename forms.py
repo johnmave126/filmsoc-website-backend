@@ -229,20 +229,20 @@ class SubmitUserForm(Form):
 
 class RateForm(Form):
     rate = f.TextField(u'rate', [
-        Required(),
+        Required(message="Rate missing"),
         AnyOf(['up', 'down'], message="Invalid rate")
     ])
 
 
 class VoteForm(Form):
     film_id = f.IntegerField(u'rfs_id', [
-        Required(),
+        Required(message="The film to vote missing"),
         AnyOf([1, 2, 3], message="Invalid Choice")
     ])
 
 
 class ApplyTicketForm(Form):
     number = f.IntegerField(u'number', [
-        Required(),
+        Required(message="Number of ticket missing"),
         AnyOf([1, 2], message="Invalid choice of number")
     ])
