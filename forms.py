@@ -116,6 +116,9 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
 
 
 DiskReviewForm = model_form(DiskReview, field_args={
+    'disk': dict(validators=[
+        Required(message="The disk to review missing")
+    ]),
     'content': dict(validators=[
         Required(message="Content cannot be null")
     ])

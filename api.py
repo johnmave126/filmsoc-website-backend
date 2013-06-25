@@ -540,6 +540,27 @@ class PreviewShowTicketResource(CustomResource):
         return self.response({})
 
 
+class DiskReviewResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+    }
+
+    def validate_data(self, data):
+        form = DiskReviewForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def check_post(self, obj=None):
+        return not obj
+
+    def check_put(self, obj):
+        return False
+
+    def check_delete(self, obj):
+        return g.user.admin
+
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)
 read_auth = Authentication()
@@ -554,3 +575,4 @@ api.register(Log, LogResource, auth=read_auth)
 api.register(Disk, DiskResource, auth=user_auth)
 api.register(RegularFilmShow, RegularFilmShowResource, auth=user_auth)
 api.register(PreviewShowTicket, PreviewShowTicketResource, auth=user_auth)
+api.register(DiskReviewResource, DiskReview, auth=user_auth)
