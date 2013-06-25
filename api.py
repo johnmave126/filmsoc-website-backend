@@ -16,10 +16,6 @@ from helpers import query_user, update_mailing_list, upload_file, send_email
 
 
 __all__ = [
-    'FileResource',
-    'UserResource',
-    'LogResource',
-    'DiskResource',
     'api',
 ]
 
@@ -102,7 +98,7 @@ class UserResource(CustomResource):
             ref_id = instance.id
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
         # update mailing-list
-        # update_mailing_list([x.itsc for x in User.select(User.itsc)])
+        # update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.expired == False)])
         # disable because it is danger
 
     def get_urls(self):
@@ -228,10 +224,7 @@ class DiskResource(CustomResource):
                 new_log.content = "member %s reserves disk %s (Hall %d %s). remarks: %s" % (g.user.itsc, obj.get_callnumber(), data.get('hall', ''), data.get('room', ''), data.get('remarks', ''))
                 mail_content = render_template('exco_reserve.html', disk=obj, member=g.user, data=data, time=str(datetime.now()))
                 sq = Exco.select().where(Exco.hall_allocate % ("%%%d%%" % int(data.get('hall', '8'))))
-                if sq.count() == 0:
-                    send_email(['su_film@ust.hk'], [], "Delivery Request (No Exco available)", mail_content)
-                else:
-                    send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Delivery Request", mail_content)
+                send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Delivery Request", mail_content)
 
         elif request.method == 'DELETE':
             if not g.user.admin:
@@ -375,7 +368,7 @@ class RegularFilmShowResource(CustomResource):
         return True, ""
 
     def prepare_data(self, obj, data):
-        if not g.user.admin:
+        if not (g.user and g.user.admin):
             data.discard('participant_list')
         return data
 
@@ -513,7 +506,13 @@ class PreviewShowTicketResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
-            pass
+            mail_content = render_template('ticket_apply.html', ticket=obj, member=g.user, data=data, time=str(datetime.now()))
+            sq = Exco.select().where(Exco.position == "External Vice-President")
+            send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Ticket Application", mail_content)
+            Log.create(model="PreviewShowTicket", Type='apply', model_refer=obj.id, user_affected=g.user, content="member %s apply for ticket id=%d" % (g.user.itsc, obj.id))
+
+        return self.response({})
+
 
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)

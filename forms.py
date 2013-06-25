@@ -22,8 +22,10 @@ __all__ = [
     'OneSentenceForm',
     'ExcoForm',
     'ReserveForm',
-    'BorrowForm',
+    'SubmitUserForm',
     'RateForm',
+    'VoteForm',
+    'ApplyTicketForm',
 ]
 
 

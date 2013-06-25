@@ -1,0 +1,40 @@
+{% extends "base_email.html" %}
+{% block body %}
+    <tr>
+        <td>
+            <h3 style="font-weight: bold; margin-bottom: 5px;">
+                Ticket Application
+            </h3>
+            <table cellpadding="0" cellspacing="0" border="0" align="left" style="border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">
+                <tr>
+                    <td style="font-weight: bold;">Name of Ticket:</td>
+                    <td style="padding-left:5px;">{{ ticket.title_en }}/{{ ticket.title_ch }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Member name:</td>
+                    <td style="padding-left:5px;">{{ member.full_name }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Member itsc:</td>
+                    <td style="padding-left:5px;">{{ member.itsc }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Member student id:</td>
+                    <td style="padding-left:5px;">{{ member.student_id }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Member mobile:</td>
+                    <td style="padding-left:5px;">{{ member.mobile or 'Unknown' }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Number of tickets:</td>
+                    <td style="padding-left:5px;">{{ data['number'] }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Created at:</td>
+                    <td style="padding-left:5px;">{{ time }}</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+{% endblock %}
