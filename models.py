@@ -126,7 +126,7 @@ class Disk(CustomBaseModel):
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
     due_at = DateField(null=True)
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
-    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, ReservedCounter, Voting
+    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, ReservedCounter, Voting, Onshow
 
     borrow_cnt = IntegerField(default=0)
     rank = DecimalField(default=0)
@@ -169,7 +169,7 @@ class Disk(CustomBaseModel):
 class RegularFilmShow(CustomBaseModel):
     id = PrimaryKeyField()
 
-    state = CharField(max_length=16)  # Draft, Closed, Open, Pending, Passed
+    state = CharField(max_length=16)  # Draft, Open, Pending, Passed
 
     film_1 = ForeignKeyField(Disk, null=True)
     film_2 = ForeignKeyField(Disk, null=True)

@@ -83,7 +83,7 @@ DiskForm = model_form(Disk, field_args={
 RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     'state': dict(validators=[
         Required(message="Show state Missing"),
-        AnyOf(['Draft', 'Closed', 'Open', 'Pending', 'Passed'], message="Invalid Show State")
+        AnyOf(['Draft', 'Open', 'Pending', 'Passed'], message="Invalid Show State")
     ])
 }, exclude=(
     'participant_list', 'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3',

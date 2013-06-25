@@ -380,6 +380,25 @@ class RegularFilmShowResource(CustomResource):
         else:
             ref_id = instance.id
             Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
+        if instance.state == 'Open':
+            for x in [1, 2, 3]:
+                disk = getattr(instance, "film_%d" % x)
+                disk.avail_type = 'Voting'
+                for y in ['reserved_by', 'borrowed_by', 'due_at', 'hold_by']:
+                    setattr(disk, y, None)
+                disk.save()
+        elif instance.state == 'Pending':
+            largest = max([1, 2, 3], key=lambda o: getattr(instance, "vote_cnt_%d" % o))
+            for x in [1, 2, 3]:
+                disk = getattr(instance, "film_%d" % x)
+                disk.avail_type = 'Available'
+                disk.save()
+            disk = getattr(instance, "film_%d" % largest)
+            disk.avail_type = 'Onshow'
+            disk.save()
+        elif instance.state == 'Passed':
+            disk = next((x for x in (getattr(instance, "film_%d" % y) for y in [1, 2, 3]) if x.avail_type == 'Onshow'))
+            disk.save()
         return instance
 
     def check_post(self, obj=None):
@@ -411,6 +430,8 @@ class RegularFilmShowResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
+            if obj.state != 'Open':
+                return jsonify(errno=3, error="The show cannot be voted now")
             vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user)]
             if len(vote_log) >= 2:
                 return jsonify(errno=3, error="A member can vote at most twice")
@@ -439,6 +460,8 @@ class RegularFilmShowResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
+            if obj.state != 'Pending':
+                return jsonify(errno=3, error="The show is not in entry mode")
             if data['id'] in obj.participant_list:
                 return jsonify(errno=3, error="Recorded before")
             try:
@@ -506,6 +529,8 @@ class PreviewShowTicketResource(CustomResource):
             if not form.validate():
                 error = join([join(x, '\n') for x in form.errors.values()], '\n')
                 return jsonify(errno=1, error=error)
+            if obj.state != 'Open':
+                return jsonify(errno=3, error="The ticket cannot be applied now")
             mail_content = render_template('ticket_apply.html', ticket=obj, member=g.user, data=data, time=str(datetime.now()))
             sq = Exco.select().where(Exco.position == "External Vice-President")
             send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Ticket Application", mail_content)
