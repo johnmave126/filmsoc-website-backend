@@ -194,6 +194,12 @@ class DiskResource(CustomResource):
     def check_delete(self, obj):
         return g.user.admin
 
+    def get_query(self):
+        if g.user and g.user.admin:
+            return self.model.select().where(self.model.avail_type != "Draft")
+        else:
+            return super(DiskResource, self).get_query()
+
     def api_reserve(self, pk):
         obj = get_object_or_404(self.get_query(), self.pk == pk)
         data = request.data or request.form.get('data') or ''
@@ -362,6 +368,12 @@ class RegularFilmShowResource(CustomResource):
         'create_log': SimpleLogResource,
     }
 
+    def get_query(self):
+        if g.user and g.user.admin:
+            return self.model.select().where(self.model.state != "Draft")
+        else:
+            return super(RegularFilmShowResource, self).get_query()
+
     def validate_data(self, data):
         form = RegularFilmShowForm(MultiDict(data))
         if not form.validate():
@@ -486,6 +498,12 @@ class PreviewShowTicketResource(CustomResource):
         'create_log': SimpleLogResource,
     }
 
+    def get_query(self):
+        if g.user and g.user.admin:
+            return self.model.select().where(self.model.state != "Draft")
+        else:
+            return super(PreviewShowTicketResource, self).get_query()
+
     def validate_data(self, data):
         form = PreviewShowTicketForm(MultiDict(data))
         if not form.validate():
@@ -545,6 +563,11 @@ class DiskReviewResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
     }
+
+    def prepare_data(self, obj, data):
+        if not (g.user and g.user.admin):
+            data.discard('poster')
+        return data
 
     def validate_data(self, data):
         form = DiskReviewForm(MultiDict(data))
