@@ -382,7 +382,7 @@ class RegularFilmShowResource(CustomResource):
 
     def prepare_data(self, obj, data):
         if not (g.user and g.user.admin):
-            data.discard('participant_list')
+            data.pop('participant_list', None)
         return data
 
     def before_save(self, instance, data):
@@ -566,7 +566,7 @@ class DiskReviewResource(CustomResource):
 
     def prepare_data(self, obj, data):
         if not (g.user and g.user.admin):
-            data.discard('poster')
+            data.pop('poster', None)
         return data
 
     def validate_data(self, data):
