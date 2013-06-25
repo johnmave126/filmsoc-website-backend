@@ -142,6 +142,9 @@ NewsForm = model_form(News, field_args={
 DocumentForm = model_form(Document, field_args={
     'title': dict(validators=[
         Required(message="Title Missing")
+    ]),
+    'doc_url': dict(validators=[
+        Required(message="File Missing")
     ])
 }, exclude=(
     'create_log',
@@ -155,6 +158,12 @@ PublicationForm = model_form(Publication, field_args={
     'Type': dict(validators=[
         Required(message="Type Missing"),
         AnyOf(['Magazine', 'MicroMagazine'], "Invalid Type")
+    ]),
+    'doc_url': dict(validators=[
+        Required(message="File Missing")
+    ]),
+    'cover_url': dict(validators=[
+        Required(message="Cover image Missing")
     ])
 }, exclude=(
     'create_log',
@@ -164,6 +173,9 @@ PublicationForm = model_form(Publication, field_args={
 SponsorForm = model_form(Sponsor, field_args={
     'name': dict(validators=[
         Required(message="Name Missing")
+    ]),
+    'img_url': dict(validators=[
+        Required(message="Image Missing")
     ]),
     'x': dict(validators=[
         Required(message="Location Missing"),
@@ -186,6 +198,23 @@ SponsorForm = model_form(Sponsor, field_args={
 ), converter=CustomConverter())
 
 
+ExcoForm = model_form(Exco, field_args={
+    'hall_allocate': dict(validators=[
+        NumberRange(min=1, max=9, message="Hall must be 1-9")
+    ])
+}, converter=CustomConverter())
+
+
+SiteSettingsForm = model_form(SiteSettings, field_args={
+    'key': dict(validators=[
+        Required(message="Missing key")
+    ]),
+    'value': dict(validators=[
+        Required(message="Missing value")
+    ])
+}, converter=CustomConverter())
+
+
 OneSentenceForm = model_form(OneSentence, field_args={
     'film': dict(validators=[
         Required(message="Origin Film Missing")
@@ -196,13 +225,6 @@ OneSentenceForm = model_form(OneSentence, field_args={
 }, exclude=(
     'create_log',
 ), converter=CustomConverter())
-
-
-ExcoForm = model_form(Exco, field_args={
-    'hall_allocate': dict(validators=[
-        NumberRange(min=1, max=9, message="Hall must be 1-9")
-    ])
-}, converter=CustomConverter())
 
 
 # extra forms

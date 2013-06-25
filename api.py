@@ -173,6 +173,7 @@ class DiskResource(CustomResource):
             ('/<pk>/reservation/', self.require_method(self.api_reserve, ['POST', 'DELETE'])),
             ('/<pk>/borrow/', self.require_method(self.api_borrow, ['POST', 'DELETE'])),
             ('/<pk>/rate/', self.require_method(self.api_rate, ['GET', 'POST'])),
+            ('/rand/', self.require_method(self.api_rand, ['GET'])),
         ) + super(DiskResource, self).get_urls()
 
     def before_save(self, instance, data):
@@ -355,6 +356,12 @@ class DiskResource(CustomResource):
             'downs': downs,
             'rated': rated
         })
+
+    def api_rand(self):
+        if request.method == 'GET':
+            obj = self.model.select().order_by(fn.Rand()).limit(1).get()
+
+        return self.response(self.serialize_object(obj))
 
 
 class RegularFilmShowResource(CustomResource):
@@ -595,6 +602,179 @@ class DiskReviewResource(CustomResource):
     def check_delete(self, obj):
         return g.user.admin
 
+
+class NewsResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+    }
+
+    def validate_data(self, data):
+        form = NewsForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = News.next_primary_key()
+            log = Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create news %s" % instance.title)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
+        return instance
+
+
+class DocumentResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+        'doc_url': FileResource,
+    }
+
+    def validate_data(self, data):
+        form = DocumentForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = Document.next_primary_key()
+            log = Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create document %s" % instance.title)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
+        return instance
+
+
+class PublicationResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+        'doc_url': FileResource,
+        'cover_url': FileResource,
+    }
+
+    def validate_data(self, data):
+        form = PublicationForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = Publication.next_primary_key()
+            log = Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create publication %s" % instance.title)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
+        return instance
+
+
+class SponsorResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+        'img_url': FileResource,
+    }
+
+    def validate_data(self, data):
+        form = SponsorForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = Sponsor.next_primary_key()
+            log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.title)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.title))
+        return instance
+
+
+class ExcoResource(CustomResource):
+    readonly = ['hall_allocate', 'name_en', 'name_ch', 'position']
+    delete_recursive = False
+    include_resources = {
+        'img_url': FileResource,
+    }
+
+    def validate_data(self, data):
+        form = ExcoResource(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def check_post(self, obj=None):
+        return obj
+
+    def check_put(self, obj):
+        return g.user and g.user.admin
+
+    def check_delete(self, obj):
+        return False
+
+
+class SiteSettingsResource(CustomResource):
+    readonly = ['key']
+    delete_recursive = False
+
+    def validate_data(self, data):
+        form = SiteSettingsResource(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def check_post(self, obj=None):
+        return obj
+
+    def check_put(self, obj):
+        return g.user and g.user.admin
+
+    def check_delete(self, obj):
+        return False
+
+
+class OneSentenceResource(CustomResource):
+    delete_recursive = False
+    include_resources = {
+        'create_log': SimpleLogResource,
+    }
+
+    def validate_data(self, data):
+        form = OneSentenceForm(MultiDict(data))
+        if not form.validate():
+            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+        return True, ""
+
+    def before_save(self, instance, data):
+        if g.modify_flag == 'create':
+            ref_id = OneSentence.next_primary_key()
+            log = Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create one sentence id=%d" % ref_id)
+            instance.create_log = log
+        else:
+            ref_id = instance.id
+            Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))
+        return instance
+
+    def get_urls(self):
+        return (
+            ('/rand/', self.require_method(self.api_rand, ['GET'])),
+        ) + super(OneSentenceResource, self).get_urls()
+
+    def api_rand(self):
+        if request.method == 'GET':
+            obj = self.model.select().order_by(fn.Rand()).limit(1).get()
+
+        return self.response(self.serialize_object(obj))
+
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)
 read_auth = Authentication()
@@ -610,3 +790,10 @@ api.register(Disk, DiskResource, auth=user_auth)
 api.register(RegularFilmShow, RegularFilmShowResource, auth=user_auth)
 api.register(PreviewShowTicket, PreviewShowTicketResource, auth=user_auth)
 api.register(DiskReview, DiskReviewResource, auth=user_auth)
+api.register(News, NewsResource)
+api.register(Document, DocumentResource)
+api.register(Publication, PublicationResource)
+api.register(Sponsor, SponsorResource)
+api.register(Exco, ExcoResource)
+api.register(SiteSettings, SiteSettingsResource)
+api.register(OneSentence, OneSentenceResource)

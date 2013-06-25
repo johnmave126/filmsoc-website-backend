@@ -306,7 +306,7 @@ class Exco(CustomBaseModel):
 
 
 class SiteSettings(CustomBaseModel):
-    key = CharField()
+    key = CharField(max_length=16, unique=True)
     value = CharField()
 
 
