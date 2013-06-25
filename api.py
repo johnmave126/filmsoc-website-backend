@@ -359,7 +359,7 @@ class RegularFilmShowResource(CustomResource):
         'film_1': DiskResource,
         'film_2': DiskResource,
         'film_3': DiskResource,
-        'create_log': LogResource,
+        'create_log': SimpleLogResource,
     }
 
     def validate_data(self, data):
@@ -483,7 +483,7 @@ class PreviewShowTicketResource(CustomResource):
     delete_recursive = False
 
     include_resources = {
-        'create_log': LogResource,
+        'create_log': SimpleLogResource,
     }
 
     def validate_data(self, data):
