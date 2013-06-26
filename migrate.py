@@ -40,7 +40,10 @@ def migrate_user(record):
         try:
             expire_at = datetime.strptime(expire_at, '%Y-%m-%d')
         except ValueError:
-            expire_at = datetime.strptime('%s-09-01' % expire_at, '%Y-%m-%d')
+            try:
+                expire_at = datetime.strptime('%s-09-01' % expire_at, '%Y-%m-%d')
+            except:
+                expire_at = datetime.strptime('%s-09-01' % expire_at[0:4], '%Y-%m-%d')
     # convert Type
     Type = user_map[Type]
     data = {
