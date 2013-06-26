@@ -31,7 +31,10 @@ def migrate_user(record):
         try:
             join_at = datetime.strptime(join_at, '%Y-%m-%d')
         except ValueError:
-            join_at = datetime.strptime('%s-09-01' % join_at, '%Y-%m-%d')
+            try:
+                join_at = datetime.strptime('%s-09-01' % join_at, '%Y-%m-%d')
+            except:
+                join_at = datetime.strptime('%s-09-01' % join_at[0:4], '%Y-%m-%d')
 
     # convert expire_at
     if len(expire_at) == 0 or expire_at == '0000-00-00':
@@ -51,7 +54,8 @@ def migrate_user(record):
         'student_id': stuid,
         'mobile': mobile,
         'member_type': Type,
-        'expire_at': expire_at.strftime('%Y-%m-%d')
+        'expire_at': expire_at.strftime('%Y-%m-%d'),
+        'join_at': join_at.strftime('%Y-%m-%d')
     }
     form = UserForm(MultiDict(data))
     if not form.validate():
