@@ -5,6 +5,7 @@ from forms import *
 
 import MySQLdb
 from datetime import datetime, date
+from string import join
 from helpers import query_user, send_email
 
 
