@@ -61,6 +61,7 @@ def migrate_user(record):
     if not form.validate():
         if len(form.errors) == 1 and 'mobile' in form.errors:
             data.pop('mobile')
+            Log.create(model="User", model_refer=User.next_primary_key(), Type='create', content="import warning at user %s(%s). Wrong mobile." % (itsc, stuid))
         else:
             Log.create(model="User", model_refer=0, Type='create', content="import error at user %s(%s). Wrong format. %s" % (itsc, stuid, join([join(x, '\n') for x in form.errors.values()], '\n')))
             return
