@@ -6,7 +6,9 @@ from forms import *
 import MySQLdb
 from datetime import datetime, date
 from string import join
-from helpers import query_user, send_email
+from helpers import query_user, send_email, upload_file
+import StringIO
+import uuid
 
 
 user_map = {
@@ -84,34 +86,46 @@ def migrate_disk(record):
     Type = callnumber[0]
     id = int(callnumber[1:])
 
+    #upload cover first
+    if len(image_blob) > 0:
+        f_obj = StringIO.StringIO(image_blob)
+
+        new_filename = str(uuid.uuid4()) + '.jpg'
+        while File.select().where(File.url == new_filename).count() > 0:
+            new_filename = str(uuid.uuid4()) + '.jpg'
+
+        upload_file(new_filename, f_obj)
+        f_ins = File.create(name=name_en + '.jpg', url=new_filename)
+    else:
+        f_ins = None
+
     log = Log.create(model="Disk", Type='create', model_refer=id, user_affected=None, admin_involved=None, content="import disk %s" % callnumber)
-    disk = Disk(id=id, disk_type=Type, title_en=name_en, title_ch=name_ch, desc_ch=desc_ch, show_year=0, avail_type='Available', create_log=log)
-    print disk.id
+    disk = Disk(id=id, disk_type=Type, title_en=name_en, title_ch=name_ch, desc_ch=desc_ch, show_year=0, avail_type='Available', cover_url=f_ins, create_log=log)
     disk._meta.auto_increment = False
     try:
         disk.save(force_insert=True)
+        disk._meta.auto_increment = True
     except MySQLdb.Error:
         log.model_refer = Disk.next_primary_key()
         log.content = "import disk %s%s from %s(callnumber changed)" % (Type, log.model_refer, callnumber)
         disk._meta.auto_increment = True
         disk.save(force_insert=True)
-        disk._meta.auto_increment = False
         log.save()
 
 
 # migrate database
 def main():
     try:
-        conn = MySQLdb.connect(host='localhost', user='film', passwd='filmsoc', db='old_film', charset='utf8')
+        conn = MySQLdb.connect(host='localhost', user='root', passwd='sflsbug5', db='old_film', charset='utf8')
         cursor = conn.cursor()
         # user
-        cursor.execute("select `Stu_ID` AS `stuid`, `ITSC` AS `itsc`, `Mobile` AS `mobile`, `Membership` AS `Type`, `Year_Attend` AS `join_at`, `Valid_Thru` AS `expire_at` from `member`")
-        for row in cursor:
-            migrate_user(row)
-        #disk
-        #cursor.execute("select `Call_Number` AS `callnumber`, `Name_CHN` AS `name_ch`, `Name_ENG` AS `name_en`, `Describ` AS `desc_ch`, `Img` AS `image` from `disc` ORDER BY `callnumber` ASC")
+        #cursor.execute("select `Stu_ID` AS `stuid`, `ITSC` AS `itsc`, `Mobile` AS `mobile`, `Membership` AS `Type`, `Year_Attend` AS `join_at`, `Valid_Thru` AS `expire_at` from `member`")
         #for row in cursor:
-        #    migrate_disk(row)
+        #    migrate_user(row)
+        # disk
+        cursor.execute("select `Call_Number` AS `callnumber`, `Name_CHN` AS `name_ch`, `Name_ENG` AS `name_en`, `Describ` AS `desc_ch`, `Img` AS `image` from `disc` ORDER BY `callnumber` ASC")
+        for row in cursor:
+            migrate_disk(row)
         cursor.close()
         conn.close()
     except MySQLdb.Error, e:
