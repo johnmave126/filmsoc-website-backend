@@ -45,7 +45,10 @@ UserForm = model_form(User, field_args={
     ]),
     'member_type': dict(validators=[
         Required(message="Member Type required"),
-        AnyOf(['Full', 'OneSem', 'OneYear', 'TwoYear', 'ThreeYear', 'Honor', 'Assoc'], message="Invalid Member Type")
+        AnyOf(['Full', 'OneSem', 'OneYear', 'TwoYear', 'ThreeYear', 'Honour', 'Assoc'], message="Invalid Member Type")
+    ]),
+    'expire_at': dict(validators=[
+        Required(message="Expire date required")
     ])
 }, exclude=(
     'last_login', 'this_login', 'login_count', 'rfs_count', 'full_name',

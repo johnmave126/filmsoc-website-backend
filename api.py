@@ -507,6 +507,10 @@ class PreviewShowTicketResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
     }
+    search = {
+        'default': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
+        'title': ['title_en', 'title_ch'],
+    }
 
     def get_query(self):
         if g.user and g.user.admin:
@@ -573,6 +577,9 @@ class DiskReviewResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
     }
+    search = {
+        'default': ['content']
+    }
 
     def prepare_data(self, obj, data):
         if not (g.user and g.user.admin):
@@ -611,6 +618,9 @@ class NewsResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
     }
+    search = {
+        'default': ['title', 'content']
+    }
 
     def validate_data(self, data):
         form = NewsForm(MultiDict(data))
@@ -634,6 +644,9 @@ class DocumentResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
         'doc_url': FileResource,
+    }
+    search = {
+        'default': ['title']
     }
 
     def validate_data(self, data):
@@ -660,6 +673,9 @@ class PublicationResource(CustomResource):
         'doc_url': FileResource,
         'cover_url': FileResource,
     }
+    search = {
+        'default': ['title']
+    }
 
     def validate_data(self, data):
         form = PublicationForm(MultiDict(data))
@@ -683,6 +699,9 @@ class SponsorResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
         'img_url': FileResource,
+    }
+    search = {
+        'default': ['name']
     }
 
     def validate_data(self, data):
@@ -747,6 +766,9 @@ class SiteSettingsResource(CustomResource):
 
 class OneSentenceResource(CustomResource):
     delete_recursive = False
+    search = {
+        'default': ['film', 'content']
+    }
     include_resources = {
         'create_log': SimpleLogResource,
     }
