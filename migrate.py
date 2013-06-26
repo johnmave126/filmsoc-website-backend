@@ -59,8 +59,11 @@ def migrate_user(record):
     }
     form = UserForm(MultiDict(data))
     if not form.validate():
-        Log.create(model="User", model_refer=0, Type='create', content="import error at user %s(%s). Wrong format." % (itsc, stuid))
-        return
+        if len(form.errors) == 1 and 'mobile' in form.errors:
+            data.pop('mobile')
+        else:
+            Log.create(model="User", model_refer=0, Type='create', content="import error at user %s(%s). Wrong format. %s" % (itsc, stuid, join([join(x, '\n') for x in form.errors.values()], '\n')))
+            return
     user_info = query_user(data.get('itsc', None))
     if not user_info:
         Log.create(model="User", model_refer=0, Type='create', content="import error at user %s(%s). Non-exist ITSC." % (itsc, stuid))
