@@ -68,6 +68,7 @@ class UserResource(CustomResource):
         if not user_info:
             return False, "Wrong ITSC, please check the spelling"
         data['full_name'] = user_info['displayName']
+        data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
             if User.select().where(User.itsc == data['itsc']).count() != 0:
