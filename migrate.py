@@ -86,6 +86,8 @@ def migrate_disk(record):
     Type = callnumber[0]
     id = int(callnumber[1:])
 
+    print callnumber
+
     #upload cover first
     if len(image_blob) > 0:
         f_obj = StringIO.StringIO(image_blob)

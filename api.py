@@ -280,9 +280,10 @@ class DiskResource(CustomResource):
                     return jsonify(errno=3, error="Disk not borrowed by the user")
                 if (not g.user.admin) and req_user != g.user:
                     return self.response_forbidden()
+                if obj.due_at < date.today():
+                    return jsonify(errno=3, error="Disk is overdue")
                 # renew
-                last_log_q = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'borrow', Log.user_affected == req_user).limit(1)
-                last_log = [x for x in last_log_q][0]
+                last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'borrow', Log.user_affected == req_user).order_by(Log.created_at.desc()).get()
                 if 'renew' in last_log.content:
                     # renewed before
                     return jsonify(errno=3, error="The disk can only be renewed once")
@@ -305,6 +306,7 @@ class DiskResource(CustomResource):
                 except DoesNotExist:
                     obj.due_at = date.today() + timedelta(7)
 
+                obj.borrow_cnt += 1
                 new_log.content = "check out disk %s for member %s" % (obj.get_callnumber(), req_user.itsc)
                 new_log.user_affected = req_user
                 new_log.admin_involved = g.user

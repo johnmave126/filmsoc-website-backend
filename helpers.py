@@ -40,6 +40,7 @@ def call_after_request_callbacks(response):
 
 
 def confidence(ups, downs):
+    # Wilson score confidence interval for a Bernoulli parameter
     n = ups + downs
 
     if n == 0:
@@ -47,7 +48,10 @@ def confidence(ups, downs):
 
     z = 1.0
     phat = float(ups) / n
-    return (phat + (z * z) / (2 * n) - z * sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
+    phat_volume = (phat + (z * z) / (2 * n) - z * sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
+    quat = float(downs) / n
+    quat_volume = (quat + (z * z) / (2 * n) - z * sqrt((quat * (1 - quat) + z * z / (4 * n)) / n)) / (1 + z * z / n)
+    return phat_volume - quat_volume / 2
 
 
 def query_user(itsc):
