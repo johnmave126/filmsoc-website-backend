@@ -1,5 +1,5 @@
 #framework
-from flask import Flask, url_for
+from flask import Flask, url_for, redirect
 
 #database
 from flask_peewee.db import Database
@@ -14,4 +14,4 @@ db = Database(app)
 
 @app.route('/')
 def index():
-    return "url_for('login')"
+    return redirect(app.config['FRONT_SERVER'])
