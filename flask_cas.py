@@ -15,10 +15,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-#  Secret used to produce hash.   This can be any string.  Hackers
-#  who know this string can forge this script's authentication cookie.
-SECRET = "754b2cc5e6c10a800a82862979f06f26"
-
 # Name field for pycas cookie
 FLASK_CAS_NAME = "cas_auth"
 
@@ -45,6 +41,7 @@ CAS_MSG = (
     "CAS server returned without ticket while in gateway mode.",
 )
 
+from app import app
 from flask import request
 import md5
 import time
@@ -77,10 +74,10 @@ def split2(str, sep):
 
 
 #  Use hash and secret to encrypt string.
-def makehash(str, secret=SECRET):
+def makehash(str):
     m = md5.new()
     m.update(str)
-    m.update(SECRET)
+    m.update(app.config['SECRET_KEY'])
     return m.hexdigest()[0: 8]
 
 
