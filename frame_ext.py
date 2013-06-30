@@ -3,6 +3,7 @@ import functools
 import flask_cas
 import re
 import operator
+from urlparse import urlparse
 
 from werkzeug.datastructures import MultiDict
 from peewee import *
@@ -84,7 +85,7 @@ class CustomAuth(Auth):
                             response.set_cookie(flask_cas.FLASK_CAS_NAME, cookie, path=url_for('index'), httponly=True)
 
                     # redirect to front server
-                    return redirect(self.app.config['FRONT_SERVER'] + '/#!' + next_url)
+                    return redirect(self.app.config['FRONT_SERVER'] + '#!' + next_url)
                 except self.User.DoesNotExist:
                     pass
 
@@ -98,7 +99,7 @@ class CustomAuth(Auth):
     def logout(self):
         next_url = request.args.get('next') or ""
         self.logout_user(self.get_logged_in_user())
-        return redirect(self.app.config['FRONT_SERVER'] + '/#!' + next_url)
+        return redirect(self.app.config['FRONT_SERVER'] + '#!' + next_url)
 
     def login_user(self, user):
         session['logged_in'] = True
@@ -121,6 +122,17 @@ class CustomBaseModel(db.Model):
 
 
 class CustomRestAPI(RestAPI):
+    def auth_wrapper(self, func, provider):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            if not provider.authorize():
+                return self.response_auth_failed()
+            referer = request.referer or ''
+            if not referer.startswith(self.app.config['FRONT_SERVER']):
+                return jsonify(errno=403, error="Not Authorized")
+            return func(*args, **kwargs)
+        return inner
+
     def response_auth_failed(self):
         return jsonify(errno=403, error="User not login")
 
