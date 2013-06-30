@@ -127,8 +127,8 @@ class CustomRestAPI(RestAPI):
         def inner(*args, **kwargs):
             if not provider.authorize():
                 return self.response_auth_failed()
-            referer = request.referer or ''
-            if not referer.startswith(self.app.config['FRONT_SERVER']):
+            referrer = request.referrer or ''
+            if not referrer.startswith(self.app.config['FRONT_SERVER']):
                 return jsonify(errno=403, error="Not Authorized")
             return func(*args, **kwargs)
         return inner
