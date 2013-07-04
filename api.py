@@ -126,6 +126,10 @@ class UserResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())():
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'User',
@@ -391,6 +395,10 @@ class DiskResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Disk',
@@ -535,6 +543,10 @@ class RegularFilmShowResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'RegularFilmShow',
@@ -618,6 +630,10 @@ class PreviewShowTicketResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'PreviewShowTicket',
@@ -700,6 +716,10 @@ class NewsResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'News',
@@ -742,6 +762,10 @@ class DocumentResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Document',
@@ -785,6 +809,10 @@ class PublicationResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Publication',
@@ -827,6 +855,10 @@ class SponsorResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Sponsor',
@@ -865,6 +897,10 @@ class ExcoResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Exco',
@@ -900,6 +936,10 @@ class SiteSettingsResource(CustomResource):
 
     def api_dirty(self):
         dirty_list = []
+
+        if not getattr(self, 'check_%s' % method.lower())(obj):
+            return self.response_forbidden()
+
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'SiteSettings',
