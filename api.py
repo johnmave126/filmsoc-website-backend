@@ -980,7 +980,6 @@ class OneSentenceResource(CustomResource):
     def get_urls(self):
         return (
             ('/rand/', self.require_method(self.api_rand, ['GET'])),
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(OneSentenceResource, self).get_urls()
 
     def api_rand(self):
