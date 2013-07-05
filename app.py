@@ -11,8 +11,8 @@ class cFlask(Flask):
         rv = super(cFlask, self).make_default_options_response()
         h = rv.headers
         h['Access-Control-Allow-Origin'] = 'http://ihome.ust.hk'
-        h['Access-Control-Allow-Methods'] = str(rv.allow)
-        self.logger.notice(str(rv.allow))
+        #h['Access-Control-Allow-Methods'] = str(rv.allow)
+        self.logger.notice(rv.allow)
         return rv
 
 #app and database
