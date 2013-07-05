@@ -260,7 +260,7 @@ class CustomResource(RestResource):
             h = resp.headers
             h['Access-Control-Allow-Origin'] = 'http://ihome.ust.hk'
             h['Access-Control-Allow-Methods'] = h['Allow']
-            h['Access-Control-Allow-Headers'] = 'origin, content-type, accept'
+            h['Access-Control-Allow-Headers'] = 'origin, content-type, accept, x-requested-with'
             return resp
         return inner
 
