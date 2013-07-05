@@ -248,6 +248,22 @@ class CustomResource(RestResource):
 
         self._field_tree = make_field_tree(self.model, self._filter_fields, self._filter_exclude, self.filter_recursive)
 
+    def require_method(self, func, methods):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            if request.method not in methods:
+                resp = self.response_bad_method()
+                resp.allow.update(methods + ['HEAD', 'OPTIONS'])
+                return resp
+            resp = func(*args, **kwargs)
+            resp.allow.update(methods + ['HEAD', 'OPTIONS'])
+            h = resp.headers
+            h['Access-Control-Allow-Origin'] = 'http://ihome.ust.hk'
+            h['Access-Control-Allow-Methods'] = h['Allow']
+            h['Access-Control-Allow-Headers'] = 'origin, content-type, accept'
+            return resp
+        return inner
+
     def get_serializer(self):
         return CustomSerializer()
 
@@ -280,15 +296,6 @@ class CustomResource(RestResource):
 
     def check_delete(self, obj):
         return (g.user and g.user.admin)
-
-    def response_forbidden(self):
-        return jsonify(errno=403, error="Authorization Forbidden")
-
-    def response_bad_method(self):
-        return jsonify(errno=403, error='Unsupported method "%s"' % (request.method))
-
-    def response_bad_request(self):
-        return jsonify(errno=400, error='Bad request')
 
     def validate_data(self, data):
         return True, ""
