@@ -1011,3 +1011,13 @@ api.register(Sponsor, SponsorResource)
 api.register(Exco, ExcoResource)
 api.register(SiteSettings, SiteSettingsResource)
 api.register(OneSentence, OneSentenceResource)
+
+
+# set HTTP access control
+@app.after_request
+def http_access_control(response):
+    if request.method == 'OPTIONS':
+        h = response.headers
+        h['Access-Control-Allow-Origin'] = app.settings['FRONT_SERVER']
+        h['Access-Control-Allow-Methods'] = 'OPTIONS, GET, POST, PUT, DELETE'
+    return response
