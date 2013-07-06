@@ -127,7 +127,7 @@ class UserResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -396,7 +396,7 @@ class DiskResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -544,7 +544,7 @@ class RegularFilmShowResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -631,7 +631,7 @@ class PreviewShowTicketResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -717,7 +717,7 @@ class NewsResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -763,7 +763,7 @@ class DocumentResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -810,7 +810,7 @@ class PublicationResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -856,7 +856,7 @@ class SponsorResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -898,7 +898,7 @@ class ExcoResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
@@ -937,7 +937,7 @@ class SiteSettingsResource(CustomResource):
     def api_dirty(self):
         dirty_list = []
 
-        if not getattr(self, 'check_%s' % method.lower())():
+        if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
 
         for dirty_item in Log.select().where(
