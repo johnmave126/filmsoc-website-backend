@@ -5,21 +5,19 @@ from flask import Flask, url_for, redirect
 from flask_peewee.db import Database
 from db_ext import JSONField, SimpleListField
 
-
-class cFlask(Flask):
-    def make_default_options_response(self):
-        rv = super(cFlask, self).make_default_options_response()
-        h = rv.headers
-        h['Access-Control-Allow-Origin'] = 'http://ihome.ust.hk'
-        h['Access-Control-Allow-Methods'] = h['Allow']
-        h['Access-Control-Allow-Headers'] = 'origin, content-type, accept, x-requested-with'
-        return rv
-
 #app and database
-app = cFlask(__name__)
+app = Flask(__name__)
 app.config.from_object('settings.Settings')
 
 db = Database(app)
+
+
+@app.after_request
+def cros_headers(response):
+    h = response.headers
+    h['Access-Control-Allow-Origin'] = 'http://ihome.ust.hk'
+    h['Access-Control-Allow-Methods'] = h['Allow']
+    h['Access-Control-Allow-Headers'] = 'origin, content-type, accept, x-requested-with'
 
 
 @app.route('/')
