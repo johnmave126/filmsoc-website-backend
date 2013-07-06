@@ -35,7 +35,7 @@ def after_this_request(f):
 @app.after_request
 def call_after_request_callbacks(response):
     for callback in getattr(g, 'after_request_callbacks', ()):
-        callback(response)
+        response = callback(response)
     return response
 
 
