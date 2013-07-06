@@ -12,7 +12,7 @@ app.config.from_object('settings.Settings')
 
 db = Database(app)
 
-file_handler = logging.FileHandler(filename='/var/log/apache2/film.log')
+file_handler = logging.FileHandler(filename='/tmp/film.log')
 file_handler.setLevel(logging.WARNING)
 app.logger.addHandler(file_handler)
 
