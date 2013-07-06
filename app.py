@@ -1,5 +1,6 @@
 #framework
 from flask import Flask, url_for, redirect
+import logging
 
 #database
 from flask_peewee.db import Database
@@ -10,6 +11,10 @@ app = Flask(__name__)
 app.config.from_object('settings.Settings')
 
 db = Database(app)
+
+file_handler = logging.FileHandler(filename='/var/log/apache2/film.log')
+file_handler.setLevel(logging.WARNING)
+app.logger.addHandler(file_handler)
 
 
 @app.route('/')
