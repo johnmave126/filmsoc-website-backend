@@ -136,7 +136,7 @@ class UserResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class SimpleUserResource(CustomResource):
@@ -405,7 +405,7 @@ class DiskResource(CustomResource):
             (Log.Type == 'modify' | Log.Type == 'reserve' | Log.Type == 'borrow')
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class RegularFilmShowResource(CustomResource):
@@ -553,7 +553,7 @@ class RegularFilmShowResource(CustomResource):
             (Log.Type == 'modify' | Log.Type == 'vote')
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class PreviewShowTicketResource(CustomResource):
@@ -640,7 +640,7 @@ class PreviewShowTicketResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class DiskReviewResource(CustomResource):
@@ -726,7 +726,7 @@ class NewsResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class DocumentResource(CustomResource):
@@ -772,7 +772,7 @@ class DocumentResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class PublicationResource(CustomResource):
@@ -819,7 +819,7 @@ class PublicationResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class SponsorResource(CustomResource):
@@ -865,7 +865,7 @@ class SponsorResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class ExcoResource(CustomResource):
@@ -907,7 +907,7 @@ class ExcoResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class SiteSettingsResource(CustomResource):
@@ -946,7 +946,7 @@ class SiteSettingsResource(CustomResource):
             Log.Type == 'modify'
         ):
             dirty_list.append(dirty_item.model_refer)
-        return self.response(jsonify(dirty=dirty_list))
+        return self.response({dirty: dirty_list})
 
 
 class OneSentenceResource(CustomResource):
