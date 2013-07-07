@@ -270,7 +270,7 @@ class CustomResource(RestResource):
         return data
 
     def response(self, data):
-        kwargs = {} if request.is_xhr else {'indent': 2}
+        kwargs = {'separators': (',', ':')} if request.is_xhr else {'indent': 2}
         return Response(json.dumps(self.before_send(data), **kwargs), mimetype='application/json')
 
     def serialize_query(self, query):
