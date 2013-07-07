@@ -163,6 +163,7 @@ class DiskResource(CustomResource):
     delete_recursive = False
 
     exclude = ['rank']
+    filter_exclude = ['rank', 'hold_by', 'due_at', 'reserved_by', 'create_log']
     search = {
         'default': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
         'title': ['title_en', 'title_ch'],
@@ -407,6 +408,8 @@ class DiskResource(CustomResource):
 class RegularFilmShowResource(CustomResource):
     readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
     delete_recursive = False
+
+    participant_list = ['participant_list']
 
     include_resources = {
         'film_1': DiskResource,
