@@ -54,8 +54,6 @@ class UserResource(CustomResource):
     readonly = ['join_at', 'last_login', 'this_login', 'login_count', 'rfs_count']
     delete_recursive = False
 
-    list_fields = ['id', 'full_name', 'student_id', 'itsc', 'pennalized', 'member_type']
-
     search = {
         'default': ['full_name', 'student_id', 'itsc']
     }
@@ -165,8 +163,6 @@ class DiskResource(CustomResource):
     delete_recursive = False
 
     exclude = ['rank']
-    list_fields = ['id', 'disk_type', 'title_en', 'title_ch', 'director_en', 'director_ch', 'actors', 'cover_url', 'avail_type']
-
     search = {
         'default': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
         'title': ['title_en', 'title_ch'],

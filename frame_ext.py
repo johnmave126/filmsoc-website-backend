@@ -184,16 +184,11 @@ class CustomResource(RestResource):
     #  readonly means only can be set on create
     readonly = None
 
-    # serializing: dictionary of model -> field names to restrict output in list mode
-    list_fields = None
-    list_exclude = None
-
     # search: dictionary of search_engine -> field
     search = {
         'default': []
     }
 
-    # override all
     def __init__(self, rest_api, model, authentication, allowed_methods=None):
         self.api = rest_api
         self.model = model
@@ -202,23 +197,11 @@ class CustomResource(RestResource):
         self.authentication = authentication
         self.allowed_methods = allowed_methods or ['GET', 'POST', 'PUT', 'DELETE']
 
-        # merge normal fields and exclude in list mode
-        if self.fields:
-            self.list_fields = list(set(self.fields) & set(self.list_fields or self.model._meta.get_field_names()))
-        if self.exclude:
-            self.list_exclude = list(set(self.exclude + (self.list_exclude or [])))
-
         self._fields = {self.model: self.fields or self.model._meta.get_field_names()}
-        self._list_fields = {self.model: self.list_fields or self.model._meta.get_field_names()}
         if self.exclude:
             self._exclude = {self.model: self.exclude}
         else:
             self._exclude = {}
-
-        if self.list_exclude:
-            self._list_exclude = {self.model: self.list_exclude}
-        else:
-            self._list_exclude = {}
 
         self._filter_fields = self.filter_fields or self.model._meta.get_field_names()
         self._filter_exclude = self.filter_exclude or []
@@ -237,8 +220,6 @@ class CustomResource(RestResource):
                 self._resources[field_name] = resource_obj
                 self._fields.update(resource_obj._fields)
                 self._exclude.update(resource_obj._exclude)
-                self._list_fields.update(resource_obj._list_fields)
-                self._list_exclude.update(resource_obj._list_exclude)
 
                 self._filter_fields.extend(['%s__%s' % (field_name, ff) for ff in resource_obj._filter_fields])
                 self._filter_exclude.extend(['%s__%s' % (field_name, ff) for ff in resource_obj._filter_exclude])
@@ -272,13 +253,6 @@ class CustomResource(RestResource):
     def response(self, data):
         kwargs = {'separators': (',', ':')} if request.is_xhr else {'indent': 2}
         return Response(json.dumps(self.before_send(data), **kwargs), mimetype='application/json')
-
-    def serialize_query(self, query):
-        s = self.get_serializer()
-        return [
-            self.prepare_data(obj, s.serialize_object(obj, self._list_fields, self._list_exclude)) \
-                for obj in query
-        ]
 
     def get_urls(self):
         return (
