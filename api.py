@@ -166,7 +166,7 @@ class UserResource(CustomResource):
 
 
 class SimpleUserResource(CustomResource):
-    fields = ['id', 'itsc']
+    fields = ['id', 'itsc', 'student_id', 'university_id', 'full_name']
 
 
 class LogResource(CustomResource):
@@ -202,6 +202,8 @@ class DiskResource(CustomResource):
     include_resources = {
         'cover_url': FileResource,
         'create_log': SimpleLogResource,
+        'hold_by': SimpleUserResource,
+        'reserved_by': SimpleUserResource,
     }
 
     def prepare_data(self, obj, data):
