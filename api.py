@@ -104,6 +104,7 @@ class UserResource(CustomResource):
     def get_urls(self):
         return (
             ('/current_user/', self.require_method(self.api_current, ['GET'])),
+            ('/relation/', self.require_method(self.api_relation, ['POST'])),
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(UserResource, self).get_urls()
 
@@ -121,6 +122,33 @@ class UserResource(CustomResource):
             return jsonify(errno=2, error="Not logged in")
 
         return self.object_detail(obj)
+
+    def api_relation(self):
+        data = request.data or request.form.get('data') or ''
+
+        if not getattr(self, 'check_%s' % request.method.lower())():
+            return self.response_forbidden()
+
+        if request.method == 'POST':
+            try:
+                data = json.loads(data)
+            except ValueError:
+                return self.response_bad_request()
+            # do validation first
+            form = RelationForm(MultiDict(data))
+            if not form.validate():
+                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                return jsonify(errno=1, error=error)
+            try:
+                obj = User.select().where(User.student_id == data['student_id']).get()
+            except DoesNotExist:
+                return jsonify(errno=3, error="User not found")
+            if obj.university_id:
+                return jsonify(errno=3, error="Binded before")
+            obj.university_id = data['university_id']
+            obj.save()
+            Log.create(model='User', Type='modify', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
+        return self.response(self.serialize_object(obj))
 
     def api_dirty(self):
         dirty_list = []

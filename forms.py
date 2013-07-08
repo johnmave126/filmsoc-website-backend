@@ -274,3 +274,14 @@ class ApplyTicketForm(Form):
         Required(message="Number of ticket missing"),
         AnyOf([1, 2], message="Invalid choice of number")
     ])
+
+
+class RelationForm(Form):
+    student_id = f.TextField(u'student_id', [
+        Required(message="Student ID required"),
+        Regexp("\d{8}", message="Invalid Student ID")
+    ])
+    university_id = f.TextField(u'student_id', [
+        Required(message="University ID required"),
+        Regexp("\d{9}", message="Invalid University ID")
+    ])
