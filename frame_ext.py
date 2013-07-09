@@ -242,6 +242,16 @@ class CustomResource(RestResource):
             return resp
         return inner
 
+    def apply_filter(self, query, expr, op, arg_list):
+        query_expr = '%s__%s' % (expr, op)
+        if op == 'in':
+            return query.filter(**{query_expr: reduce(lambda x, y: x.extend(y) or x, [x.split(',') for x in arg_list])})
+        elif len(arg_list) == 1:
+            return query.filter(**{query_expr: arg_list[0]})
+        else:
+            query_clauses = [DQ(**{query_expr: val}) for val in arg_list]
+            return query.filter(reduce(operator.or_, query_clauses))
+
     def get_serializer(self):
         return CustomSerializer()
 
