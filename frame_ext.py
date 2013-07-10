@@ -294,12 +294,15 @@ class CustomResource(RestResource):
         current_page = paginated_query.get_page()
         next = previous = ''
 
+        regex = re.compile('^.*?/%s' % self.get_api_name)
         if current_page > 1:
             request_arguments[var] = current_page - 1
             previous = url_for(self.get_url_name(g.list_callback), **request_arguments)
+            previous = regex.sub('', previous)
         if current_page < paginated_query.get_pages():
             request_arguments[var] = current_page + 1
             next = url_for(self.get_url_name(g.list_callback), **request_arguments)
+            next = regex.sub('', next)
 
         return {
             'model': self.get_api_name(),
