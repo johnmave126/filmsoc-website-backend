@@ -181,6 +181,9 @@ class CustomSerializer(Serializer):
 
 
 class CustomResource(RestResource):
+    # more to display
+    paginate_by = 40
+
     #  readonly means only can be set on create
     readonly = None
 
