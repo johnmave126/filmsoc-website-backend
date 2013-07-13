@@ -147,7 +147,7 @@ class UserResource(CustomResource):
                 return jsonify(errno=3, error="Binded before")
             obj.university_id = data['university_id']
             obj.save()
-            Log.create(model='User', Type='modify', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
+            Log.create(model='User', Type='edit', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
         return self.response(self.serialize_object(obj))
 
     def api_dirty(self):
@@ -159,7 +159,7 @@ class UserResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'User',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -429,7 +429,7 @@ class DiskResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Disk',
-            (Log.Type == 'modify' | Log.Type == 'reserve' | Log.Type == 'borrow')
+            (Log.Type == 'edit' | Log.Type == 'reserve' | Log.Type == 'borrow')
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -579,7 +579,7 @@ class RegularFilmShowResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'RegularFilmShow',
-            (Log.Type == 'modify' | Log.Type == 'vote')
+            (Log.Type == 'edit' | Log.Type == 'vote')
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -666,7 +666,7 @@ class PreviewShowTicketResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'PreviewShowTicket',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -752,7 +752,7 @@ class NewsResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'News',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -798,7 +798,7 @@ class DocumentResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Document',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -845,7 +845,7 @@ class PublicationResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Publication',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -891,7 +891,7 @@ class SponsorResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Sponsor',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -933,7 +933,7 @@ class ExcoResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'Exco',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
@@ -972,7 +972,7 @@ class SiteSettingsResource(CustomResource):
         for dirty_item in Log.select().where(
             Log.created_at > (datetime.now() - timedelta(minutes=6)),
             Log.model == 'SiteSettings',
-            Log.Type == 'modify'
+            Log.Type == 'edit'
         ):
             dirty_list.append(dirty_item.model_refer)
         return self.response({'dirty': dirty_list})
