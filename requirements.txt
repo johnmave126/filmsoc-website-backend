@@ -1,5 +1,5 @@
 Flask>=0.10.1
-peewee>=2.1.2
+-e git://github.com/coleifer/peewee.git@c6294f35507424eefbf84d466fd2d32bd72710c8#egg=peewee
 flask-peewee>=0.6.5
 python-ldap>=2.4.12
 MySQL-python>=1.2.4
