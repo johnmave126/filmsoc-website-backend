@@ -58,7 +58,7 @@ class UserResource(CustomResource):
         'default': ['full_name', 'student_id', 'itsc']
     }
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = UserForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -77,14 +77,13 @@ class UserResource(CustomResource):
                 return False, "University ID existed"
         elif g.modify_flag == 'edit':
             sq = User.select().where(User.itsc == data['itsc'])
-            return False, sq.get().itsc
-            if sq.count() != 0 and sq.get().id != data['id']:
+            if sq.count() != 0 and sq.get() != obj:
                 return False, "ITSC existed"
             sq = User.select().where(User.student_id == data['student_id'])
-            if sq.count() != 0 and sq.get().id != data['id']:
+            if sq.count() != 0 and sq.get() != obj:
                 return False, "Student existed"
             sq = User.select().where(User.university_id == data['university_id'])
-            if sq.count() != 0 and sq.get().id != data['id']:
+            if sq.count() != 0 and sq.get() != obj:
                 return False, "University ID existed"
         return True, ""
 
@@ -217,7 +216,7 @@ class DiskResource(CustomResource):
             data.pop('reserved_by', None)
         return super(DiskResource, self).prepare_data(obj, data)
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = DiskForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -455,7 +454,7 @@ class RegularFilmShowResource(CustomResource):
         else:
             return super(RegularFilmShowResource, self).get_query()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = RegularFilmShowForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -604,7 +603,7 @@ class PreviewShowTicketResource(CustomResource):
         else:
             return super(PreviewShowTicketResource, self).get_query()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = PreviewShowTicketForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -687,7 +686,7 @@ class DiskReviewResource(CustomResource):
             data.pop('poster', None)
         return data
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = DiskReviewForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -728,7 +727,7 @@ class NewsResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(NewsResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = NewsForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -774,7 +773,7 @@ class DocumentResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(DocumentResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = DocumentForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -821,7 +820,7 @@ class PublicationResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(PublicationResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = PublicationForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -867,7 +866,7 @@ class SponsorResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(SponsorResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = SponsorForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -910,7 +909,7 @@ class ExcoResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(ExcoResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = ExcoResource(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -949,7 +948,7 @@ class SiteSettingsResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(SiteSettingsResource, self).get_urls()
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = SiteSettingsResource(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
@@ -988,7 +987,7 @@ class OneSentenceResource(CustomResource):
         'create_log': SimpleLogResource,
     }
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         form = OneSentenceForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')

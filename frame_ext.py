@@ -281,7 +281,7 @@ class CustomResource(RestResource):
     def check_delete(self, obj):
         return (g.user and g.user.admin)
 
-    def validate_data(self, data):
+    def validate_data(self, data, obj=None):
         return True, ""
 
     def before_save(self, instance, data=None):
@@ -346,7 +346,7 @@ class CustomResource(RestResource):
             return self.response_bad_request()
 
         g.modify_flag = 'edit'
-        valid, error = self.validate_data(data)
+        valid, error = self.validate_data(data, obj)
         if not valid:
             return jsonify(errno=1, error=error)
 
