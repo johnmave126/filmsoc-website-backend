@@ -372,9 +372,6 @@ class CustomResource(RestResource):
 
     def apply_search_query(self, query, terms, fields):
         query_clauses = [reduce(operator.or_, [DQ(**{"%s__ilike" % y: z}) for y in fields]) for z in ("%%%s%%" % x for x in terms)]
-        for x in terms:
-            for y in fields:
-                app.logger.warning(query.filter(DQ(**{"%s__ilike" % y: "%%%s%%" % x})).sql())
         return query.filter(reduce(operator.and_, query_clauses))
 
     def api_list(self):
