@@ -284,7 +284,7 @@ class CustomResource(RestResource):
     def validate_data(self, data, obj=None):
         return True, ""
 
-    def before_save(self, instance, data=None):
+    def before_save(self, instance):
         return instance
 
     def after_save(self, instance):
@@ -331,7 +331,7 @@ class CustomResource(RestResource):
 
         instance, models = self.deserialize_object(data, self.model())
 
-        instance = self.before_save(instance, data)
+        instance = self.before_save(instance)
         self.save_related_objects(instance, data)
         instance = self.save_object(instance, data)
         self.after_save(instance)
@@ -355,7 +355,7 @@ class CustomResource(RestResource):
 
         obj, models = self.deserialize_object(data, obj)
 
-        obj = self.before_save(obj, data)
+        obj = self.before_save(obj)
         self.save_related_objects(obj, data)
         obj = self.save_object(obj, data)
         self.after_save(obj)
