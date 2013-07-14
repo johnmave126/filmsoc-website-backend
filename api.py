@@ -77,8 +77,7 @@ class UserResource(CustomResource):
                 return False, "University ID existed"
         elif g.modify_flag == 'edit':
             sq = User.select().where(User.itsc == data['itsc'])
-            app.logger.warning(sq.get())
-            return False, "Test"
+            return False, sq.get().itsc
             if sq.count() != 0 and sq.get().id != data['id']:
                 return False, "ITSC existed"
             sq = User.select().where(User.student_id == data['student_id'])
