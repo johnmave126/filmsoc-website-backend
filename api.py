@@ -87,7 +87,7 @@ class UserResource(CustomResource):
                 return False, "University ID existed"
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'delete':
             ref_id = instance.id
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content="delete member " + instance.itsc)
@@ -231,7 +231,7 @@ class DiskResource(CustomResource):
             ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(DiskResource, self).get_urls()
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = Disk.next_primary_key()
             log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % instance.get_callnumber())
@@ -465,7 +465,7 @@ class RegularFilmShowResource(CustomResource):
             data.pop('participant_list', None)
         return data
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = RegularFilmShow.next_primary_key()
             log = Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create rfs id=%d" % ref_id)
@@ -609,7 +609,7 @@ class PreviewShowTicketResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = PreviewShowTicket.next_primary_key()
             log = Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create ticket id=%d" % ref_id)
@@ -692,7 +692,7 @@ class DiskReviewResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = DiskReview.next_primary_key()
             log = Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=g.user, content="create disk review of %s" % instance.disk.get_callnumber())
@@ -733,7 +733,7 @@ class NewsResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = News.next_primary_key()
             log = Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create news %s" % instance.title)
@@ -779,7 +779,7 @@ class DocumentResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = Document.next_primary_key()
             log = Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create document %s" % instance.title)
@@ -826,7 +826,7 @@ class PublicationResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = Publication.next_primary_key()
             log = Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create publication %s" % instance.title)
@@ -872,7 +872,7 @@ class SponsorResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = Sponsor.next_primary_key()
             log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.title)
@@ -993,7 +993,7 @@ class OneSentenceResource(CustomResource):
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
 
-    def before_save(self, instance, data):
+    def before_save(self, instance, data=None):
         if g.modify_flag == 'create':
             ref_id = OneSentence.next_primary_key()
             log = Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create one sentence id=%d" % ref_id)
