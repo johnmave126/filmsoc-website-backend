@@ -12,6 +12,7 @@ from wtfpeewee.fields import WPDateTimeField
 from wtfpeewee.fields import WPTimeField
 from wtforms import fields as f
 from wtforms import validators
+from wtforms.validators import StopValidation
 from wtfpeewee.orm import ModelConverter, FieldInfo, handle_null_filter
 from flask import request, g, json, jsonify, abort, url_for, redirect, session, Response
 from peewee import QueryResultWrapper
