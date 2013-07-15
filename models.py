@@ -89,7 +89,7 @@ class Log(CustomBaseModel):
     model = CharField(max_length=16)
     Type = CharField(max_length=16)
     model_refer = IntegerField()
-    user_affected = ForeignKeyField(User, null=True)
+    user_affected = ForeignKeyField(User, related_name='actions', null=True)
     admin_involved = ForeignKeyField(User, null=True)
     content = TextField(null=True)
 
