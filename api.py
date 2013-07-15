@@ -72,7 +72,7 @@ class UserResource(CustomResource):
                 return False, "ITSC existed"
             if User.select().where(User.student_id == data['student_id']).exists():
                 return False, "Student ID existed"
-            if User.select().where(User.university_id == data['university_id']).exists():
+            if data['university_id'] and User.select().where(User.university_id == data['university_id']).exists():
                 return False, "University ID existed"
         elif g.modify_flag == 'edit':
             if obj.itsc != data['itsc']:
@@ -84,7 +84,7 @@ class UserResource(CustomResource):
                     return False, "ITSC existed"
             if obj.student_id != data['student_id'] and User.select().where(User.student_id == data['student_id']).exists():
                 return False, "Student ID existed"
-            if obj.university_id != data['university_id'] and User.select().where(User.university_id == data['university_id']).exists():
+            if data['university_id'] and obj.university_id != data['university_id'] and User.select().where(User.university_id == data['university_id']).exists():
                 return False, "University ID existed"
         return True, ""
 
