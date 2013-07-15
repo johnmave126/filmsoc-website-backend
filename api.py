@@ -91,7 +91,7 @@ class UserResource(CustomResource):
     def before_save(self, instance):
         if g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content="delete member " + instance.itsc)
+            Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="delete member " + instance.itsc)
         return instance
 
     def after_save(self, instance=None):
