@@ -428,6 +428,13 @@ class CustomResource(RestResource):
         return self.response(self.serialize_query(query))
 
 
+class CustomOptional(validators.Optional):
+    def __call__(self, form, field):
+        if not field.raw_data or field.raw_data[0] is None or isinstance(field.raw_data[0], string_types) and not self.string_check(field.raw_data[0]):
+            field.errors[:] = []
+            raise StopValidation()
+
+
 class CustomConverter(ModelConverter):
     defaults = {
         BlobField: f.TextAreaField,
@@ -471,7 +478,7 @@ class CustomConverter(ModelConverter):
         if (field.null or (field.default is not None) or (field_args is None)) and not field.choices:
             # If the field can be empty, or has a default value, do not require
             # it when submitting a form.
-            kwargs['validators'].append(validators.Optional())
+            kwargs['validators'].append(CustomOptional())
         else:
             if isinstance(field, self.required):
                 kwargs['validators'].append(validators.Required())
