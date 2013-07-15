@@ -289,7 +289,7 @@ class CustomResource(RestResource):
     def before_save(self, instance):
         return instance
 
-    def after_save(self, instance):
+    def after_save(self, instance=None):
         pass
 
     def get_request_metadata(self, paginated_query):
