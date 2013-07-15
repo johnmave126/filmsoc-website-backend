@@ -67,7 +67,7 @@ class CustomAuth(Auth):
     def login(self):
         if request.method == 'GET':
             next_url = request.args.get('next') or ""
-            login_url = 'http://' + self.app.config['SERVER_NAME'] + url_for('%s.login' % self.blueprint.name)
+            login_url = request.url.rpartition('ticket=')[0].rstrip('?&')
             status, username, cookie = flask_cas.login(self.app.config['AUTH_SERVER'], login_url)
             if status == flask_cas.CAS_OK:
                 try:
