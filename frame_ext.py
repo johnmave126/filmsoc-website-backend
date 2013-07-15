@@ -56,7 +56,7 @@ class CustomAuth(Auth):
 
             try:
                 return self.User.select().where(
-                    self.User.expired == False,
+                    self.User.member_type != 'Expired',
                     self.User.id == session.get('user_pk')
                 ).get()
             except self.User.DoesNotExist:
@@ -70,7 +70,7 @@ class CustomAuth(Auth):
             if status == flask_cas.CAS_OK:
                 try:
                     user = self.User.select().where(
-                        self.User.expired == False,
+                        self.User.member_type != 'Expired',
                         self.User.itsc == username
                     ).get()
                     self.login_user(user)

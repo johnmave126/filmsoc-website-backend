@@ -52,7 +52,6 @@ class FileResource(CustomResource):
 
 class UserResource(CustomResource):
     readonly = ['join_at', 'last_login', 'this_login', 'login_count', 'rfs_count']
-    delete_recursive = False
 
     search = {
         'default': ['full_name', 'student_id', 'itsc']
@@ -62,28 +61,30 @@ class UserResource(CustomResource):
         form = UserForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
-        user_info = query_user(data.get('itsc', None))
-        if not user_info:
-            return False, "Wrong ITSC, please check the spelling"
-        data['full_name'] = user_info['displayName']
         data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
-            if User.select().where(User.itsc == data['itsc']).count() != 0:
+            user_info = query_user(data.get('itsc', None))
+            if not user_info:
+                return False, "Wrong ITSC, please check the spelling"
+            data['full_name'] = user_info['displayName']
+            if User.select().where(User.itsc == data['itsc']).exists():
                 return False, "ITSC existed"
-            if User.select().where(User.student_id == data['student_id']).count() != 0:
+            if User.select().where(User.student_id == data['student_id']).exists():
                 return False, "Student ID existed"
-            if User.select().where(User.university_id == data['university_id']).count() != 0:
+            if User.select().where(User.university_id == data['university_id']).exists():
                 return False, "University ID existed"
         elif g.modify_flag == 'edit':
-            sq = User.select().where(User.itsc == data['itsc'])
-            if sq.count() != 0 and sq.get() != obj:
-                return False, "ITSC existed"
-            sq = User.select().where(User.student_id == data['student_id'])
-            if sq.count() != 0 and sq.get() != obj:
-                return False, "Student existed"
-            sq = User.select().where(User.university_id == data['university_id'])
-            if sq.count() != 0 and sq.get() != obj:
+            if obj.itsc != data['itsc']:
+                user_info = query_user(data.get('itsc', None))
+                if not user_info:
+                    return False, "Wrong ITSC, please check the spelling"
+                data['full_name'] = user_info['displayName']
+                if User.select().where(User.itsc == data['itsc']).exists():
+                    return False, "ITSC existed"
+            if obj.student_id != data['student_id'] and User.select().where(User.student_id == data['student_id']).exists():
+                return False, "Student ID existed"
+            if obj.university_id != data['university_id'] and User.select().where(User.university_id == data['university_id']).exists():
                 return False, "University ID existed"
         return True, ""
 
@@ -98,7 +99,7 @@ class UserResource(CustomResource):
             ref_id = instance.id
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
         # update mailing-list
-        # update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.expired == False)])
+        # update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.member_type != 'Expired')])
         # disable because it is danger
 
     def get_urls(self):
@@ -188,7 +189,6 @@ class SimpleLogResource(CustomResource):
 
 class DiskResource(CustomResource):
     readonly = ['hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log']
-    delete_recursive = False
 
     exclude = ['rank']
     filter_exclude = ['rank', 'hold_by', 'due_at', 'reserved_by', 'create_log']
@@ -437,7 +437,6 @@ class DiskResource(CustomResource):
 
 class RegularFilmShowResource(CustomResource):
     readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
-    delete_recursive = False
 
     participant_list = ['participant_list']
 
@@ -587,7 +586,6 @@ class RegularFilmShowResource(CustomResource):
 
 class PreviewShowTicketResource(CustomResource):
     readonly = ['create_log']
-    delete_recursive = False
 
     include_resources = {
         'create_log': SimpleLogResource,
@@ -673,7 +671,6 @@ class PreviewShowTicketResource(CustomResource):
 
 
 class DiskReviewResource(CustomResource):
-    delete_recursive = False
     include_resources = {
         'create_log': SimpleLogResource,
     }
@@ -714,7 +711,6 @@ class DiskReviewResource(CustomResource):
 
 
 class NewsResource(CustomResource):
-    delete_recursive = False
     include_resources = {
         'create_log': SimpleLogResource,
     }
@@ -759,7 +755,6 @@ class NewsResource(CustomResource):
 
 
 class DocumentResource(CustomResource):
-    delete_recursive = False
     include_resources = {
         'create_log': SimpleLogResource,
         'doc_url': FileResource,
@@ -805,7 +800,6 @@ class DocumentResource(CustomResource):
 
 
 class PublicationResource(CustomResource):
-    delete_recursive = False
     include_resources = {
         'create_log': SimpleLogResource,
         'doc_url': FileResource,
@@ -852,7 +846,6 @@ class PublicationResource(CustomResource):
 
 
 class SponsorResource(CustomResource):
-    delete_recursive = False
     include_resources = {
         'create_log': SimpleLogResource,
         'img_url': FileResource,
@@ -899,7 +892,6 @@ class SponsorResource(CustomResource):
 
 class ExcoResource(CustomResource):
     readonly = ['hall_allocate', 'name_en', 'name_ch', 'position']
-    delete_recursive = False
     include_resources = {
         'img_url': FileResource,
     }
@@ -941,7 +933,6 @@ class ExcoResource(CustomResource):
 
 class SiteSettingsResource(CustomResource):
     readonly = ['key']
-    delete_recursive = False
 
     def get_urls(self):
         return (
@@ -979,7 +970,6 @@ class SiteSettingsResource(CustomResource):
 
 
 class OneSentenceResource(CustomResource):
-    delete_recursive = False
     search = {
         'default': ['film', 'content']
     }

@@ -47,7 +47,6 @@ class User(CustomBaseModel):
     member_type = CharField(max_length=16)  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honour, Assoc
     join_at = DateField(default=datetime.datetime.now)
     expire_at = DateField()
-    expired = BooleanField(default=False)
     pennalized = BooleanField(default=False)
 
     last_login = DateTimeField(null=True, default=None)
@@ -227,7 +226,7 @@ class PreviewShowTicket(CustomBaseModel):
 class DiskReview(CustomBaseModel):
     id = PrimaryKeyField()
 
-    poster = ForeignKeyField(User)
+    poster = ForeignKeyField(User, null=True)
     disk = ForeignKeyField(Disk, related_name='reviews')
 
     create_log = ForeignKeyField(Log)
