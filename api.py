@@ -193,8 +193,8 @@ class DiskResource(CustomResource):
     exclude = ['rank']
     filter_exclude = ['rank', 'hold_by', 'due_at', 'reserved_by', 'create_log']
     search = {
-        'default': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
-        'title': ['title_en', 'title_ch'],
+        'default': ['title_en', 'title_ch'],
+        'fulltext': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
         'actor': ['actors'],
         'tag': ['tags'],
         'director': ['director_ch', 'director_en']

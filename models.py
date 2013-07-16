@@ -44,7 +44,7 @@ class User(CustomBaseModel):
     mobile = CharField(max_length=8, null=True)
     full_name = CharField()
 
-    member_type = CharField(max_length=16)  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honour, Assoc
+    member_type = CharField(max_length=16)  # Full, OneSem, OneYear, TwoYear, ThreeYear, Honour, Assoc, Expired
     join_at = DateField(default=datetime.datetime.now)
     expire_at = DateField()
     pennalized = BooleanField(default=False)
