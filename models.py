@@ -155,6 +155,7 @@ class Disk(CustomBaseModel):
 
         self.avail_type = "Available"
         self.hold_by = None
+        self.due_at = None
 
         return (True, "")
 
