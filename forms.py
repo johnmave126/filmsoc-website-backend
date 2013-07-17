@@ -61,6 +61,7 @@ DiskForm = model_form(Disk, field_args={
         AnyOf(['A', 'B'], message="Invalid Disk Type")
     ]),
     'show_year': dict(validators=[
+        Required(message="Missing show year"),
         NumberRange(max=datetime.date.today().year, message="Invalid Show Year")
     ]),
     'imdb_url': dict(validators=[

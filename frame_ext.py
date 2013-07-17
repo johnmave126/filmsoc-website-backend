@@ -437,6 +437,19 @@ class CustomOptional(validators.Optional):
             raise StopValidation()
 
 
+class CustomInteger(f.IntegerField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                self.data = int(valuelist[0])
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid integer value'))
+            except TypeError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid integer'))
+
+
 class CustomConverter(ModelConverter):
     defaults = {
         BlobField: f.TextAreaField,
@@ -447,7 +460,7 @@ class CustomConverter(ModelConverter):
         DecimalField: f.DecimalField,
         DoubleField: f.FloatField,
         FloatField: f.FloatField,
-        IntegerField: f.IntegerField,
+        IntegerField: CustomInteger,
         PrimaryKeyField: f.HiddenField,
         TextField: f.TextAreaField,
         TimeField: WPTimeField,
