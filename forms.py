@@ -68,6 +68,7 @@ DiskForm = model_form(Disk, field_args={
         Regexp('tt\d{7}', message="Invalid IMDB Link")
     ]),
     'avail_type': dict(validators=[
+        Optional(),
         AnyOf(['Draft', 'Available'], message="Invalid Available Type")
     ]),
     'title_en': dict(validators=[
