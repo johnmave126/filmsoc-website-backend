@@ -17,7 +17,7 @@ class SimpleListField(TextField):
     def python_value(self, value):
         if value is None:
             return []
-        return split(value, ',')
+        return map(lambda x: x.strip(), split(value, ','))
 
 
 class JSONField(TextField):
