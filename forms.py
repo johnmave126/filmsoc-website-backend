@@ -26,6 +26,7 @@ __all__ = [
     'RateForm',
     'VoteForm',
     'ApplyTicketForm',
+    'RelationForm',
 ]
 
 
