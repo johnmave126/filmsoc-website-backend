@@ -212,9 +212,6 @@ ExcoForm = model_form(Exco, field_args={
 
 
 SiteSettingsForm = model_form(SiteSettings, field_args={
-    'key': dict(validators=[
-        Required(message="Missing key")
-    ]),
     'value': dict(validators=[
         Required(message="Missing value")
     ])
