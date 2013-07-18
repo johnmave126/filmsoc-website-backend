@@ -902,7 +902,7 @@ class ExcoResource(CustomResource):
         ) + super(ExcoResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
-        form = ExcoResource(MultiDict(data))
+        form = ExcoForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
@@ -940,7 +940,7 @@ class SiteSettingsResource(CustomResource):
         ) + super(SiteSettingsResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
-        form = SiteSettingsResource(MultiDict(data))
+        form = SiteSettingsForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, '\n') for x in form.errors.values()], '\n')
         return True, ""
