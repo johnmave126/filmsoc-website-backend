@@ -21,6 +21,7 @@ __all__ = [
     'SponsorForm',
     'OneSentenceForm',
     'ExcoForm',
+    'SiteSettingsForm',
     'ReserveForm',
     'SubmitUserForm',
     'RateForm',
