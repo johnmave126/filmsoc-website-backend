@@ -234,7 +234,7 @@ class DiskResource(CustomResource):
     def before_save(self, instance):
         if g.modify_flag == 'create':
             ref_id = Disk.next_primary_key()
-            log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % instance.get_callnumber())
+            log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % (instance.disk_type + str(ref_id).ljust(4, '0')))
             instance.create_log = log
         else:
             ref_id = instance.id
