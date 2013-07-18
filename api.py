@@ -252,9 +252,9 @@ class DiskResource(CustomResource):
 
     def get_query(self):
         if g.user and g.user.admin:
-            return self.model.select().where(self.model.avail_type != "Draft")
-        else:
             return super(DiskResource, self).get_query()
+        else:
+            return self.model.select().where(self.model.avail_type != "Draft")
 
     def api_reserve(self, pk):
         obj = get_object_or_404(self.get_query(), self.pk == pk)
@@ -449,9 +449,9 @@ class RegularFilmShowResource(CustomResource):
 
     def get_query(self):
         if g.user and g.user.admin:
-            return self.model.select().where(self.model.state != "Draft")
-        else:
             return super(RegularFilmShowResource, self).get_query()
+        else:
+            return self.model.select().where(self.model.state != "Draft")
 
     def validate_data(self, data, obj=None):
         form = RegularFilmShowForm(MultiDict(data))
@@ -597,9 +597,9 @@ class PreviewShowTicketResource(CustomResource):
 
     def get_query(self):
         if g.user and g.user.admin:
-            return self.model.select().where(self.model.state != "Draft")
-        else:
             return super(PreviewShowTicketResource, self).get_query()
+        else:
+            return self.model.select().where(self.model.state != "Draft")
 
     def validate_data(self, data, obj=None):
         form = PreviewShowTicketForm(MultiDict(data))
