@@ -327,7 +327,7 @@ class DiskResource(CustomResource):
             except DoesNotExist:
                 return jsonify(errno=3, error="User not found")
             if obj.avail_type == 'Borrowed':
-                if obj.borrowed_by != req_user:
+                if obj.hold_by != req_user:
                     return jsonify(errno=3, error="Disk not borrowed by the user")
                 if (not g.user.admin) and req_user != g.user:
                     return self.response_forbidden()
@@ -476,7 +476,7 @@ class RegularFilmShowResource(CustomResource):
             for x in [1, 2, 3]:
                 disk = getattr(instance, "film_%d" % x)
                 disk.avail_type = 'Voting'
-                for y in ['reserved_by', 'borrowed_by', 'due_at', 'hold_by']:
+                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
                     setattr(disk, y, None)
                 disk.save()
         elif instance.state == 'Pending':
