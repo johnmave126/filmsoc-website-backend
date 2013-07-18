@@ -1015,7 +1015,7 @@ read_auth = Authentication()
 api = CustomRestAPI(app, default_auth=admin_auth)
 
 # register resources
-api.register(File, FileResource, auth=read_auth)
+api.register(File, FileResource)
 api.register(User, UserResource)
 api.register(Log, LogResource, auth=read_auth)
 api.register(Disk, DiskResource, auth=user_auth)
