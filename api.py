@@ -416,7 +416,9 @@ class DiskResource(CustomResource):
 
     def api_rand(self):
         if request.method == 'GET':
-            obj = self.model.select().order_by(fn.Rand()).limit(1).get()
+            obj = self.model.select().where(
+                self.model.disk_type << ['B']
+            ).order_by(fn.Rand()).limit(1).get()
 
         return self.response(self.serialize_object(obj))
 
