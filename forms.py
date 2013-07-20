@@ -216,7 +216,9 @@ SiteSettingsForm = model_form(SiteSettings, field_args={
     'value': dict(validators=[
         Required(message="Missing value")
     ])
-}, converter=CustomConverter())
+}, exclude=(
+    'key',
+), converter=CustomConverter())
 
 
 OneSentenceForm = model_form(OneSentence, field_args={
