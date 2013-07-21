@@ -2,7 +2,7 @@ import datetime
 
 from wtforms.form import Form
 from wtforms import fields as f
-from wtforms.validators import AnyOf, NumberRange, Regexp, Required, Optional
+from wtforms.validators import AnyOf, NumberRange, Regexp, InputRequired, Optional
 from wtfpeewee.orm import model_form
 
 from models import *
@@ -33,10 +33,10 @@ __all__ = [
 
 UserForm = model_form(User, field_args={
     'itsc': dict(validators=[
-        Required(message="ITSC required")
+        InputRequired(message="ITSC required")
     ]),
     'student_id': dict(validators=[
-        Required(message="Student ID required"),
+        InputRequired(message="Student ID required"),
         Regexp("\d{8}", message="Invalid Student ID")
     ]),
     'university_id': dict(validators=[
@@ -46,11 +46,11 @@ UserForm = model_form(User, field_args={
         Regexp("\d{8}", message="Invalid Mobile Phone")
     ]),
     'member_type': dict(validators=[
-        Required(message="Member Type required"),
+        InputRequired(message="Member Type required"),
         AnyOf(['Full', 'OneSem', 'OneYear', 'TwoYear', 'ThreeYear', 'Honour', 'Assoc', 'Expired'], message="Invalid Member Type")
     ]),
     'expire_at': dict(validators=[
-        Required(message="Expire date required")
+        InputRequired(message="Expire date required")
     ])
 }, exclude=(
     'last_login', 'this_login', 'login_count', 'rfs_count', 'full_name',
@@ -59,11 +59,11 @@ UserForm = model_form(User, field_args={
 
 DiskForm = model_form(Disk, field_args={
     'disk_type': dict(validators=[
-        Required(message="Disk Type missing"),
+        InputRequired(message="Disk Type missing"),
         AnyOf(['A', 'B'], message="Invalid Disk Type")
     ]),
     'show_year': dict(validators=[
-        Required(message="Missing show year"),
+        InputRequired(message="Missing show year"),
         NumberRange(max=datetime.date.today().year, message="Invalid Show Year")
     ]),
     'imdb_url': dict(validators=[
@@ -74,10 +74,10 @@ DiskForm = model_form(Disk, field_args={
         AnyOf(['Draft', 'Available'], message="Invalid Available Type")
     ]),
     'title_en': dict(validators=[
-        Required(message="English Title missing")
+        InputRequired(message="English Title missing")
     ]),
     'title_ch': dict(validators=[
-        Required(message="Chinese Title missing")
+        InputRequired(message="Chinese Title missing")
     ]),
     'category': dict(validators=[
         AnyOf(['I', 'II A', 'II B', 'III'], message="Invalid Category")
@@ -89,7 +89,7 @@ DiskForm = model_form(Disk, field_args={
 
 RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     'state': dict(validators=[
-        Required(message="Show state Missing"),
+        InputRequired(message="Show state Missing"),
         AnyOf(['Draft', 'Open', 'Pending', 'Passed'], message="Invalid Show State")
     ])
 }, exclude=(
@@ -99,23 +99,23 @@ RegularFilmShowForm = model_form(RegularFilmShow, field_args={
 
 PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
     'state': dict(validators=[
-        Required(message="Ticket state Missing"),
+        InputRequired(message="Ticket state Missing"),
         AnyOf(['Draft', 'Open', 'Closed'], message="Invalid Ticket State")
     ]),
     'title_en': dict(validators=[
-        Required(message="English Title missing")
+        InputRequired(message="English Title missing")
     ]),
     'title_ch': dict(validators=[
-        Required(message="Chinese Title missing")
+        InputRequired(message="Chinese Title missing")
     ]),
     'title_ch': dict(validators=[
-        Required(message="Chinese Title missing")
+        InputRequired(message="Chinese Title missing")
     ]),
     'title_ch': dict(validators=[
-        Required(message="Chinese Title missing")
+        InputRequired(message="Chinese Title missing")
     ]),
     'apply_deadline': dict(validators=[
-        Required(message="Apply Deadline missing")
+        InputRequired(message="Apply Deadline missing")
     ])
 }, exclude=(
     'create_log',
@@ -124,10 +124,10 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
 
 DiskReviewForm = model_form(DiskReview, field_args={
     'disk': dict(validators=[
-        Required(message="The disk to review missing")
+        InputRequired(message="The disk to review missing")
     ]),
     'content': dict(validators=[
-        Required(message="Content cannot be null")
+        InputRequired(message="Content cannot be null")
     ])
 }, exclude=(
     'last_login', 'this_login', 'login_count', 'rfs_count'
@@ -136,10 +136,10 @@ DiskReviewForm = model_form(DiskReview, field_args={
 
 NewsForm = model_form(News, field_args={
     'title': dict(validators=[
-        Required(message="Title Missing")
+        InputRequired(message="Title Missing")
     ]),
     'content': dict(validators=[
-        Required(message="Content Missing")
+        InputRequired(message="Content Missing")
     ])
 }, exclude=(
     'create_log',
@@ -148,10 +148,10 @@ NewsForm = model_form(News, field_args={
 
 DocumentForm = model_form(Document, field_args={
     'title': dict(validators=[
-        Required(message="Title Missing")
+        InputRequired(message="Title Missing")
     ]),
     'doc_url': dict(validators=[
-        Required(message="File Missing")
+        InputRequired(message="File Missing")
     ])
 }, exclude=(
     'create_log',
@@ -160,17 +160,17 @@ DocumentForm = model_form(Document, field_args={
 
 PublicationForm = model_form(Publication, field_args={
     'title': dict(validators=[
-        Required(message="Title Missing")
+        InputRequired(message="Title Missing")
     ]),
     'Type': dict(validators=[
-        Required(message="Type Missing"),
+        InputRequired(message="Type Missing"),
         AnyOf(['Magazine', 'MicroMagazine'], "Invalid Type")
     ]),
     'doc_url': dict(validators=[
-        Required(message="File Missing")
+        InputRequired(message="File Missing")
     ]),
     'cover_url': dict(validators=[
-        Required(message="Cover image Missing")
+        InputRequired(message="Cover image Missing")
     ])
 }, exclude=(
     'create_log',
@@ -179,25 +179,25 @@ PublicationForm = model_form(Publication, field_args={
 
 SponsorForm = model_form(Sponsor, field_args={
     'name': dict(validators=[
-        Required(message="Name Missing")
+        InputRequired(message="Name Missing")
     ]),
     'img_url': dict(validators=[
-        Required(message="Image Missing")
+        InputRequired(message="Image Missing")
     ]),
     'x': dict(validators=[
-        Required(message="Location Missing"),
+        InputRequired(message="Location Missing"),
         NumberRange(min=0, max=100, message="Out of Range")
     ]),
     'y': dict(validators=[
-        Required(message="Location Missing"),
+        InputRequired(message="Location Missing"),
         NumberRange(min=0, max=100, message="Out of Range")
     ]),
     'w': dict(validators=[
-        Required(message="Location Missing"),
+        InputRequired(message="Location Missing"),
         NumberRange(min=0, max=100, message="Out of Range")
     ]),
     'h': dict(validators=[
-        Required(message="Location Missing"),
+        InputRequired(message="Location Missing"),
         NumberRange(min=0, max=100, message="Out of Range")
     ])
 }, exclude=(
@@ -214,7 +214,7 @@ ExcoForm = model_form(Exco, field_args={
 
 SiteSettingsForm = model_form(SiteSettings, field_args={
     'value': dict(validators=[
-        Required(message="Missing value")
+        InputRequired(message="Missing value")
     ])
 }, exclude=(
     'key',
@@ -223,10 +223,10 @@ SiteSettingsForm = model_form(SiteSettings, field_args={
 
 OneSentenceForm = model_form(OneSentence, field_args={
     'film': dict(validators=[
-        Required(message="Origin Film Missing")
+        InputRequired(message="Origin Film Missing")
     ]),
     'content': dict(validators=[
-        Required(message="Content Missing")
+        InputRequired(message="Content Missing")
     ])
 }, exclude=(
     'create_log',
@@ -236,7 +236,7 @@ OneSentenceForm = model_form(OneSentence, field_args={
 # extra forms
 class ReserveForm(Form):
     form = f.TextField(u'form', [
-        Required(message="Reserve type missing"),
+        InputRequired(message="Reserve type missing"),
         AnyOf(['Hall', 'Counter'], message="Unsupported reserve type")
     ])
     hall = f.IntegerField(u'hall', [
@@ -254,37 +254,37 @@ class ReserveForm(Form):
 
 class SubmitUserForm(Form):
     id = f.IntegerField(u'id', [
-        Required(message="User missing"),
+        InputRequired(message="User missing"),
     ])
 
 
 class RateForm(Form):
     rate = f.TextField(u'rate', [
-        Required(message="Rate missing"),
+        InputRequired(message="Rate missing"),
         AnyOf(['up', 'down'], message="Invalid rate")
     ])
 
 
 class VoteForm(Form):
     film_id = f.IntegerField(u'rfs_id', [
-        Required(message="The film to vote missing"),
+        InputRequired(message="The film to vote missing"),
         AnyOf([1, 2, 3], message="Invalid Choice")
     ])
 
 
 class ApplyTicketForm(Form):
     number = f.IntegerField(u'number', [
-        Required(message="Number of ticket missing"),
+        InputRequired(message="Number of ticket missing"),
         AnyOf([1, 2], message="Invalid choice of number")
     ])
 
 
 class RelationForm(Form):
     student_id = f.TextField(u'student_id', [
-        Required(message="Student ID required"),
+        InputRequired(message="Student ID required"),
         Regexp("\d{8}", message="Invalid Student ID")
     ])
     university_id = f.TextField(u'student_id', [
-        Required(message="University ID required"),
+        InputRequired(message="University ID required"),
         Regexp("\d{9}", message="Invalid University ID")
     ])

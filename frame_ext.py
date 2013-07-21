@@ -496,7 +496,7 @@ class CustomConverter(ModelConverter):
             kwargs['validators'].append(CustomOptional())
         else:
             if isinstance(field, self.required):
-                kwargs['validators'].append(validators.Required())
+                kwargs['validators'].append(validators.InputRequired())
 
         field_class = type(field)
         if field_class in self.converters:
