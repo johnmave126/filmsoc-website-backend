@@ -257,6 +257,19 @@ class CustomResource(RestResource):
             query_clauses = [DQ(**{query_expr: val}) for val in arg_list]
             return query.filter(reduce(operator.or_, query_clauses))
 
+    def apply_ordering(self, query):
+        ordering = request.args.get('ordering') or ''
+        if ordering:
+            order_list = []
+            for keyword in ordering.split(','):
+                desc, column = keyword.startswith('-'), keyword.lstrip('-')
+                if column in self.model._meta.fields:
+                    field = self.model._meta.fields[column]
+                    order_list.append(field.asc() if not desc else field.desc())
+            query = query.order_by(*order_list)
+
+        return query
+
     def get_serializer(self):
         return CustomSerializer()
 
