@@ -400,7 +400,7 @@ class CustomResource(RestResource):
             return self.response_forbidden()
 
         search_term = request.args.get('query') or ''
-        engine = request.args.get('engine') or 'default'
+        engine = request.args.get('engine') or ''
 
         query = self.get_query()
         query = self.apply_ordering(query)
