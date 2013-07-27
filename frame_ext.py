@@ -434,7 +434,7 @@ class CustomResource(RestResource):
                 if engine in self._search:
                     kw_set = set(kws)
                     kw_set.discard('')
-                    if len(kw_set) > 0 and len(self._search[query]) > 0:
+                    if len(kw_set) > 0 and len(self._search[engine]) > 0:
                         query = self.apply_search_query(query, list(kw_set), self._search[query])
 
         if self.paginate_by or 'limit' in request.args:
