@@ -408,7 +408,7 @@ class CustomResource(RestResource):
         if engine == 'default':
             kw_set = set(re.split(r'\s+', search_term, re.U))
             kw_set.discard('')
-            if len(kw_set) > 0 and len(self._search['default']) > 0:
+            if len(kw_set) > 0 and len(self._search.get('default', [])) > 0:
                 query = self.apply_search_query(query, list(kw_set), self._search['default'])
         else:
             regex = re.compile('((?:\w+:\S+)|[^:\s]+|(?:\w+:\([^)]*\)))', re.U)
@@ -431,11 +431,10 @@ class CustomResource(RestResource):
                     search_kw.add('default', kw)
 
             for engine, kws in search_kw.iterlists():
-                if engine in self._search:
-                    kw_set = set(kws)
-                    kw_set.discard('')
-                    if len(kw_set) > 0 and len(self._search[engine]) > 0:
-                        query = self.apply_search_query(query, list(kw_set), self._search[query])
+                kw_set = set(kws)
+                kw_set.discard('')
+                if len(kw_set) > 0 and len(self._search.get(engine, [])) > 0:
+                    query = self.apply_search_query(query, list(kw_set), self._search[engine])
 
         if self.paginate_by or 'limit' in request.args:
             return self.paginated_object_list(query)
