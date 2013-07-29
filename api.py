@@ -936,11 +936,6 @@ class ExcoResource(CustomResource):
 class SiteSettingsResource(CustomResource):
     readonly = ['key']
 
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(SiteSettingsResource, self).get_urls()
-
     def validate_data(self, data, obj=None):
         form = SiteSettingsForm(MultiDict(data))
         if not form.validate():
