@@ -411,7 +411,7 @@ class CustomResource(RestResource):
             if len(kw_set) > 0 and len(self._search.get('default', [])) > 0:
                 query = self.apply_search_query(query, list(kw_set), self._search['default'])
         else:
-            regex = re.compile('((?:\w+:\S+)|[^:\s]+|(?:\w+:\([^)]*\)))', re.U)
+            regex = re.compile('((?:\w+:\([^)]*\))|(?:\w+:[^()\s]+)|[^:\s]+)', re.U)
             kw_split_list = regex.findall(search_term)
             search_kw = MultiDict()
             for kw in kw_split_list:
