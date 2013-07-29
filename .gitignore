@@ -12,3 +12,6 @@ settings.py
 
 #profiling
 wsgi.prof
+
+#server use
+cronfile
