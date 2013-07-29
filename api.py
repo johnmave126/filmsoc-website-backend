@@ -956,20 +956,6 @@ class SiteSettingsResource(CustomResource):
     def check_delete(self, obj):
         return False
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'SiteSettings',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class OneSentenceResource(CustomResource):
     search = {
