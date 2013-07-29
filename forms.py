@@ -37,13 +37,13 @@ UserForm = model_form(User, field_args={
     ]),
     'student_id': dict(validators=[
         InputRequired(message="Student ID required"),
-        Regexp("\d{8}", message="Invalid Student ID")
+        Regexp("^\d{8}$", message="Invalid Student ID")
     ]),
     'university_id': dict(validators=[
-        Regexp("\d{9}", message="Invalid University ID")
+        Regexp("^\d{9}$", message="Invalid University ID")
     ]),
     'mobile': dict(validators=[
-        Regexp("\d{8}", message="Invalid Mobile Phone")
+        Regexp("^\d{8}$", message="Invalid Mobile Phone")
     ]),
     'member_type': dict(validators=[
         InputRequired(message="Member Type required"),
@@ -67,7 +67,7 @@ DiskForm = model_form(Disk, field_args={
         NumberRange(max=datetime.date.today().year, message="Invalid Show Year")
     ]),
     'imdb_url': dict(validators=[
-        Regexp('tt\d{7}', message="Invalid IMDB Link")
+        Regexp('^tt\d{7}$', message="Invalid IMDB Link")
     ]),
     'avail_type': dict(validators=[
         Optional(),
@@ -245,7 +245,7 @@ class ReserveForm(Form):
     ])
     room = f.TextField(u'room', [
         Optional(),
-        Regexp('\d{3}[ULRulr]{0,1}', message="Invalid room number")
+        Regexp('^\d{3}[ULRulr]?$', message="Invalid room number")
     ])
     remarks = f.TextField(u'remarks', [
         Optional()
@@ -282,9 +282,9 @@ class ApplyTicketForm(Form):
 class RelationForm(Form):
     student_id = f.TextField(u'student_id', [
         InputRequired(message="Student ID required"),
-        Regexp("\d{8}", message="Invalid Student ID")
+        Regexp("^\d{8}$", message="Invalid Student ID")
     ])
     university_id = f.TextField(u'student_id', [
         InputRequired(message="University ID required"),
-        Regexp("\d{9}", message="Invalid University ID")
+        Regexp("^\d{9}$", message="Invalid University ID")
     ])
