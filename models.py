@@ -234,7 +234,7 @@ class DiskReview(CustomBaseModel):
     content = TextField()
 
     class Meta:
-        order_by = ('id',)
+        order_by = ('-id',)
 
 
 class News(CustomBaseModel):
