@@ -60,7 +60,7 @@ class UserResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = UserForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
@@ -138,7 +138,7 @@ class UserResource(CustomResource):
             # do validation first
             form = RelationForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             try:
                 obj = User.select().where(User.student_id == data['student_id']).get()
@@ -219,7 +219,7 @@ class DiskResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = DiskForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def get_urls(self):
@@ -270,7 +270,7 @@ class DiskResource(CustomResource):
             # do validation first
             form = ReserveForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             if g.user.reserved.count() >= 2:
                 return jsonify(errno=3, error="A member can reserve at most 2 disks at the same time")
@@ -320,7 +320,7 @@ class DiskResource(CustomResource):
             # do validation first
             form = SubmitUserForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             try:
                 req_user = User.select().where(User.id == data['id']).get()
@@ -392,7 +392,7 @@ class DiskResource(CustomResource):
             # do validation first
             form = RateForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             rate = data['rate']
             rated = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
@@ -458,7 +458,7 @@ class RegularFilmShowResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = RegularFilmShowForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def prepare_data(self, obj, data):
@@ -523,7 +523,7 @@ class RegularFilmShowResource(CustomResource):
             # do validation first
             form = VoteForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             if obj.state != 'Open':
                 return jsonify(errno=3, error="The show cannot be voted now")
@@ -553,7 +553,7 @@ class RegularFilmShowResource(CustomResource):
             # do validation first
             form = SubmitUserForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             if obj.state != 'Pending':
                 return jsonify(errno=3, error="The show is not in entry mode")
@@ -606,7 +606,7 @@ class PreviewShowTicketResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = PreviewShowTicketForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -646,7 +646,7 @@ class PreviewShowTicketResource(CustomResource):
             # do validation first
             form = ApplyTicketForm(MultiDict(data))
             if not form.validate():
-                error = join([join(x, '\n') for x in form.errors.values()], '\n')
+                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
             if obj.state != 'Open':
                 return jsonify(errno=3, error="The ticket cannot be applied now")
@@ -688,7 +688,7 @@ class DiskReviewResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = DiskReviewForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -728,7 +728,7 @@ class NewsResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = NewsForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -773,7 +773,7 @@ class DocumentResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = DocumentForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -819,7 +819,7 @@ class PublicationResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = PublicationForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -864,7 +864,7 @@ class SponsorResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = SponsorForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
@@ -906,7 +906,7 @@ class ExcoResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = ExcoForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def check_post(self, obj=None):
@@ -939,7 +939,7 @@ class SiteSettingsResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = SiteSettingsForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def check_post(self, obj=None):
@@ -963,7 +963,7 @@ class OneSentenceResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = OneSentenceForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, '\n') for x in form.errors.values()], '\n')
+            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
 
     def before_save(self, instance):
