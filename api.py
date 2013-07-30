@@ -675,6 +675,7 @@ class PreviewShowTicketResource(CustomResource):
 class DiskReviewResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
+        'poster': SimpleUserResource,
     }
     search = {
         'default': ['content']
