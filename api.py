@@ -452,8 +452,6 @@ class DiskResource(CustomResource):
 class RegularFilmShowResource(CustomResource):
     readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
 
-    participant_list = ['participant_list']
-
     include_resources = {
         'film_1': DiskResource,
         'film_2': DiskResource,
