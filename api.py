@@ -251,7 +251,7 @@ class DiskResource(CustomResource):
         return g.user.admin
 
     def check_disable(self):
-        state = SiteSettings.select().where(SiteSettings.key === 'liba_state').get()
+        state = SiteSettings.select().where(SiteSettings.key == 'liba_state').get()
         return state.value != "Open"
 
     def get_query(self):
