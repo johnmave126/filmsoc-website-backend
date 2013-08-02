@@ -7,7 +7,7 @@ from wtfpeewee.orm import model_form
 
 from models import *
 from db_ext import *
-from frame_ext import CustomConverter
+from frame_ext import CustomConverter, InstanceExist
 
 __all__ = [
     'UserForm',
