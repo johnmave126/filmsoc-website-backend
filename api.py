@@ -544,7 +544,7 @@ class RegularFilmShowResource(CustomResource):
                 return jsonify(errno=1, error=error)
             if obj.state != 'Open':
                 return jsonify(errno=3, error="The show cannot be voted now")
-            vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(Log.model="RegularFilmShow", Log.model_refer=obj.id, Log.Type="vote", Log.user_affected=g.user)]
+            vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(Log.model == "RegularFilmShow", Log.model_refer == obj.id, Log.Type == "vote", Log.user_affected == g.user)]
             if len(vote_log) >= 2:
                 return jsonify(errno=3, error="A member can vote at most twice")
             if data['film_id'] in vote_log:
