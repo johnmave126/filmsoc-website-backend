@@ -179,6 +179,7 @@ class RegularFilmShow(CustomBaseModel):
     vote_cnt_2 = IntegerField(default=0)
     vote_cnt_3 = IntegerField(default=0)
 
+    remarks = TextField(null=True)
     participant_list = SimpleListField(null=True)
 
     create_log = ForeignKeyField(Log)
@@ -282,11 +283,6 @@ class Sponsor(CustomBaseModel):
 
     name = TextField()
     img_url = ForeignKeyField(File)
-
-    x = DecimalField()
-    y = DecimalField()
-    w = DecimalField()
-    h = DecimalField()
 
     create_log = ForeignKeyField(Log)
 
