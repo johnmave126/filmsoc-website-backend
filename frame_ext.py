@@ -449,6 +449,28 @@ class CustomOptional(validators.Optional):
             raise StopValidation()
 
 
+class InstanceExist(object):
+    """
+    Check the existence of a foreignkey field.
+
+    :param model:
+        The model to check.
+    :param message:
+        Error message to raise in case of a validation error.
+    """
+    def __init__(self, model, message=None):
+        self.model = model
+        self.pk = model._meta.primary_key
+        self.message = message
+
+    def __call__(self, form, field):
+        if not self.model.select().where(self.pk == field.data).exists():
+            if self.message is None:
+                self.message = field.gettext('The instance referred to not exist')
+
+            raise ValidationError(self.message)
+
+
 class CustomInteger(f.IntegerField):
     def process_formdata(self, valuelist):
         if valuelist:

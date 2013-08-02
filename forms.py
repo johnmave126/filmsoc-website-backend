@@ -81,7 +81,11 @@ DiskForm = model_form(Disk, field_args={
     ]),
     'category': dict(validators=[
         AnyOf(['I', 'II A', 'II B', 'III'], message="Invalid Category")
-    ])
+    ]),
+    'cover_url': dict(validators=[
+        Optional(),
+        InstanceExist(File, message="Non exist cover")
+    ]),
 }, exclude=(
     'hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log',
 ), converter=CustomConverter())
@@ -91,7 +95,18 @@ RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     'state': dict(validators=[
         InputRequired(message="Show state Missing"),
         AnyOf(['Draft', 'Open', 'Pending', 'Passed'], message="Invalid Show State")
-    ])
+    ]),
+    'film_1': dict(validators=[
+        InstanceExist(Disk, message="Non exist Film #1")
+    ]),
+    'film_2': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #2")
+    ]),
+    'film_3': dict(validators=[
+        Optional(),
+        InstanceExist(Disk, message="Non exist Film #3")
+    ]),
 }, exclude=(
     'participant_list', 'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3',
 ), converter=CustomConverter())
@@ -116,7 +131,11 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
     ]),
     'apply_deadline': dict(validators=[
         InputRequired(message="Apply Deadline missing")
-    ])
+    ]),
+    'cover_url': dict(validators=[
+        Optional(),
+        InstanceExist(File, message="Non exist cover")
+    ]),
 }, exclude=(
     'create_log',
 ), converter=CustomConverter())
@@ -124,7 +143,8 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
 
 DiskReviewForm = model_form(DiskReview, field_args={
     'disk': dict(validators=[
-        InputRequired(message="The disk to review missing")
+        InputRequired(message="The disk to review missing"),
+        InstanceExist(Disk, message="Non exist Disk")
     ]),
     'content': dict(validators=[
         InputRequired(message="Content cannot be null")
@@ -151,7 +171,8 @@ DocumentForm = model_form(Document, field_args={
         InputRequired(message="Title Missing")
     ]),
     'doc_url': dict(validators=[
-        InputRequired(message="File Missing")
+        InputRequired(message="File Missing"),
+        InstanceExist(File, message="File not exist")
     ])
 }, exclude=(
     'create_log',
@@ -167,10 +188,12 @@ PublicationForm = model_form(Publication, field_args={
         AnyOf(['Magazine', 'MicroMagazine'], "Invalid Type")
     ]),
     'doc_url': dict(validators=[
-        InputRequired(message="File Missing")
+        InputRequired(message="File Missing"),
+        InstanceExist(File, message="File not exist")
     ]),
     'cover_url': dict(validators=[
-        InputRequired(message="Cover image Missing")
+        InputRequired(message="Cover image Missing"),
+        InstanceExist(File, message="Cover not exist")
     ])
 }, exclude=(
     'create_log',
@@ -182,7 +205,8 @@ SponsorForm = model_form(Sponsor, field_args={
         InputRequired(message="Name Missing")
     ]),
     'img_url': dict(validators=[
-        InputRequired(message="Image Missing")
+        InputRequired(message="Image Missing"),
+        InstanceExist(File, message="Image not exist")
     ]),
     'x': dict(validators=[
         InputRequired(message="Location Missing"),
@@ -255,6 +279,7 @@ class ReserveForm(Form):
 class SubmitUserForm(Form):
     id = f.IntegerField(u'id', [
         InputRequired(message="User missing"),
+        InstanceExist(User, message="User not exist")
     ])
 
 
