@@ -15,7 +15,7 @@ class SimpleListField(TextField):
         return join(value, ',') if isinstance(value, list) else value
 
     def python_value(self, value):
-        if value is None:
+        if value is None or len(value.strip()) == 0:
             return []
         return map(lambda x: x.strip(), split(value, ','))
 
