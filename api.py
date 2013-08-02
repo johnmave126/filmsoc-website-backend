@@ -469,6 +469,13 @@ class RegularFilmShowResource(CustomResource):
         form = RegularFilmShowForm(MultiDict(data))
         if not form.validate():
             return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
+        if g.modify_flag == 'edit':
+            if obj.state != 'Draft' and data.get('film_1', '') != obj.film_1.id:
+                return False, "Cannot modify Film 1 if not Draft"
+            if obj.state != 'Draft' and data.get('film_2', '') != obj.film_2.id:
+                return False, "Cannot modify Film 2 if not Draft"
+            if obj.state != 'Draft' and data.get('film_3', '') != obj.film_3.id:
+                return False, "Cannot modify Film 3 if not Draft"
         return True, ""
 
     def prepare_data(self, obj, data):
