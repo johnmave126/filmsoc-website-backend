@@ -544,14 +544,14 @@ class RegularFilmShowResource(CustomResource):
                 return jsonify(errno=1, error=error)
             if obj.state != 'Open':
                 return jsonify(errno=3, error="The show cannot be voted now")
-            vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(Log.model == "RegularFilmShow", Log.model_refer == obj.id, Log.Type == "vote", Log.user_affected == g.user)]
+            vote_log = [x.content[len(x.content) - 1] for x in Log.select().where(Log.model == "RegularFilmShow", Log.model_refer == obj.id, Log.Type == "vote", Log.user_affected == g.user)]
             if len(vote_log) >= 2:
                 return jsonify(errno=3, error="A member can vote at most twice")
-            if int(data['film_id']) in vote_log:
+            if data['film_id'] in vote_log:
                 return jsonify(errno=3, error="You have voted before")
-            setattr(obj, "vote_cnt_%d" % int(data['film_id']), getattr(obj, "vote_cnt_%d" % int(data['film_id'])) + 1)
+            setattr(obj, "vote_cnt_%s" % data['film_id'], getattr(obj, "vote_cnt_%s" % data['film_id']) + 1)
             obj.save()
-            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user, content="member %s vote for film No. %d" % data['film_id'])
+            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user, content="member %s vote for film No. %s" % (g.user.itsc, data['film_id']))
 
         return self.response(self.serialize_object(obj))
 
