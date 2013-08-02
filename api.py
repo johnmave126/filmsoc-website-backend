@@ -547,9 +547,9 @@ class RegularFilmShowResource(CustomResource):
             vote_log = [int(x.content[len(x.content) - 1]) for x in Log.select().where(Log.model == "RegularFilmShow", Log.model_refer == obj.id, Log.Type == "vote", Log.user_affected == g.user)]
             if len(vote_log) >= 2:
                 return jsonify(errno=3, error="A member can vote at most twice")
-            if data['film_id'] in vote_log:
+            if int(data['film_id']) in vote_log:
                 return jsonify(errno=3, error="You have voted before")
-            setattr(obj, "vote_cnt_%d" % data['film_id'], getattr(obj, "vote_cnt_%d" % data['film_id']) + 1)
+            setattr(obj, "vote_cnt_%d" % int(data['film_id']), getattr(obj, "vote_cnt_%d" % int(data['film_id'])) + 1)
             obj.save()
             Log.create(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user, content="member %s vote for film No. %d" % data['film_id'])
 
