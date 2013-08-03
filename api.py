@@ -890,7 +890,7 @@ def dirty():
                 Log.created_at > (datetime.now() - timedelta(minutes=6)),
                 Log.Type << x[2]
             )
-            result[x[1].lower()] = [x.id for x in sq]
+            result[x[1].lower()] = [y.model_refer for y in sq]
     # response
     result['errno'] = 0
     result['error'] = ''
