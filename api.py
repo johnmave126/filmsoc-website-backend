@@ -513,8 +513,10 @@ class RegularFilmShowResource(CustomResource):
             disk.avail_type = 'Onshow'
             disk.save()
         elif instance.state == 'Passed':
-            disk = next((x for x in (getattr(instance, "film_%d" % y) for y in [1, 2, 3]) if x.avail_type == 'Onshow'))
-            disk.save()
+            disk = next((x for x in (getattr(instance, "film_%d" % y) for y in [1, 2, 3]) if x.avail_type == 'Onshow'), None)
+            if disk:
+                disk.avail_type = 'Available'
+                disk.save()
         return instance
 
     def check_post(self, obj=None):
