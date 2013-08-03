@@ -222,7 +222,7 @@ class PreviewShowTicket(CustomBaseModel):
     create_log = ForeignKeyField(Log)
 
     class Meta:
-        order_by = ('-id',)
+        order_by = ('-apply_deadline', '-id',)
 
 
 class DiskReview(CustomBaseModel):
