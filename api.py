@@ -477,10 +477,8 @@ class RegularFilmShowResource(CustomResource):
             if obj.state != 'Draft' and data.get('film_3', obj.film_3.id) != obj.film_3.id:
                 return False, "Cannot modify Film 3 if not Draft"
             if obj.state != 'Draft' and data.get('state', '') == 'Draft':
-                # Reset vote cnt
-                obj.vote_cnt_1 = 0
-                obj.vote_cnt_2 = 0
-                obj.vote_cnt_3 = 0
+                # Forbid such behaviour
+                return False, "Cannot turn back to Draft"
         return True, ""
 
     def prepare_data(self, obj, data):
