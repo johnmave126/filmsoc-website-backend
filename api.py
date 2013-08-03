@@ -881,7 +881,7 @@ dirty_map = [
 def dirty():
     result = {}
     referrer = request.referrer or ''
-    if not referrer.startswith(self.app.config['FRONT_SERVER']):
+    if not referrer.startswith(app.config['FRONT_SERVER']):
         return jsonify(errno=403, error="Not Authorized")
     for x in dirty_map:
         if x[0] or (g.user and g.user.admin):
