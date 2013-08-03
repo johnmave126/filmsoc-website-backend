@@ -106,7 +106,6 @@ class UserResource(CustomResource):
         return (
             ('/current_user/', self.require_method(self.api_current, ['GET'])),
             ('/relation/', self.require_method(self.api_relation, ['POST'])),
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(UserResource, self).get_urls()
 
     def check_get(self, obj=None):
@@ -150,20 +149,6 @@ class UserResource(CustomResource):
             obj.save()
             Log.create(model='User', Type='edit', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
         return self.response(self.serialize_object(obj))
-
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'User',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
 
 
 class SimpleUserResource(CustomResource):
@@ -228,7 +213,6 @@ class DiskResource(CustomResource):
             ('/<pk>/borrow/', self.require_method(self.api_borrow, ['POST', 'DELETE'])),
             ('/<pk>/rate/', self.require_method(self.api_rate, ['GET', 'POST'])),
             ('/rand/', self.require_method(self.api_rand, ['GET'])),
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(DiskResource, self).get_urls()
 
     def before_save(self, instance):
@@ -434,20 +418,6 @@ class DiskResource(CustomResource):
 
         return self.response(self.serialize_object(obj))
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'Disk',
-            (Log.Type == 'edit' | Log.Type == 'reserve' | Log.Type == 'borrow')
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class RegularFilmShowResource(CustomResource):
     readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
@@ -535,7 +505,6 @@ class RegularFilmShowResource(CustomResource):
         return (
             ('/<pk>/vote/', self.require_method(self.api_vote, ['POST'])),
             ('/<pk>/participant/', self.require_method(self.api_particip, ['POST'])),
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(RegularFilmShowResource, self).get_urls()
 
     def api_vote(self, pk):
@@ -598,20 +567,6 @@ class RegularFilmShowResource(CustomResource):
 
         return self.response(self.serialize_object(obj))
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'RegularFilmShow',
-            (Log.Type == 'edit' | Log.Type == 'vote')
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class PreviewShowTicketResource(CustomResource):
     readonly = ['create_log']
@@ -658,7 +613,6 @@ class PreviewShowTicketResource(CustomResource):
     def get_urls(self):
         return (
             ('/<pk>/application/', self.require_method(self.api_apply, ['POST'])),
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
         ) + super(PreviewShowTicketResource, self).get_urls()
 
     def api_apply(self, pk):
@@ -683,20 +637,6 @@ class PreviewShowTicketResource(CustomResource):
             Log.create(model="PreviewShowTicket", Type='apply', model_refer=obj.id, user_affected=g.user, content="member %s apply for ticket id=%d" % (g.user.itsc, obj.id))
 
         return self.response({})
-
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'PreviewShowTicket',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
 
 
 class DiskReviewResource(CustomResource):
@@ -748,11 +688,6 @@ class NewsResource(CustomResource):
         'default': ['title', 'content']
     }
 
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(NewsResource, self).get_urls()
-
     def validate_data(self, data, obj=None):
         form = NewsForm(MultiDict(data))
         if not form.validate():
@@ -769,20 +704,6 @@ class NewsResource(CustomResource):
             Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
         return instance
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'News',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class DocumentResource(CustomResource):
     include_resources = {
@@ -792,11 +713,6 @@ class DocumentResource(CustomResource):
     search = {
         'default': ['title']
     }
-
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(DocumentResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
         form = DocumentForm(MultiDict(data))
@@ -814,20 +730,6 @@ class DocumentResource(CustomResource):
             Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
         return instance
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'Document',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class PublicationResource(CustomResource):
     include_resources = {
@@ -838,11 +740,6 @@ class PublicationResource(CustomResource):
     search = {
         'default': ['title']
     }
-
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(PublicationResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
         form = PublicationForm(MultiDict(data))
@@ -860,20 +757,6 @@ class PublicationResource(CustomResource):
             Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
         return instance
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'Publication',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class SponsorResource(CustomResource):
     include_resources = {
@@ -883,11 +766,6 @@ class SponsorResource(CustomResource):
     search = {
         'default': ['name']
     }
-
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(SponsorResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
         form = SponsorForm(MultiDict(data))
@@ -905,31 +783,12 @@ class SponsorResource(CustomResource):
             Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.title))
         return instance
 
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'Sponsor',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
-
 
 class ExcoResource(CustomResource):
-    readonly = ['hall_allocate', 'name_en', 'name_ch', 'position']
+    readonly = ['position']
     include_resources = {
         'img_url': FileResource,
     }
-
-    def get_urls(self):
-        return (
-            ('/dirty/', self.require_method(self.api_dirty, ['GET'])),
-        ) + super(ExcoResource, self).get_urls()
 
     def validate_data(self, data, obj=None):
         form = ExcoForm(MultiDict(data))
@@ -945,20 +804,6 @@ class ExcoResource(CustomResource):
 
     def check_delete(self, obj):
         return False
-
-    def api_dirty(self):
-        dirty_list = []
-
-        if not getattr(self, 'check_%s' % request.method.lower())():
-            return self.response_forbidden()
-
-        for dirty_item in Log.select().where(
-            Log.created_at > (datetime.now() - timedelta(minutes=6)),
-            Log.model == 'Exco',
-            Log.Type == 'edit'
-        ):
-            dirty_list.append(dirty_item.model_refer)
-        return self.response({'dirty': dirty_list})
 
 
 class SiteSettingsResource(CustomResource):
@@ -1017,6 +862,37 @@ class OneSentenceResource(CustomResource):
             obj = self.model.select().order_by(fn.Rand()).limit(1).get()
 
         return self.response(self.serialize_object(obj))
+
+# use a centered dirty generator
+# dirty map
+dirty_map = [
+#    guest, Model, DispName, actions
+    (False, User, "User", ['edit']),
+    (True, Disk, "Disk", ['edit', 'reserve', 'borrow']),
+    (True, RegularFilmShow, "RegularFilmShow", ['edit', 'vote']),
+    (True, PreviewShowTicket, "PreviewShowTicket", ['edit']),
+    (True, News, "News", ['edit']),
+    (True, Document, "Document", ['edit']),
+    (True, Publication, "Publication", ['edit']),
+    (True, Exco, "Exco", ['edit']),
+    (True, Sponsor, "Sponsor", ['edit']),
+]
+@app.route('/api/dirty/')
+def dirty():
+    result = {}
+    for x in dirty_map:
+        if x[0] or (g.user and g.user.admin):
+            sq = Log.select().where(
+                Log.model == x[2],
+                Log.created_at > (datetime.now() - timedelta(minutes=6)),
+                Log.Type << x[3]
+            )
+            result[x[2].lower] = [x.id for x in sq]
+    # response
+    result['errno'] = 0
+    result['error'] = ''
+    kwargs = {'separators': (',', ':')} if request.is_xhr else {'indent': 2}
+    return Response(json.dumps(result, **kwargs), mimetype='application/json')
 
 user_auth = CustomAuthentication(auth)
 admin_auth = CustomAdminAuthentication(auth)
