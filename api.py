@@ -866,16 +866,16 @@ class OneSentenceResource(CustomResource):
 # use a centered dirty generator
 # dirty map
 dirty_map = [
-#    guest, Model, DispName, actions
-    (False, User, "User", ['edit']),
-    (True, Disk, "Disk", ['edit', 'reserve', 'borrow']),
-    (True, RegularFilmShow, "RegularFilmShow", ['edit', 'vote']),
-    (True, PreviewShowTicket, "PreviewShowTicket", ['edit']),
-    (True, News, "News", ['edit']),
-    (True, Document, "Document", ['edit']),
-    (True, Publication, "Publication", ['edit']),
-    (True, Exco, "Exco", ['edit']),
-    (True, Sponsor, "Sponsor", ['edit']),
+#    guest, Model, actions
+    (False, "User", ['edit']),
+    (True, "Disk", ['edit', 'reserve', 'borrow']),
+    (True, "RegularFilmShow", ['edit', 'vote']),
+    (True, "PreviewShowTicket", ['edit']),
+    (True, "News", ['edit']),
+    (True, "Document", ['edit']),
+    (True, "Publication", ['edit']),
+    (True, "Exco", ['edit']),
+    (True, "Sponsor", ['edit']),
 ]
 @app.route('/api/dirty/')
 def dirty():
@@ -886,11 +886,11 @@ def dirty():
     for x in dirty_map:
         if x[0] or (g.user and g.user.admin):
             sq = Log.select().where(
-                Log.model == x[2],
+                Log.model == x[1],
                 Log.created_at > (datetime.now() - timedelta(minutes=6)),
-                Log.Type << x[3]
+                Log.Type << x[2]
             )
-            result[x[2].lower] = [x.id for x in sq]
+            result[x[1].lower()] = [x.id for x in sq]
     # response
     result['errno'] = 0
     result['error'] = ''
