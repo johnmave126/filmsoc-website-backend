@@ -506,15 +506,20 @@ class RegularFilmShowResource(CustomResource):
             for x in [1, 2, 3]:
                 disk = getattr(instance, "film_%d" % x)
                 disk.avail_type = 'Available'
+                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
+                    setattr(disk, y, None)
                 disk.save()
             disk = getattr(instance, "film_%d" % largest)
             disk.avail_type = 'Onshow'
             disk.save()
         elif instance.state == 'Passed':
-            disk = next((x for x in (getattr(instance, "film_%d" % y) for y in [1, 2, 3]) if x.avail_type == 'Onshow'), None)
-            if disk:
-                disk.avail_type = 'Available'
-                disk.save()
+            for x in [1, 2, 3]:
+                disk = getattr(instance, "film_%d" % x)
+                if disk.avail_type == 'Voting' or disk.avail_type == 'Onshow':
+                    disk.avail_type = 'Available'
+                    for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
+                        setattr(disk, y, None)
+                    disk.save()
         return instance
 
     def check_post(self, obj=None):
