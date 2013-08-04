@@ -86,7 +86,7 @@ class User(CustomBaseModel):
 class Log(CustomBaseModel):
     id = PrimaryKeyField()
 
-    model = CharField(max_length=16)
+    model = CharField(max_length=32)
     Type = CharField(max_length=16)
     model_refer = IntegerField()
     user_affected = ForeignKeyField(User, related_name='actions', null=True)
@@ -217,7 +217,7 @@ class PreviewShowTicket(CustomBaseModel):
     show_time = DateTimeField(null=True)
     remarks = TextField(null=True)
 
-    successful_applicant = SimpleListField(null=True)
+    successful_applicant = TextField(null=True)
 
     create_log = ForeignKeyField(Log)
 
