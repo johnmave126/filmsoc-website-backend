@@ -572,6 +572,7 @@ class PreviewShowTicketResource(CustomResource):
     readonly = ['create_log']
 
     include_resources = {
+        'cover_url': FileResource,
         'create_log': SimpleLogResource,
     }
     search = {
