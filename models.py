@@ -258,7 +258,7 @@ class Document(CustomBaseModel):
     create_log = ForeignKeyField(Log)
 
     class Meta:
-        order_by = ('-id',)
+        order_by = ('id',)
 
 
 class Publication(CustomBaseModel):
