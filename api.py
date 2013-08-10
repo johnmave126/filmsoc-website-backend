@@ -777,11 +777,11 @@ class SponsorResource(CustomResource):
     def before_save(self, instance):
         if g.modify_flag == 'create':
             ref_id = Sponsor.next_primary_key()
-            log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.title)
+            log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.name)
             instance.create_log = log
         else:
             ref_id = instance.id
-            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.title))
+            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
         return instance
 
 
