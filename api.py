@@ -264,7 +264,7 @@ class DiskResource(CustomResource):
                 return jsonify(errno=3, error="A member can reserve at most 2 disks at the same time")
             if obj.avail_type != 'Available':
                 return jsonify(errno=3, error="Disk not reservable")
-            if check_disable():
+            if self.check_disable():
                 return jsonify(errno=3, error="VCD/DVD Library Closed")
             obj.reserved_by = g.user
             new_log.user_affected = g.user
@@ -323,7 +323,7 @@ class DiskResource(CustomResource):
                     return self.response_forbidden()
                 if obj.due_at < date.today():
                     return jsonify(errno=3, error="Disk is overdue")
-                if check_disable():
+                if self.check_disable():
                     return jsonify(errno=3, error="VCD/DVD Library Closed")
                 # renew
                 last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'borrow', Log.user_affected == req_user).order_by(Log.created_at.desc()).get()
@@ -340,7 +340,7 @@ class DiskResource(CustomResource):
                     return self.response_forbidden()
                 if req_user.borrowed.count() >= 2:
                     return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
-                if check_disable():
+                if self.check_disable():
                     return jsonify(errno=3, error="VCD/DVD Library Closed")
                 success, error = obj.check_out(req_user)
                 if not success:
@@ -388,7 +388,7 @@ class DiskResource(CustomResource):
             if not form.validate():
                 error = join([join(x, ', ') for x in form.errors.values()], ' | ')
                 return jsonify(errno=1, error=error)
-            if check_disable():
+            if self.check_disable():
                 return jsonify(errno=3, error="VCD/DVD Library Closed")
             rate = data['rate']
             rated = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
