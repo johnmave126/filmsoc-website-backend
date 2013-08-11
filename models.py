@@ -136,7 +136,7 @@ class Disk(CustomBaseModel):
         order_by = ('-id',)
 
     def get_callnumber(self):
-        return self.disk_type + str(self.id).ljust(4, '0')
+        return self.disk_type + str(self.id).rjust(4, '0')
 
     def check_out(self, user):
         if self.avail_type not in ["Available", 'Reserved', 'ReservedCounter']:
