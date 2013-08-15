@@ -116,7 +116,7 @@ class Disk(CustomBaseModel):
     actors = SimpleListField(null=True)  # actors, simmple list
 
     show_year = IntegerField()
-    cover_url = ForeignKeyField(File, null=True)
+    cover_url = ForeignKeyField(File, related_name='disk_usage', null=True)
     tags = SimpleListField(null=True)  # tags, json
     imdb_url = CharField(null=True)
     length = IntegerField(null=True)
@@ -171,9 +171,9 @@ class RegularFilmShow(CustomBaseModel):
 
     state = CharField(max_length=16)  # Draft, Open, Pending, Passed
 
-    film_1 = ForeignKeyField(Disk, null=True)
-    film_2 = ForeignKeyField(Disk, null=True)
-    film_3 = ForeignKeyField(Disk, null=True)
+    film_1 = ForeignKeyField(Disk, related_name='dummy_1', null=True)
+    film_2 = ForeignKeyField(Disk, related_name='dummy_2', null=True)
+    film_3 = ForeignKeyField(Disk, related_name='dummy_3', null=True)
 
     vote_cnt_1 = IntegerField(default=0)
     vote_cnt_2 = IntegerField(default=0)
@@ -206,7 +206,7 @@ class PreviewShowTicket(CustomBaseModel):
     director_ch = TextField(null=True)
     actors = SimpleListField(null=True)  # actors, simmple list
 
-    cover_url = ForeignKeyField(File)
+    cover_url = ForeignKeyField(File, related_name='ticket_usage')
     length = IntegerField(null=True)
     language = CharField(null=True)
     subtitle = CharField(null=True)
@@ -228,7 +228,7 @@ class PreviewShowTicket(CustomBaseModel):
 class DiskReview(CustomBaseModel):
     id = PrimaryKeyField()
 
-    poster = ForeignKeyField(User, null=True)
+    poster = ForeignKeyField(User, related_name='posted_reviews', null=True)
     disk = ForeignKeyField(Disk, related_name='reviews')
 
     create_log = ForeignKeyField(Log)
@@ -253,7 +253,7 @@ class Document(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
-    doc_url = ForeignKeyField(File)
+    doc_url = ForeignKeyField(File, related_name='doc_usage')
 
     create_log = ForeignKeyField(Log)
 
@@ -265,8 +265,8 @@ class Publication(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
-    doc_url = ForeignKeyField(File)
-    cover_url = ForeignKeyField(File)
+    doc_url = ForeignKeyField(File, related_name='pub_usage_doc')
+    cover_url = ForeignKeyField(File, related_name='pub_usage_cover')
 
     create_log = ForeignKeyField(Log)
     Type = CharField(max_length=16)  # Magazine, MicroMagazine, Podcast
@@ -282,7 +282,7 @@ class Sponsor(CustomBaseModel):
     id = PrimaryKeyField()
 
     name = TextField()
-    img_url = ForeignKeyField(File)
+    img_url = ForeignKeyField(File, related_name='sponsor_usage')
 
     create_log = ForeignKeyField(Log)
 
