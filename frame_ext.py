@@ -116,12 +116,13 @@ class CustomBaseModel(db.Model):
     def next_primary_key(cls):
         tb_name = cls._meta.db_table
         cls_db = cls._meta.database
-        cursor = cls_db.execute_sql("SELECT  `AUTO_INCREMENT` "
+        cursor = cls_db.execute_sql("SELECT  `AUTO_INCREMENT` AS `next` "
                                     "FROM information_schema.`TABLES` "
-                                    "WHERE TABLE_SCHEMA =  '" + cls_db.database + "' "
-                                    "AND TABLE_NAME =  '" + tb_name + "'")
-        sq = QueryResultWrapper(None, cursor)
-        return next(sq)[0]
+                                    "WHERE TABLE_SCHEMA = %s"
+                                    "AND TABLE_NAME = %s", (cls_db.database, tb_name,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
 
 
 class CustomRestAPI(RestAPI):
