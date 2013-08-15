@@ -185,7 +185,7 @@ PublicationForm = model_form(Publication, field_args={
     ]),
     'Type': dict(validators=[
         InputRequired(message="Type Missing"),
-        AnyOf(['Magazine', 'MicroMagazine'], "Invalid Type")
+        AnyOf(['Magazine', 'MicroMagazine', 'Podcast'], "Invalid Type")
     ]),
     'doc_url': dict(validators=[
         InputRequired(message="File Missing"),

@@ -269,7 +269,7 @@ class Publication(CustomBaseModel):
     cover_url = ForeignKeyField(File)
 
     create_log = ForeignKeyField(Log)
-    Type = CharField(max_length=16)  # Magazine, MicroMagazine
+    Type = CharField(max_length=16)  # Magazine, MicroMagazine, Podcast
 
     class Meta:
         indexes = (
