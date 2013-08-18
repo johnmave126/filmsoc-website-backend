@@ -231,8 +231,12 @@ SponsorForm = model_form(Sponsor, field_args={
 
 ExcoForm = model_form(Exco, field_args={
     'hall_allocate': dict(validators=[
-        NumberRange(min=1, max=9, message="Hall must be 1-9")
-    ])
+        Regexp('^[\d*]*$', message="Invalid hall number")
+    ]),
+    'img_url': dict(validators=[
+        InputRequired(message="Image Missing"),
+        InstanceExist(File, message="Image not exist")
+    ]),
 }, converter=CustomConverter())
 
 
