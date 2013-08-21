@@ -274,7 +274,7 @@ class Publication(CustomBaseModel):
 
     class Meta:
         indexes = (
-            (('Type'), False),
+            (('Type',), False),
         )
         order_by = ('-id',)
 
