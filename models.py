@@ -326,6 +326,7 @@ def create_tables():
     DiskReview.create_table()
     News.create_table()
     Document.create_table()
+    Publication.create_table()
     Sponsor.create_table()
     Exco.create_table()
     SiteSettings.create_table()
