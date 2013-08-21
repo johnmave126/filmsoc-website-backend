@@ -265,7 +265,8 @@ class Publication(CustomBaseModel):
     id = PrimaryKeyField()
 
     title = TextField()
-    doc_url = ForeignKeyField(File, related_name='pub_usage_doc')
+    doc_url = ForeignKeyField(File, related_name='pub_usage_doc', null=True)
+    ext_doc_url = TextField(null=True)
     cover_url = ForeignKeyField(File, related_name='pub_usage_cover')
 
     create_log = ForeignKeyField(Log)

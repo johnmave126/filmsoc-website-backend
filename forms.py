@@ -188,7 +188,6 @@ PublicationForm = model_form(Publication, field_args={
         AnyOf(['Magazine', 'MicroMagazine', 'Podcast'], "Invalid Type")
     ]),
     'doc_url': dict(validators=[
-        InputRequired(message="File Missing"),
         InstanceExist(File, message="File not exist")
     ]),
     'cover_url': dict(validators=[
