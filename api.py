@@ -756,6 +756,10 @@ class PublicationResource(CustomResource):
         else:
             ref_id = instance.id
             Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
+        if instance.Type == 'Magazine':
+            instance.ext_doc_url = None
+        else:
+            instance.doc_url = None
         return instance
 
 
