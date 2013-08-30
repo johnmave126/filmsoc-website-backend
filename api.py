@@ -99,8 +99,7 @@ class UserResource(CustomResource):
             ref_id = instance.id
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
         # update mailing-list
-        # update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.member_type != 'Expired')])
-        # disable because it is danger
+        update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.member_type != 'Expired')])
 
     def get_urls(self):
         return (
