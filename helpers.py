@@ -114,7 +114,7 @@ def update_mailing_list(new_list):
         'list': 'su-film-list',
         'passwd': 'su-film-list.admin',
         'whotime': whotime,
-        'who': join(new_list, '\n')
+        'who': join(new_list + [app.config['SOCIETY_USERNAME']], '\n')
     }
     data = urlencode(payload)
     # send but not read
