@@ -12,7 +12,7 @@ class SimpleListField(TextField):
     def db_value(self, value):
         if value is None:
             return ''
-        return join(value, ',') if isinstance(value, list) else value
+        return join(map(lambda x: str(x), value), ',') if isinstance(value, list) else value
 
     def python_value(self, value):
         if value is None or len(value.strip()) == 0:
