@@ -1,3 +1,4 @@
+from app import app
 from models import *
 import StringIO
 from ftplib import FTP
