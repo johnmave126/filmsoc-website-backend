@@ -1,5 +1,4 @@
 from models import *
-import time
 import StringIO
 from ftplib import FTP
 
@@ -26,7 +25,7 @@ def main():
     write_tag(output, "http://ihome.ust.hk/~su_film/#!home", priority=1.0)
     for news in News.select():
         log = Log.select().where(Log.model == 'News', Log.model_refer == news.id).get()
-        log_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', log.created_at)
+        log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
         write_tag(output, "http://ihome.ust.hk/~su_film/#!news/%d/" % news.id, lastmod=log_time, changefreq="monthly", priority=0.3)
 
     #rfs
@@ -36,27 +35,27 @@ def main():
     write_tag(output, "http://ihome.ust.hk/~su_film/#!library", priority=0.8)
     for disk in Disk.select():
         log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id).get()
-        log_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', log.created_at)
+        log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
         write_tag(output, "http://ihome.ust.hk/~su_film/#!library/%d/" % disk.id, lastmod=log_time, changefreq="weekly", priority=0.4)
 
     #ticket
     tlog = Log.select().where(Log.model == 'PreviewShowTicket').get()
-    tlog_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', tlog.created_at)
+    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
     write_tag(output, "http://ihome.ust.hk/~su_film/#!ticket", lastmod=tlog_time, changefreq="weekly", priority=0.8)
 
     #document
     tlog = Log.select().where(Log.model == 'Document').get()
-    tlog_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', tlog.created_at)
+    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
     write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, changefreq="yearly", priority=0.2)
 
     #publication
     tlog = Log.select().where(Log.model == 'Publication').get()
-    tlog_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', tlog.created_at)
+    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
     write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
 
     #sponsor
     tlog = Log.select().where(Log.model == 'Sponsor').get()
-    tlog_time = time.strftime('%Y-%m-%dT%H:%M:%S+8:00', tlog.created_at)
+    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
     write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, priority=0.4)
 
     #aboutus
