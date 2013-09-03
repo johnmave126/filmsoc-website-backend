@@ -49,7 +49,7 @@ def main():
     write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, changefreq="yearly", priority=0.2)
 
     #publication
-    if (Log.select().where(Log.model == 'Publication').exist()):
+    if (Log.select().where(Log.model == 'Publication').exists()):
         tlog = Log.select().where(Log.model == 'Publication').get()
         tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
         write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
