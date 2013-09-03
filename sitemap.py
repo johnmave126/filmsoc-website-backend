@@ -65,10 +65,12 @@ def main():
 
     print >>output, "</urlset>"
 
+    output.seek(0)
     conn = FTP('ihome.ust.hk', app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
     conn.cwd('/')
     conn.storbinary("STOR sitemap.xml", output)
     conn.quit()
+    output.close()
 
 if __name__ == '__main__':
     main()
