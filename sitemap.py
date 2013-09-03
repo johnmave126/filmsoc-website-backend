@@ -49,9 +49,10 @@ def main():
     write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, changefreq="yearly", priority=0.2)
 
     #publication
-    tlog = Log.select().where(Log.model == 'Publication').get()
-    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
+    if (Log.select().where(Log.model == 'Publication').exist()):
+        tlog = Log.select().where(Log.model == 'Publication').get()
+        tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+8:00')
+        write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
 
     #sponsor
     tlog = Log.select().where(Log.model == 'Sponsor').get()
