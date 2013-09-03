@@ -61,6 +61,8 @@ def main():
     #aboutus
     write_tag(output, "http://ihome.ust.hk/~su_film/#!aboutus", priority=0.7)
 
+    print >>output, "</urlset>"
+
     conn = FTP('ihome.ust.hk', app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
     conn.cwd('/')
     conn.storbinary("STOR sitemap.xml", output)
