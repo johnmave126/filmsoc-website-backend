@@ -330,7 +330,7 @@ class DiskResource(CustomResource):
                     # renewed before
                     return jsonify(errno=3, error="The disk can only be renewed once")
                 # renew it
-                obj.due_at = obj.due_at + timedelta(7)
+                obj.due_at = date.today() + timedelta(7)
                 new_log.content = "member %s renews disk %s" % (req_user.itsc, obj.get_callnumber())
                 new_log.user_affected = req_user
             else:
