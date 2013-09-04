@@ -9,7 +9,7 @@ __all__ = [
 
 
 class SimpleListField(TextField):
-    def to_str(x):
+    def to_str(self, x):
         if isinstance(x, unicode) or isinstance(x, str):
             return x
         return unicode(x)
@@ -17,7 +17,7 @@ class SimpleListField(TextField):
     def db_value(self, value):
         if value is None:
             return ''
-        return join(map(to_str, value), ',') if isinstance(value, list) else value
+        return join(map(self.to_str, value), ',') if isinstance(value, list) else value
 
     def python_value(self, value):
         if value is None or len(value.strip()) == 0:
