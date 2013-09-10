@@ -142,8 +142,10 @@ class UserResource(CustomResource):
                 obj = User.select().where(User.student_id == data['student_id']).get()
             except DoesNotExist:
                 return jsonify(errno=3, error="User not found")
-            if obj.university_id:
-                return jsonify(errno=3, error="Binded before")
+            if obj.university_id and obj.university_id == data['university_id']:
+                return self.response(self.serialize_object(obj))
+            if User.select().where(User.university_id == data['university_id']).exists():
+                return jsonify(errno=3, error="Duplicate University ID of other member")
             obj.university_id = data['university_id']
             obj.save()
             Log.create(model='User', Type='edit', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
