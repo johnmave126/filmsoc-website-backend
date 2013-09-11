@@ -31,7 +31,7 @@ def main():
         if passed.days % 3 == 1:
             body = tp_overdue.render(disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Overdue of the VCD/DVD(s)', body)
-    reserved = Disk.select().where(Disk.avail_type == 'Reserved')
+    reserved = Disk.select().where(Disk.avail_type == 'ReservedCounter')
     for disk in reserved:
         reserve_log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id, Log.Type == 'reserve', Log.user_affected == disk.reserved_by).order_by(Log.created_at.desc()).get()
         if date.today() - reserve_log.created_at.date() > timedelta(2):
