@@ -335,6 +335,8 @@ class DiskResource(CustomResource):
                 obj.due_at = date.today() + timedelta(7)
                 new_log.content = "member %s renews disk %s" % (req_user.itsc, obj.get_callnumber())
                 new_log.user_affected = req_user
+                if g.user.admin:
+                    new_log.admin_involved = g.user
             else:
                 # checkout
                 if not g.user.admin:
