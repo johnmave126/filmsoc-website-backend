@@ -1,0 +1,28 @@
+{% extends "base_email.html" %}
+{% block body %}
+    <tr>
+        <td>
+            <p>Dear {{disk.borrowed_by.full_name}},</p>
+            <p>Please be reminded that the VCD/DVD(s) you borrowed <b>{{disk.title_en}}/{{disk.title_ch}}</b> will be due on <b>{{disk.due_date}}</b></p>
+            <p>
+                If you wish to return the VCD/DVD(s), you may EITHER:<br/>
+                1) Come to our VCD/DVD Library counter located next to <b style="color:#0b5394;">McCafé (LG5)</b> during <b style="color:#0b5394;">17:00~18:30</b> on weekdays (except public holidays),<br/>
+                2) OR contact the Executive Committee member who delivered the disk(s) to you (only available if you chose the delivery service at the time you reserved the disk).
+            </p>
+            <p>Please be noted that since you have renewed the disk(s) once before, you can only return the disk(s) this time.</p>
+            <p>Thank you for your kind attention.</p>
+            <p>Should you have any inquiry, please feel free to contact us.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            --<br/>
+            Best Regards,<br/>
+            Film Society, HKUSTSU<br/>
+            Session 2013-2014<br/>
+            <a href="http://ihome.ust.hk/~su_film" alt="Homepage">http://ihome.ust.hk/~su_film</a><br/>
+            <a href="http://www.facebook.com/filmsoc.ust.hk" alt="Facebook">http://www.facebook.com/filmsoc.ust.hk</a><br/>
+            <a href="http://www.renren.com/313246403" alt="RenRen">http://www.renren.com/313246403</a>
+        </td>
+    </tr>
+{% endblock %}

@@ -8,12 +8,16 @@ from helpers import send_email
 def main():
     neardue = Disk.select().where(
         Disk.avail_type == 'Borrowed',
-        Disk.due_at == date.today() + timedelta(2)
+        Disk.due_at == date.today() + timedelta(1)
     )
     for disk in neardue:
         last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id, Log.Type == 'borrow', Log.user_affected == disk.borrowed_by).order_by(Log.created_at.desc()).get()
-        body = render_template('reminder.html', disk=disk, renewable='renew' not in last_log.content)
-        send_email([disk.borrowed_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder to return disk', body)
+        if 'renew' not in last_log.content:
+            body = render_template('reminder.html', disk=disk)
+            send_email([disk.borrowed_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Borrowed', body)
+        else:
+            body = render_template('renewed_reminder.html', disk=disk)
+            send_email([disk.borrowed_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Renewed', body)
     overdue = Disk.select().where(
         Disk.avail_type == 'Borrowed',
         Disk.due_at < date.today()
@@ -22,7 +26,7 @@ def main():
         passed = date.today() - Disk.due_at
         if passed.days % 3 == 1:
             body = render_template('overdue.html', disk=disk)
-            send_email([disk.borrowed_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder to return overdue disk', body)
+            send_email([disk.borrowed_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Overdue of the VCD/DVD(s)', body)
     reserved = Disk.select().where(Disk.avail_type == 'Reserved')
     for disk in reserved:
         reserve_log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id, Log.Type == 'reserve', Log.user_affected == disk.borrowed_by).order_by(Log.created_at.desc()).get()
