@@ -17,10 +17,10 @@ def main():
     for disk in neardue:
         last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id, Log.Type == 'borrow', Log.user_affected == disk.hold_by).order_by(Log.created_at.desc()).get()
         if 'renew' not in last_log.content:
-            body = tp_reminder.render('reminder.html', disk=disk)
+            body = tp_reminder.render(disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Borrowed', body)
         else:
-            body = tp_renewed.render('renewed_reminder.html', disk=disk)
+            body = tp_renewed.render(disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Renewed', body)
     overdue = Disk.select().where(
         Disk.avail_type == 'Borrowed',
@@ -29,7 +29,7 @@ def main():
     for disk in overdue:
         passed = date.today() - disk.due_at
         if passed.days % 3 == 1:
-            body = tp_overdue.render('overdue.html', disk=disk)
+            body = tp_overdue.render(disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Overdue of the VCD/DVD(s)', body)
     reserved = Disk.select().where(Disk.avail_type == 'Reserved')
     for disk in reserved:
