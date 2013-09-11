@@ -1,4 +1,4 @@
-from flask import render_template
+from jinja2 import Environment, PackageLoader
 from datetime import date, timedelta
 
 from models import *
@@ -6,6 +6,10 @@ from helpers import send_email
 
 
 def main():
+    env = Environment(loader=PackageLoader('filmsoc', 'templates'))
+    tp_reminder = env.get_template("reminder.html")
+    tp_renewed = env.get_template("renewed_reminder.html")
+    tp_overdue = env.get_template("overdue.html")
     neardue = Disk.select().where(
         Disk.avail_type == 'Borrowed',
         Disk.due_at == date.today() + timedelta(1)
@@ -13,10 +17,10 @@ def main():
     for disk in neardue:
         last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id, Log.Type == 'borrow', Log.user_affected == disk.hold_by).order_by(Log.created_at.desc()).get()
         if 'renew' not in last_log.content:
-            body = render_template('reminder.html', disk=disk)
+            body = tp_reminder.render('reminder.html', disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Borrowed', body)
         else:
-            body = render_template('renewed_reminder.html', disk=disk)
+            body = tp_renewed.render('renewed_reminder.html', disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Due Date of the VCD/DVD(s) You Renewed', body)
     overdue = Disk.select().where(
         Disk.avail_type == 'Borrowed',
@@ -25,7 +29,7 @@ def main():
     for disk in overdue:
         passed = date.today() - Disk.due_at
         if passed.days % 3 == 1:
-            body = render_template('overdue.html', disk=disk)
+            body = tp_overdue.render('overdue.html', disk=disk)
             send_email([disk.hold_by.itsc + '@ust.hk'], ['su_film@ust.hk'], 'Reminder: Overdue of the VCD/DVD(s)', body)
     reserved = Disk.select().where(Disk.avail_type == 'Reserved')
     for disk in reserved:
