@@ -103,7 +103,7 @@ class CustomAuth(Auth):
         next_url = request.args.get('next') or ""
         next_url = self.app.config['FRONT_SERVER'] + '#' + next_url
         self.logout_user(self.get_logged_in_user())
-        return redirect(self.app.config['AUTH_SERVER'], next_url)
+        return redirect(flask_cas.logout(self.app.config['AUTH_SERVER'], next_url))
 
     def login_user(self, user):
         session['logged_in'] = True
