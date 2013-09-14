@@ -192,3 +192,6 @@ def login(cas_host, service_url, protocol=2, opt=""):
 
     else:
         return CAS_TICKET_INVALID, "", ""
+
+def logout(cas_host, service_url):
+    return cas_host + '/cas/logout?url=' + service_url

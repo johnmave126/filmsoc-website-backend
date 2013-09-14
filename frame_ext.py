@@ -88,7 +88,7 @@ class CustomAuth(Auth):
                             return response
 
                     # redirect to front server
-                    return redirect(self.app.config['FRONT_SERVER'] + '#' + next_url)
+                    return redirect(self.app.config['FRONT_SERVER'] + '#!' + next_url)
                 except self.User.DoesNotExist:
                     pass
 
@@ -100,8 +100,10 @@ class CustomAuth(Auth):
             abort(405)
 
     def logout(self):
+        next_url = request.args.get('next') or ""
+        next_url = self.app.config['FRONT_SERVER'] + '#!' + next_url
         self.logout_user(self.get_logged_in_user())
-        return redirect(self.app.config['AUTH_SERVER'] + '/logout')
+        return redirect(self.app.config['AUTH_SERVER'], next_url)
 
     def login_user(self, user):
         session['logged_in'] = True
