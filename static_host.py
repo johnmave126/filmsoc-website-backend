@@ -1,5 +1,5 @@
 from app import app
-from flask import g, render_template, request, Response, abort
+from flask import Blueprint, g, render_template, request, Response, abort
 from functools import wraps
 import socket
 
@@ -11,8 +11,22 @@ def limit_source(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route('/static/')
-@app.route('/static/home/')
+static_host = Blueprint('static_host', __name__, template_folder='static_templates')
+
+
+@static_host.route('/')
+@static_host.route('/home/')
+@limit_source
 def static_home():
     return "Home"
 
+
+@static_host.route('/news/<news_id>/')
+@limit_source
+def static_news(news_id):
+    return news_id
+
+
+@app.route('/news/<news_id>/')
+def static_news(news_id):
+    return news_id

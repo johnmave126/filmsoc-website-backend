@@ -100,9 +100,8 @@ class CustomAuth(Auth):
             abort(405)
 
     def logout(self):
-        next_url = request.args.get('next') or ""
         self.logout_user(self.get_logged_in_user())
-        return redirect(self.app.config['FRONT_SERVER'] + '#' + next_url)
+        return redirect(self.app.config['AUTH_SERVER'] + '/logout')
 
     def login_user(self, user):
         session['logged_in'] = True
