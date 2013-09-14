@@ -161,6 +161,7 @@ def get_ticket_status(cas_host, service_url, protocol, opt):
 #   Returns status, id, pycas_cookie.
 #
 def login(cas_host, service_url, protocol=2, opt=""):
+    service_url = urllib.quote(service_url)
 
     #  Check cookie for previous pycas state, with is either
     #     COOKIE_AUTH    - client already authenticated by pycas.
@@ -194,4 +195,4 @@ def login(cas_host, service_url, protocol=2, opt=""):
         return CAS_TICKET_INVALID, "", ""
 
 def logout(cas_host, service_url):
-    return cas_host + '/cas/logout?url=' + service_url
+    return cas_host + '/cas/logout?url=' + urllib.quote(service_url)
