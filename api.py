@@ -468,6 +468,11 @@ class RegularFilmShowResource(CustomResource):
             ref_id = instance.id
             Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
         if instance.state == 'Open':
+            for disk in Disk.select.where(Disk.avail_type << ['Voting', 'OnShow']):
+                disk.avail_type = 'Available'
+                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
+                    setattr(disk, y, None)
+                disk.save()
             for x in [1, 2, 3]:
                 disk = getattr(instance, "film_%d" % x)
                 disk.avail_type = 'Voting'
@@ -476,8 +481,7 @@ class RegularFilmShowResource(CustomResource):
                 disk.save()
         elif instance.state == 'Pending':
             largest = max([1, 2, 3], key=lambda o: getattr(instance, "vote_cnt_%d" % o))
-            for x in [1, 2, 3]:
-                disk = getattr(instance, "film_%d" % x)
+            for disk in Disk.select.where(Disk.avail_type << ['Voting', 'OnShow']):
                 disk.avail_type = 'Available'
                 for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
                     setattr(disk, y, None)
