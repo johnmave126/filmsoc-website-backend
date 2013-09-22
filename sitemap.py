@@ -26,8 +26,8 @@ def main():
     print >>output, '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'
 
     # home
-    write_tag(output, "http://ihome.ust.hk/~su_film/", priority=1.0)
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!home", priority=1.0)
+    write_tag(output, "http://ihome.ust.hk/~su_film/", changefreq="daily", priority=1.0)
+    write_tag(output, "http://ihome.ust.hk/~su_film/#!home", changefreq="daily", priority=1.0)
     for news in News.select():
         log = Log.select().where(Log.model == 'News', Log.model_refer == news.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
