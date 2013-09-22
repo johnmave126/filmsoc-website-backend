@@ -31,7 +31,7 @@ def main():
     for news in News.select():
         log = Log.select().where(Log.model == 'News', Log.model_refer == news.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-        delta = datetime.today() - news.created_log.created_at
+        delta = datetime.now() - news.created_log.created_at
         write_tag(output, "http://ihome.ust.hk/~su_film/#!news/%d/" % news.id, lastmod=log_time, changefreq="monthly", priority=priority_calc(delta, 0.3))
 
     #rfs
@@ -42,7 +42,7 @@ def main():
     for disk in Disk.select():
         log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-        delta = datetime.today() - disk.created_log.created_at
+        delta = datetime.now() - disk.created_log.created_at
         write_tag(output, "http://ihome.ust.hk/~su_film/#!library/%d/" % disk.id, lastmod=log_time, changefreq="weekly", priority=priority_calc(delta, 0.5))
 
     #ticket
