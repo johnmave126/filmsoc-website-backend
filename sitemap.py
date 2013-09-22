@@ -2,7 +2,7 @@ from app import app
 from models import *
 import StringIO
 from ftplib import FTP
-import datetime
+from datetime import datetime
 
 def write_tag(output, url, img=None, lastmod=None, changefreq="yearly", priority=0.5):
     print >>output, '<url>'
