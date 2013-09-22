@@ -18,7 +18,7 @@ def write_tag(output, url, img=None, lastmod=None, changefreq="yearly", priority
     print >>output, '</url>'
 
 def priority_calc(delta, upbound):
-    return 5 * upbound / ((delta.days + 5) ** 1.8)
+    return (7 ** 1.8) * upbound / ((delta.days + 7) ** 1.8)
 
 def main():
     output = StringIO.StringIO()
