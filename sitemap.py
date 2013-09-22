@@ -2,6 +2,7 @@ from app import app
 from models import *
 import StringIO
 from ftplib import FTP
+import datetime
 
 def write_tag(output, url, img=None, lastmod=None, changefreq="yearly", priority=0.5):
     print >>output, '<url>'
@@ -16,6 +17,9 @@ def write_tag(output, url, img=None, lastmod=None, changefreq="yearly", priority
         print >>output, '</image:image>'
     print >>output, '</url>'
 
+def priority_calc(delta, upbound):
+    return 5 * upbound / ((delta.days + 5) ** 1.8)
+
 def main():
     output = StringIO.StringIO()
     print >>output, '<?xml version="1.0" encoding="UTF-8"?>'
@@ -27,7 +31,8 @@ def main():
     for news in News.select():
         log = Log.select().where(Log.model == 'News', Log.model_refer == news.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-        write_tag(output, "http://ihome.ust.hk/~su_film/#!news/%d/" % news.id, lastmod=log_time, changefreq="monthly", priority=0.3)
+        delta = datetime.today() - news.created_log.created_at
+        write_tag(output, "http://ihome.ust.hk/~su_film/#!news/%d/" % news.id, lastmod=log_time, changefreq="monthly", priority=priority_calc(delta, 0.3))
 
     #rfs
     write_tag(output, "http://ihome.ust.hk/~su_film/#!show", priority=0.8)
@@ -37,7 +42,8 @@ def main():
     for disk in Disk.select():
         log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-        write_tag(output, "http://ihome.ust.hk/~su_film/#!library/%d/" % disk.id, lastmod=log_time, changefreq="weekly", priority=0.4)
+        delta = datetime.today() - disk.created_log.created_at
+        write_tag(output, "http://ihome.ust.hk/~su_film/#!library/%d/" % disk.id, lastmod=log_time, changefreq="weekly", priority=priority_calc(delta, 0.5))
 
     #ticket
     tlog = Log.select().where(Log.model == 'PreviewShowTicket').get()
@@ -58,7 +64,7 @@ def main():
     #sponsor
     tlog = Log.select().where(Log.model == 'Sponsor').get()
     tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, priority=0.4)
+    write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, priority=0.3)
 
     #aboutus
     write_tag(output, "http://ihome.ust.hk/~su_film/#!aboutus", priority=0.7)
