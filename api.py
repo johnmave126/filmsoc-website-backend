@@ -91,6 +91,7 @@ class UserResource(CustomResource):
     def before_save(self, instance):
         if g.modify_flag == 'delete':
             ref_id = instance.id
+            Log.delete.where(user_affected=instance)
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="delete member " + instance.itsc)
         return instance
 
@@ -221,6 +222,10 @@ class DiskResource(CustomResource):
             ref_id = Disk.next_primary_key()
             log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % (instance.disk_type + str(ref_id).ljust(4, '0')))
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="Disk", model_refer=ref_id)
+            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
         else:
             ref_id = instance.id
             Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
@@ -464,6 +469,10 @@ class RegularFilmShowResource(CustomResource):
             ref_id = RegularFilmShow.next_primary_key()
             log = Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create rfs id=%d" % ref_id)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete.where(model="RegularFilmShow", model_refer=ref_id)
+            Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
             Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
@@ -604,9 +613,13 @@ class PreviewShowTicketResource(CustomResource):
             ref_id = PreviewShowTicket.next_primary_key()
             log = Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create ticket id=%d" % ref_id)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="PreviewShowTicket", model_refer=ref_id)
+            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
-            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id))
+            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id)) 
         return instance
 
     def check_post(self, obj=None):
@@ -675,6 +688,7 @@ class DiskReviewResource(CustomResource):
             instance.poster = g.user
         else:
             ref_id = instance.id
+            Log.delete().where(model="DiskReview", model_refer=ref_id)
             Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=instance.poster, admin_involved=g.user, content="%s disk review of %s" % (g.modify_flag, instance.disk.get_callnumber()))
         return instance
 
@@ -707,6 +721,10 @@ class NewsResource(CustomResource):
             ref_id = News.next_primary_key()
             log = Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create news %s" % instance.title)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="News", model_refer=ref_id)
+            Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
             Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
@@ -733,6 +751,10 @@ class DocumentResource(CustomResource):
             ref_id = Document.next_primary_key()
             log = Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create document %s" % instance.title)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="Document", model_refer=ref_id)
+            Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
             Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
@@ -760,6 +782,10 @@ class PublicationResource(CustomResource):
             ref_id = Publication.next_primary_key()
             log = Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create publication %s" % instance.title)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="Publication", model_refer=ref_id)
+            Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
             Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
@@ -790,6 +816,10 @@ class SponsorResource(CustomResource):
             ref_id = Sponsor.next_primary_key()
             log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.name)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="Sponsor", model_refer=ref_id)
+            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
         else:
             ref_id = instance.id
             Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
@@ -856,6 +886,10 @@ class OneSentenceResource(CustomResource):
             ref_id = OneSentence.next_primary_key()
             log = Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create one sentence id=%d" % ref_id)
             instance.create_log = log
+        elif g.modify_flag == 'delete':
+            ref_id = instance.id
+            Log.delete().where(model="OneSentence", model_refer=ref_id)
+            Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
             Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))

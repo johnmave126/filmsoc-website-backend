@@ -99,6 +99,7 @@ class Log(CustomBaseModel):
         indexes = (
             (('model',), False),
             (('model', 'Type'), False),
+            (('model', 'model_refer'), False),
         )
         order_by = ('-created_at', '-id')
 
