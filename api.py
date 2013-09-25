@@ -652,7 +652,7 @@ class PreviewShowTicketResource(CustomResource):
                 return jsonify(errno=1, error=error)
             if obj.state != 'Open':
                 return jsonify(errno=3, error="The ticket cannot be applied now")
-            if Log.select.where(Log.model == "PreviewShowTicket",Log.Type == 'apply', Log.model_refer == obj.id, Log.user_affected == g.user).exists():
+            if Log.select().where(Log.model == "PreviewShowTicket",Log.Type == 'apply', Log.model_refer == obj.id, Log.user_affected == g.user).exists():
                 return self.response({})
             mail_content = render_template('ticket_apply.html', ticket=obj, member=g.user, data=data, time=str(datetime.now()))
             sq = Exco.select().where(Exco.position == "External Vice-President")
