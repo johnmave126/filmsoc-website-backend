@@ -485,14 +485,42 @@ class CustomInteger(f.IntegerField):
                 self.data = None
                 raise ValueError(self.gettext('Not a valid integer'))
 
+class CustomDateTime(f.DateTimeField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                date_str = ' '.join(valuelist)
+                self.data = datetime.datetime.strptime(date_str, self.format)
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid datetime value'))
+            except TypeError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid datetime value'))
+
+
+class CustomDate(f.DateField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            try:
+                date_str = ' '.join(valuelist)
+                self.data = datetime.datetime.strptime(date_str, self.format).date()
+            except ValueError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid date value'))
+            except TypeError:
+                self.data = None
+                raise ValueError(self.gettext('Not a valid date value'))
+
+
 
 class CustomConverter(ModelConverter):
     defaults = {
         BlobField: f.TextAreaField,
         BooleanField: f.BooleanField,
         CharField: f.TextField,
-        DateField: f.DateField,
-        DateTimeField: f.DateTimeField,
+        DateField: CustomDate,
+        DateTimeField: CustomDateTime,
         DecimalField: f.DecimalField,
         DoubleField: f.FloatField,
         FloatField: f.FloatField,
