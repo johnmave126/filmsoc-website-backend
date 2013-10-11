@@ -50,6 +50,9 @@ class Sympa(object):
         return filter(None, ret.read().split('\n'))
 
     def del_email(self, mailing_list, emails):
+        if len(emails) == 0:
+            return
+
         payload = urlencode({
             'list': mailing_list,
             'quiet': 'on',
@@ -60,6 +63,9 @@ class Sympa(object):
         self.opener.open(self.sympa_root, payload)
 
     def add_email(self, mailing_list, emails):
+        if len(emails) == 0:
+            return
+
         payload = urlencode({
             'list': mailing_list,
             'quiet': 'on',
