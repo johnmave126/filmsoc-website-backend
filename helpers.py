@@ -6,6 +6,7 @@ import ldap
 from ldap.filter import escape_filter_chars
 import urllib2
 from urllib import urlencode
+import sympa
 import re
 from string import join
 from ftplib import FTP
@@ -85,6 +86,7 @@ def query_user(itsc):
 
 
 def update_mailing_list(new_list):
+    '''
     auth_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
     auth_mgr.add_password(None, "https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/", app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
     auth_handler = urllib2.HTTPBasicAuthHandler(auth_mgr)
@@ -114,11 +116,20 @@ def update_mailing_list(new_list):
         'list': 'su-film-list',
         'passwd': 'su-film-list.admin',
         'whotime': whotime,
-        'who': join(new_list + [app.config['SOCIETY_USERNAME']], '\n')
+        'who': '\n'.join(new_list + [app.config['SOCIETY_USERNAME']])
     }
     data = urlencode(payload)
     # send but not read
     opener.open(url, data)
+    '''
+    sympa_mgmt = sympa.Sympa(
+        app.config['SOCIETY_USERNAME'],
+        app.config['SOCIETY_PASSWORD'],
+        app.config['AUTH_SERVER'],
+        app.config['SYMPA_SERVER']
+    )
+    member_list = map(lambda x: x + "@ust.hk", new_list)
+    sympa_mgmt.del_email(app.config['MAILING_LIST'], member_list)
 
 
 def upload_file(filename, file_handler):

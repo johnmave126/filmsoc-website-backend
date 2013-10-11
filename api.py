@@ -13,6 +13,7 @@ from app import app
 from auth import auth
 from models import *
 from forms import *
+import sympa
 from helpers import query_user, update_mailing_list, upload_file, send_email
 
 
@@ -91,6 +92,13 @@ class UserResource(CustomResource):
     def before_save(self, instance):
         if g.modify_flag == 'delete':
             ref_id = instance.id
+            sympa_mgmt = sympa.Sympa(
+                app.config['SOCIETY_USERNAME'],
+                app.config['SOCIETY_PASSWORD'],
+                app.config['AUTH_SERVER'],
+                app.config['SYMPA_SERVER']
+            )
+            sympa_mgmt.del_email(app.config['MAILING_LIST'], [instance.itsc + "@ust.hk"])
             Log.delete.where(user_affected=instance)
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="delete member " + instance.itsc)
         return instance
@@ -99,8 +107,15 @@ class UserResource(CustomResource):
         if instance:
             ref_id = instance.id
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
-        # update mailing-list
-        update_mailing_list([x.itsc for x in User.select(User.itsc).where(User.member_type != 'Expired')])
+
+        if g.modify_flag == 'create':
+            sympa_mgmt = sympa.Sympa(
+                app.config['SOCIETY_USERNAME'],
+                app.config['SOCIETY_PASSWORD'],
+                app.config['AUTH_SERVER'],
+                app.config['SYMPA_SERVER']
+            )
+            sympa_mgmt.add_email(app.config['MAILING_LIST'], [instance.itsc + "@ust.hk"])
 
     def get_urls(self):
         return (
