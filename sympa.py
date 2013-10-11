@@ -47,7 +47,7 @@ class Sympa(object):
 
     def get_list(self, mailing_list):
         ret = self.opener.open(self.sympa_root + ("/dump/%s/light" % mailing_list))
-        return ret.read().split('\n')
+        return filter(None, ret.read().split('\n'))
 
     def del_email(self, mailing_list, emails):
         payload = urlencode({
