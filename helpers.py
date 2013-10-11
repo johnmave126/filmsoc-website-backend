@@ -129,7 +129,7 @@ def update_mailing_list(new_list):
         app.config['SYMPA_SERVER']
     )
     member_list = map(lambda x: x + "@ust.hk", new_list)
-    sympa_mgmt.del_email(app.config['MAILING_LIST'], member_list)
+    sympa_mgmt.replace_email(app.config['MAILING_LIST'], member_list)
 
 
 def upload_file(filename, file_handler):
