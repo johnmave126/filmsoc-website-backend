@@ -25,7 +25,7 @@ class Sympa(object):
         })
         self.opener.open(self.sympa_root, payload)
 
-        login_url = cas_server + '/cas/login?service=' + quote(self.sympa_root + 'sso_login_succeeded/Login')
+        login_url = cas_server + '/cas/login?service=' + quote(self.sympa_root + '/sso_login_succeeded/Login')
         ret = self.opener.open(login_url)
 
         # first retrieve
