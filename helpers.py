@@ -78,7 +78,6 @@ def query_user(itsc):
         conn.unbind()
         return r_dict
     except ldap.INVALID_CREDENTIALS:
-        send_email(['stanab@ust.hk'], [], '[Warning]Failed to verify crendential in website app', 'LDAP authentication failed.')
         return None
     except ldap.LDAPError, e:
         print e
