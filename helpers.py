@@ -85,42 +85,6 @@ def query_user(itsc):
 
 
 def update_mailing_list(new_list):
-    '''
-    auth_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-    auth_mgr.add_password(None, "https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/", app.config['SOCIETY_USERNAME'], app.config['SOCIETY_PASSWORD'])
-    auth_handler = urllib2.HTTPBasicAuthHandler(auth_mgr)
-
-    opener = urllib2.build_opener(auth_handler)
-
-    # get whotime
-    url = 'https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/listadmin_majorcool'
-    payload = {
-        'action': 'edit',
-        'list': 'su-film-list',
-        'view': 'list'
-    }
-    data = urlencode(payload)
-    response = opener.open(url, data).read()
-    regexp = re.compile('NAME="whotime"\s+VALUE="(\d+)"', re.I)
-    whotime_match = regexp.search(response)
-    if whotime_match is None:
-        raise IOError('Cannot find whotime')
-    whotime = whotime_match.group(1)
-
-    # modify list
-    url = 'https://lists.ust.hk/cgi-bin/itsc/mailinglist/restricted/listadmin_majorcool'
-    payload = {
-        'submit_as': 'owner-su-film-list',
-        'action': 'do_approve',
-        'list': 'su-film-list',
-        'passwd': 'su-film-list.admin',
-        'whotime': whotime,
-        'who': '\n'.join(new_list + [app.config['SOCIETY_USERNAME']])
-    }
-    data = urlencode(payload)
-    # send but not read
-    opener.open(url, data)
-    '''
     sympa_mgmt = sympa.Sympa(
         app.config['SOCIETY_USERNAME'],
         app.config['SOCIETY_PASSWORD'],
