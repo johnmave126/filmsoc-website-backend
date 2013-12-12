@@ -99,7 +99,7 @@ class UserResource(CustomResource):
                 app.config['SYMPA_SERVER']
             )
             sympa_mgmt.del_email(app.config['MAILING_LIST'], [instance.itsc + "@ust.hk"])
-            Log.delete.where(user_affected=instance)
+            Log.delete.where(Log.user_affected == instance)
             Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="delete member " + instance.itsc)
         return instance
 
@@ -239,7 +239,7 @@ class DiskResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="Disk", model_refer=ref_id)
+            Log.delete().where(Log.model == "Disk", Log.model_refer == ref_id)
             Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
         else:
             ref_id = instance.id
@@ -486,7 +486,7 @@ class RegularFilmShowResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete.where(model="RegularFilmShow", model_refer=ref_id)
+            Log.delete.where(Log.model == "RegularFilmShow", Log.model_refer == ref_id)
             Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
@@ -630,7 +630,7 @@ class PreviewShowTicketResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="PreviewShowTicket", model_refer=ref_id)
+            Log.delete().where(Log.model == "PreviewShowTicket", Log.model_refer == ref_id)
             Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
@@ -705,7 +705,7 @@ class DiskReviewResource(CustomResource):
             instance.poster = g.user
         else:
             ref_id = instance.id
-            Log.delete().where(model="DiskReview", model_refer=ref_id)
+            Log.delete().where(Log.model == "DiskReview", Log.model_refer == ref_id)
             Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=instance.poster, admin_involved=g.user, content="%s disk review of %s" % (g.modify_flag, instance.disk.get_callnumber()))
         return instance
 
@@ -740,7 +740,7 @@ class NewsResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="News", model_refer=ref_id)
+            Log.delete().where(Log.model == "News", Log.model_refer == ref_id)
             Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
@@ -770,7 +770,7 @@ class DocumentResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="Document", model_refer=ref_id)
+            Log.delete().where(Log.model == "Document", Log.model_refer == ref_id)
             Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
@@ -801,7 +801,7 @@ class PublicationResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="Publication", model_refer=ref_id)
+            Log.delete().where(Log.model == "Publication", Log.model_refer == ref_id)
             Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
         else:
             ref_id = instance.id
@@ -835,7 +835,7 @@ class SponsorResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="Sponsor", model_refer=ref_id)
+            Log.delete().where(Log.model == "Sponsor", Log.model_refer == ref_id)
             Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
         else:
             ref_id = instance.id
@@ -873,7 +873,6 @@ class SiteSettingsResource(CustomResource):
         if not form.validate():
             return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
         return True, ""
-
     def check_post(self, obj=None):
         return obj
 
@@ -905,7 +904,7 @@ class OneSentenceResource(CustomResource):
             instance.create_log = log
         elif g.modify_flag == 'delete':
             ref_id = instance.id
-            Log.delete().where(model="OneSentence", model_refer=ref_id)
+            Log.delete().where(Log.model == "OneSentence", Log.model_refer == ref_id)
             Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))
         else:
             ref_id = instance.id
