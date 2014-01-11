@@ -126,7 +126,7 @@ class Disk(CustomBaseModel):
     hold_by = ForeignKeyField(User, related_name='borrowed', null=True)
     due_at = DateField(null=True)
     reserved_by = ForeignKeyField(User, related_name='reserved', null=True)
-    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, ReservedCounter, Voting, Onshow
+    avail_type = CharField(max_length=16)  # Draft, Available, Borrowed, Reserved, ReservedCounter, OnDelivery, Voting, Onshow
 
     borrow_cnt = IntegerField(default=0)
     rank = DecimalField(default=0)
@@ -140,7 +140,7 @@ class Disk(CustomBaseModel):
         return self.disk_type + str(self.id).rjust(4, '0')
 
     def check_out(self, user):
-        if self.avail_type not in ["Available", 'Reserved', 'ReservedCounter']:
+        if self.avail_type not in ["Available", 'Reserved', 'ReservedCounter', 'OnDelivery']:
             return (False, "The disk is not borrowable")
 
         if self.reserved_by is not None:

@@ -8,13 +8,14 @@ from peewee import DoesNotExist, fn
 from flask_peewee.rest import Authentication
 from flask_peewee.utils import get_object_or_404
 
-from frame_ext import CustomRestAPI, CustomResource, CustomAuthentication, CustomAdminAuthentication
+from frame_ext import CustomRestAPI, CustomResource, CustomAuthentication, \
+                        CustomAdminAuthentication
 from app import app
 from auth import auth
 from models import *
 from forms import *
 import sympa
-from helpers import query_user, update_mailing_list, upload_file, send_email
+from helpers import query_user, upload_file, send_email
 
 
 __all__ = [
@@ -52,7 +53,10 @@ class FileResource(CustomResource):
 
 
 class UserResource(CustomResource):
-    readonly = ['join_at', 'last_login', 'this_login', 'login_count', 'rfs_count']
+    readonly = [
+                'join_at', 'last_login',
+                'this_login', 'login_count', 'rfs_count'
+                ]
 
     search = {
         'default': ['full_name', 'student_id', 'itsc']
@@ -61,7 +65,8 @@ class UserResource(CustomResource):
     def validate_data(self, data, obj=None):
         form = UserForm(MultiDict(data))
         if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
+            return False, join([join(x, ', ') for x in form.errors.values()],
+                                ' | ')
         data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
@@ -303,7 +308,7 @@ class DiskResource(CustomResource):
         elif request.method == 'DELETE':
             if not g.user.admin:
                 return self.response_forbidden()
-            if obj.avail_type not in ['Reserved', 'ReservedCounter']:
+            if obj.avail_type not in ['Reserved', 'ReservedCounter', 'OnDelivery']:
                 return jsonify(errno=3, error="Disk is not reserved")
 
             new_log.content = "clear reservation for disk %s" % obj.get_callnumber()
@@ -357,6 +362,21 @@ class DiskResource(CustomResource):
                 new_log.user_affected = req_user
                 if g.user.admin:
                     new_log.admin_involved = g.user
+            elif obj.avail_type == 'Reserved':
+                # taken to deliver
+                if not g.user.admin:
+                    return self.response_forbidden()
+                if req_user.borrowed.count() >= 2:
+                    return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
+                if self.check_disable():
+                    return jsonify(errno=3, error="VCD/DVD Library Closed")
+
+                obj.avail_type = 'OnDelivery'
+                obj.hold_by = req_user
+                new_log.content = "take out disk %s for delivery" % (obj.get_callnumber())
+                new_log.user_affected = req_user
+                new_log.admin_involved = g.user
+
             else:
                 # checkout
                 if not g.user.admin:
