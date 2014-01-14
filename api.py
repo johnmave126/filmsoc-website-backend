@@ -372,7 +372,6 @@ class DiskResource(CustomResource):
                     return jsonify(errno=3, error="VCD/DVD Library Closed")
 
                 obj.avail_type = 'OnDelivery'
-                obj.hold_by = req_user
                 new_log.content = "take out disk %s for delivery" % (obj.get_callnumber())
                 new_log.user_affected = req_user
                 new_log.admin_involved = g.user
