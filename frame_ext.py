@@ -435,9 +435,8 @@ class HookedResource(RestResource):
         """Create a new model instance
         """
         data = request.data or request.form.get('data') or ''
-        data = self.validate_data(data)
-
         g.modify_flag = 'create'
+        data = self.validate_data(data)
 
         instance, models = self.deserialize_object(data, self.model())
 
@@ -452,9 +451,8 @@ class HookedResource(RestResource):
         """Edit an existing model instance
         """
         data = request.data or request.form.get('data') or ''
-        data = self.validate_data(data)
-
         g.modify_flag = 'edit'
+        data = self.validate_data(data)
 
         for key in self._readonly:
             data.pop(key, None)
