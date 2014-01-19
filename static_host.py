@@ -17,27 +17,9 @@ static_host = Blueprint('static_host',
 def file_location(file_):
     return "http://ihome.ust.hk/~su_film/assets/upload/%s" % file_.url
 
-
-def format_date_time(value, formats, post_process=None):
-    post_process = post_process or (lambda x: x)
-    for fmt in formats:
-        try:
-            return post_process(datetime.strptime(value, fmt))
-        except ValueError:
-            pass
-    return value
-
-def date_formats():
-    return [
-                '%Y-%m-%d %H:%M:%S.%f',
-                '%Y-%m-%d %H:%M:%S',
-                '%Y-%m-%d',
-            ]
-
 @static_host.app_template_filter('todate')
-def todatestring(data):
-    value = format_date_time(data, date_formats())
-    return value.date().strftime('%b %d')
+def todatestring(data, format=""):
+    return data.strftime(format)
 
 @static_host.app_template_filter('bbcode')
 def tobbcode(data):

@@ -11,7 +11,7 @@
 			{% for news in news_sq %}
 			<a class="home-list-item button-link" href="#!news/{{news.id}}/" alt="">
 				<div class="news-item-date">
-					{{news.create_log.created_at | todate}}
+					{{news.create_log.created_at | todate(format="%b %d")}}
 				</div>
 				<div class="news-item-title">
 					{{news.title}}
