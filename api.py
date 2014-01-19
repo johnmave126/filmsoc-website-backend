@@ -617,9 +617,8 @@ class RegularFilmShowResource(LoggedRestResource):
                     disk.save()
 
                 # set disk on show
-                disk = getattr(instance, "film_%d" % largest)
-                disk.avail_type = 'Onshow'
-                disk.save()
+                largest.avail_type = 'Onshow'
+                largest.save()
             elif instance.state == 'Passed':
                 for x in [1, 2, 3]:
                     disk = getattr(instance, "film_%d" % x)

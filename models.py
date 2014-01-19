@@ -669,9 +669,10 @@ class PreviewShowTicket(LogModel):
         )
 
     def to_show(self):
-        """Return the film that wins the Movote
+        """Return the disk that wins the Movote
         """
-        return max([1, 2, 3],key=lambda o: getattr(self, "vote_cnt_%d" % o))
+        idx = max([1, 2, 3],key=lambda o: getattr(self, "vote_cnt_%d" % o))
+        return getattr(self, "film_%d" % idx)
 
 
 
