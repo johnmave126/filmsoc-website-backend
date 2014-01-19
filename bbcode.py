@@ -92,6 +92,7 @@ class BBCode(object):
 
         return render_template("rich_ticket.html", ticket=ticket)
 
+    @staticmethod
     def markup_wrapper(f):
         if isinstance(f, basestring):
             return f
