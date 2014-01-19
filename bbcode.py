@@ -95,7 +95,7 @@ class BBCode(object):
     @staticmethod
     def markup_wrapper(f):
         if isinstance(f, basestring):
-            return f
+            return Markup(f)
 
         @functools.wraps(f)
         def inner(*args, **kwargs):
