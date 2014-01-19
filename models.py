@@ -515,7 +515,7 @@ class RegularFilmShow(LogModel):
     def get_recent(cls):
         """Return the latest regular film show"""
         return cls.select().where(
-            cls.state << ['Open', 'Pending']
+            cls.state != "Draft"
         ).order_by(cls.id.desc()).limit(1).get()
 
     def add_vote(self, user, vote):
