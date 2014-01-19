@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{news.title}}{% endblock %}
+{% block content %}
+<div class="news-wrapper">
+	<div class="news-content-wrapper">
+		<div class="news-detail-wrapper">
+			<div class="top-navigation">
+				<button class="link link-goback">Go Back</button>
+			</div>
+			<h2 class="news-title">
+				{{news.title}}
+			</h2>
+			<div class="news-datetime">
+				Published at {{news.create_log.created_at}}
+			</div>
+			<div class="news-content">
+				{{news.content|e|bbcode|safe}}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

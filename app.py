@@ -1,5 +1,5 @@
 #framework
-from flask import Flask, url_for, redirect
+from flask import Flask, redirect
 
 #database
 from flask_peewee.db import Database
@@ -12,6 +12,7 @@ app.config.from_object('settings.Settings')
 db = Database(app)
 
 if not app.debug:
+    # Set up debug logging after production
     import logging
     from logging import Formatter
     file_handler = logging.FileHandler(filename='/tmp/film.log')

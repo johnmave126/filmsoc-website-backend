@@ -1,5 +1,5 @@
 from app import app, db
-from frame_ext import CustomAuth
+from frame_ext import CASAuth
 from models import User
 
-auth = CustomAuth(app, db, user_model=User, prefix='/member')
+auth = CASAuth(app, db, user_model=User, prefix='/member')

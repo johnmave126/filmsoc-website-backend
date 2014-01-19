@@ -1,3 +1,5 @@
+# Contain form validators
+
 import datetime
 
 from wtforms.form import Form
@@ -7,7 +9,7 @@ from wtfpeewee.orm import model_form
 
 from models import *
 from db_ext import *
-from frame_ext import CustomConverter, InstanceExist
+from frame_ext import Converter, InstanceExist
 
 __all__ = [
     'UserForm',
@@ -31,6 +33,8 @@ __all__ = [
 ]
 
 
+"""Used on User Model
+"""
 UserForm = model_form(User, field_args={
     'itsc': dict(validators=[
         InputRequired(message="ITSC required")
@@ -47,16 +51,21 @@ UserForm = model_form(User, field_args={
     ]),
     'member_type': dict(validators=[
         InputRequired(message="Member Type required"),
-        AnyOf(['Full', 'OneSem', 'OneYear', 'TwoYear', 'ThreeYear', 'Honour', 'Assoc', 'Expired'], message="Invalid Member Type")
+        AnyOf([
+                'Full', 'OneSem', 'OneYear', 'TwoYear',
+                'ThreeYear', 'Honour', 'Assoc', 'Expired'
+            ], message="Invalid Member Type")
     ]),
     'expire_at': dict(validators=[
         InputRequired(message="Expire date required")
     ])
 }, exclude=(
     'last_login', 'this_login', 'login_count', 'rfs_count', 'full_name',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on Disk Model
+"""
 DiskForm = model_form(Disk, field_args={
     'disk_type': dict(validators=[
         InputRequired(message="Disk Type missing"),
@@ -88,9 +97,11 @@ DiskForm = model_form(Disk, field_args={
     ]),
 }, exclude=(
     'hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on RegularFilmShow Model
+"""
 RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     'state': dict(validators=[
         InputRequired(message="Show state Missing"),
@@ -109,9 +120,11 @@ RegularFilmShowForm = model_form(RegularFilmShow, field_args={
     ]),
 }, exclude=(
     'participant_list', 'create_log', 'vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on PreviewShowTicket Model
+"""
 PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
     'state': dict(validators=[
         InputRequired(message="Ticket state Missing"),
@@ -138,9 +151,11 @@ PreviewShowTicketForm = model_form(PreviewShowTicket, field_args={
     ]),
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on DiskReview Model
+"""
 DiskReviewForm = model_form(DiskReview, field_args={
     'disk': dict(validators=[
         InputRequired(message="The disk to review missing"),
@@ -151,9 +166,11 @@ DiskReviewForm = model_form(DiskReview, field_args={
     ])
 }, exclude=(
     'last_login', 'this_login', 'login_count', 'rfs_count'
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on News Model
+"""
 NewsForm = model_form(News, field_args={
     'title': dict(validators=[
         InputRequired(message="Title Missing")
@@ -163,9 +180,11 @@ NewsForm = model_form(News, field_args={
     ])
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on Document Model
+"""
 DocumentForm = model_form(Document, field_args={
     'title': dict(validators=[
         InputRequired(message="Title Missing")
@@ -176,14 +195,16 @@ DocumentForm = model_form(Document, field_args={
     ])
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on Publication Model
+"""
 PublicationForm = model_form(Publication, field_args={
     'title': dict(validators=[
         InputRequired(message="Title Missing")
     ]),
-    'Type': dict(validators=[
+    'pub_type': dict(validators=[
         InputRequired(message="Type Missing"),
         AnyOf(['Magazine', 'MicroMagazine', 'Podcast'], "Invalid Type")
     ]),
@@ -196,9 +217,11 @@ PublicationForm = model_form(Publication, field_args={
     ])
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on Sponsor Model
+"""
 SponsorForm = model_form(Sponsor, field_args={
     'name': dict(validators=[
         InputRequired(message="Name Missing")
@@ -225,9 +248,11 @@ SponsorForm = model_form(Sponsor, field_args={
     ])
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on Exco Model
+"""
 ExcoForm = model_form(Exco, field_args={
     'hall_allocate': dict(validators=[
         Regexp('^[\d*]*$', message="Invalid hall number")
@@ -236,18 +261,22 @@ ExcoForm = model_form(Exco, field_args={
         InputRequired(message="Image Missing"),
         InstanceExist(File, message="Image not exist")
     ]),
-}, converter=CustomConverter())
+}, converter=Converter())
 
 
+"""Used on SiteSettings Model
+"""
 SiteSettingsForm = model_form(SiteSettings, field_args={
     'value': dict(validators=[
         InputRequired(message="Missing value")
     ])
 }, exclude=(
     'key',
-), converter=CustomConverter())
+), converter=Converter())
 
 
+"""Used on OneSentence Model
+"""
 OneSentenceForm = model_form(OneSentence, field_args={
     'film': dict(validators=[
         InputRequired(message="Origin Film Missing")
@@ -257,11 +286,13 @@ OneSentenceForm = model_form(OneSentence, field_args={
     ])
 }, exclude=(
     'create_log',
-), converter=CustomConverter())
+), converter=Converter())
 
 
 # extra forms
 class ReserveForm(Form):
+    """Used when a reservation is made.
+    """
     form = f.TextField(u'form', [
         InputRequired(message="Reserve type missing"),
         AnyOf(['Hall', 'Counter'], message="Unsupported reserve type")
@@ -280,6 +311,8 @@ class ReserveForm(Form):
 
 
 class SubmitUserForm(Form):
+    """Used when there is need to submit a user as input
+    """
     id = f.IntegerField(u'id', [
         InputRequired(message="User missing"),
         InstanceExist(User, message="User not exist")
@@ -287,6 +320,8 @@ class SubmitUserForm(Form):
 
 
 class RateForm(Form):
+    """Used in rating system of VCD/DVD Library
+    """
     rate = f.TextField(u'rate', [
         InputRequired(message="Rate missing"),
         AnyOf(['up', 'down'], message="Invalid rate")
@@ -294,6 +329,8 @@ class RateForm(Form):
 
 
 class VoteForm(Form):
+    """Used in voting system of Regular Film Show
+    """
     film_id = f.IntegerField(u'rfs_id', [
         InputRequired(message="The film to vote missing"),
         AnyOf([1, 2, 3], message="Invalid Choice")
@@ -301,6 +338,8 @@ class VoteForm(Form):
 
 
 class ApplyTicketForm(Form):
+    """Used in application system of Preview Show Tickets
+    """
     number = f.IntegerField(u'number', [
         InputRequired(message="Number of ticket missing"),
         AnyOf([1, 2], message="Invalid choice of number")
@@ -308,6 +347,10 @@ class ApplyTicketForm(Form):
 
 
 class RelationForm(Form):
+    """Used to construct link between stuID and University ID.
+    Set up for legacy use since members before 2013 may have no University ID
+    recorded.
+    """
     student_id = f.TextField(u'student_id', [
         InputRequired(message="Student ID required"),
         Regexp("^\d{8}$", message="Invalid Student ID")

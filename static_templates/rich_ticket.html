@@ -1,0 +1,24 @@
+<div class="richtext-ticket" remote_id="{{ticket.id}}">
+	<a class="button-link richtext-item-wrapper rich-pointer" href="#!ticket/" alt="View ticket">
+		<div class="richtext-disk-cover">
+		</div>
+		<div class="richtext-disk-detail">
+			<div class="richtext-category">
+				Preview Show Ticket
+			</div>
+			<div class="richtext-disk-title">
+				{{ticket.title_en}}<br>
+				{{ticket.title_ch}}
+			</div>
+			<div class="richtext-disk-entry">
+				Director: {{ticket.director_en}} / {{ticket.director_ch}}
+			</div>
+			<div class="richtext-disk-entry">
+				Actors: {{ticket | join(', ', attribute="actors")}}
+			</div>
+			<div class="richtext-disk-entry">
+				Length: {{ticket.length}} min
+			</div>
+		</div>
+	</a>
+</div>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{error_title}}{% endblock %}
+{% block content %}
+<div class="dummy-wrapper">
+	<div class="error-bubble">
+		<div class="oops">
+			{{error_text}}
+		</div>
+		<div class="error-text">
+			Life is like a box of chocolates. You never know what you're gonna get.<br>
+			<q>Forrest Gump (1994)</q>
+		</div>
+	</div>
+</div>
+{% endblock %}

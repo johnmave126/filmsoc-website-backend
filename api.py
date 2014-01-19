@@ -8,119 +8,224 @@ from peewee import DoesNotExist, fn
 from flask_peewee.rest import Authentication
 from flask_peewee.utils import get_object_or_404
 
-from frame_ext import CustomRestAPI, CustomResource, CustomAuthentication, \
-                        CustomAdminAuthentication
 from app import app
 from auth import auth
 from models import *
 from forms import *
-import sympa
-from helpers import query_user, upload_file, send_email
-
+from helpers import query_user, upload_file, send_email, \
+                    update_mailing_list
+from frame_ext import JSONRestAPI, HookedResource, BusinessException, \
+                        BaseAuthentication, AdminAuthentication
 
 __all__ = [
     'api',
 ]
 
 
-class FileResource(CustomResource):
+class LoggedRestResource(HookedResource):
+    """Resource that have log on basic operations
+
+    Logs will be created on creation, edition, and deletion
+
+    :param log_model:
+        The name of model_refer field in Log. Must be set by successor.
+    :param validate_form:
+        The validate from of creation and edition. Must be set by
+        successor.
+    """
+    log_model = None
+
+    def get_log(self, instance, id):
+        """Return the log content of the operation
+
+        Only used in creation, edition, or deletion
+
+        :param instance:
+            The instance to be saved
+        :param id:
+            The id of the instance
+        """
+        raise NotImplementedError
+
+    def before_save(self, instance):
+        """Document in log before saving the instance
+
+        :param instance:
+            The instance to be saved
+        """
+        if self.log_model is None:
+            raise NotImplementedError
+
+        ref_id = (self.model.next_primary_key()
+                    if g.modify_flag == 'create' else instance.id)
+        content = self.get_log(instance, ref_id)
+
+        if g.modify_flag == 'create':
+            log = Log.create(
+                model=log_model, log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=None,
+                admin_involved=g.user, content=content)
+            instance.create_log = log
+        elif g.modify_flag == 'delete':
+            # delete related logs
+            Log.delete().where(Log.model == log_model,
+                Log.model_refer == ref_id)
+            #create delete log
+            log = Log.create(
+                model=log_model, log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=None,
+                admin_involved=g.user, content=content)
+        else:
+            log = Log.create(
+                model=log_model, log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=None,
+                admin_involved=g.user, content=content)
+        return instance
+
+
+class FileResource(HookedResource):
+    """The resource to handle file upload
+
+    The file upload will not be logged in the system
+    """
     def check_post(self, obj=None):
+        """Edition not allowed through API"""
         return obj is None
 
     def check_put(self, obj):
+        """Edition not allowed through API"""
         return False
 
     def check_delete(self, obj):
+        """Deletion not allowed through API"""
         return False
 
     def create(self):
+        """Create file on upload
+
+        The file will be relayed to FTP server
+        The server only keeps a record of the file
+        """
+        # The file uploaded
         file = request.files['file']
         name = file.filename
-        if '.' in name:
-            ext = '.' + name.rsplit('.', 1)[1]
+        # extract the extension
+        ext = ('.' + name.rsplit('.', 1)[1]) if '.' in name else ''
 
-        new_filename = str(uuid.uuid4()) + (ext or '')
+        # Generate a unique random filename
+        new_filename = str(uuid.uuid4()) + ext
         while File.select().where(File.url == new_filename).count() > 0:
-            new_filename = str(uuid.uuid4()) + (ext or '')
+            new_filename = str(uuid.uuid4()) + ext
 
+        # upload to FTP server
         try:
             upload_file(new_filename, file)
         except Exception:
             return jsonify(errno=500, error="Upload failed")
 
+        # save record
         instance = File.create(name=name, url=new_filename)
-        return self.response(self.serialize_object(instance))
+        return self.object_detail(instance)
 
 
-class UserResource(CustomResource):
+class UserResource(HookedResource):
+    """The API to manage member/user of the society
+    """
+
+    # These fields are handled by system
     readonly = [
                 'join_at', 'last_login',
                 'this_login', 'login_count', 'rfs_count'
                 ]
-
     search = {
         'default': ['full_name', 'student_id', 'itsc']
     }
 
     def validate_data(self, data, obj=None):
-        form = UserForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()],
-                                ' | ')
+        """Check the validity of member information
+        """
+        data = self.data_precheck(data, UserForm)
+        
         data['itsc'] = data['itsc'].lower()
         # validate uniqueness
         if g.modify_flag == 'create':
+            # There should be no other member that has the same student ID
+            # or the same university ID with this new member
+
+            # Validate itsc account, and fill the display name
             user_info = query_user(data.get('itsc', None))
             if not user_info:
-                return False, "Wrong ITSC, please check the spelling"
+                raise BusinessException(
+                    "Wrong ITSC, please check the spelling")
             data['full_name'] = user_info['displayName']
+
+            # Check the uniqueness of ITSC account
             if User.select().where(User.itsc == data['itsc']).exists():
-                return False, "ITSC existed"
+                raise BusinessException("ITSC existed")
+            # Check the uniqueness of student ID
             if User.select().where(User.student_id == data['student_id']).exists():
-                return False, "Student ID existed"
-            if data.get('university_id', None) and User.select().where(User.university_id == data['university_id']).exists():
-                return False, "University ID existed"
+                raise BusinessException("Student ID existed")
+            # Check the uniqueness of University ID
+            if data.get('university_id', None) and \
+                    User.select().where(
+                        User.university_id == data['university_id']).exists():
+                raise BusinessException("University ID existed")
         elif g.modify_flag == 'edit':
+            # If the unique fields are changed, we must go through a check
+
             if obj.itsc != data['itsc']:
+                # validate the existence first
                 user_info = query_user(data.get('itsc', None))
                 if not user_info:
-                    return False, "Wrong ITSC, please check the spelling"
+                    raise BusinessException(
+                        "Wrong ITSC, please check the spelling")
                 data['full_name'] = user_info['displayName']
+
+                # check the uniqueness then
                 if User.select().where(User.itsc == data['itsc']).exists():
-                    return False, "ITSC existed"
-            if obj.student_id != data['student_id'] and User.select().where(User.student_id == data['student_id']).exists():
-                return False, "Student ID existed"
-            if data.get('university_id', None) and obj.university_id != data['university_id'] and User.select().where(User.university_id == data['university_id']).exists():
-                return False, "University ID existed"
-        return True, ""
+                    raise BusinessException("ITSC existed")
+            # Check the student ID
+            if obj.student_id != data['student_id'] and \
+                    User.select().where(
+                        User.student_id == data['student_id']).exists():
+                raise BusinessException("Student ID existed")
+            # Check the university ID
+            if data.get('university_id', None) and \
+                    obj.university_id != data['university_id'] and \
+                    User.select().where(
+                        User.university_id == data['university_id']).exists():
+                raise BusinessException("University ID existed")
+        return data
 
     def before_save(self, instance):
+        """Create Log and update mailing list on deletion
+        """
         if g.modify_flag == 'delete':
             ref_id = instance.id
-            sympa_mgmt = sympa.Sympa(
-                app.config['SOCIETY_USERNAME'],
-                app.config['SOCIETY_PASSWORD'],
-                app.config['AUTH_SERVER'],
-                app.config['SYMPA_SERVER']
-            )
-            sympa_mgmt.del_email(app.config['MAILING_LIST'], [instance.itsc + "@ust.hk"])
+            # delete related logs
             Log.delete.where(Log.user_affected == instance)
-            Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="delete member " + instance.itsc)
+            # insert deletion log
+            Log.create(
+                model="User", log_type=g.modify_flag,
+                model_refer=ref_id, admin_involved=g.user,
+                content="delete member " + instance.itsc)
+        else:
+            # create or edit
+            ref_id = instance.id
+            Log.create(
+                model="User", log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=instance,
+                admin_involved=g.user,
+                content=("%s member %s") % (g.modify_flag, instance.itsc))
+
         return instance
 
     def after_save(self, instance=None):
-        if instance:
-            ref_id = instance.id
-            Log.create(model="User", Type=g.modify_flag, model_refer=ref_id, user_affected=instance, admin_involved=g.user, content=("%s member %s") % (g.modify_flag, instance.itsc))
-
-        if g.modify_flag == 'create':
-            sympa_mgmt = sympa.Sympa(
-                app.config['SOCIETY_USERNAME'],
-                app.config['SOCIETY_PASSWORD'],
-                app.config['AUTH_SERVER'],
-                app.config['SYMPA_SERVER']
-            )
-            sympa_mgmt.add_email(app.config['MAILING_LIST'], [instance.itsc + "@ust.hk"])
+        """update mailing list after any edition
+        """
+        query = User.select(User.itsc)
+        update_mailing_list(
+            [x.itsc for x in query.where(User.member_type != 'Expired')])
 
     def get_urls(self):
         return (
@@ -129,6 +234,7 @@ class UserResource(CustomResource):
         ) + super(UserResource, self).get_urls()
 
     def check_get(self, obj=None):
+        """only visible to self or admins"""
         if g.user and g.user.admin:
             return True
         if obj is None:
@@ -136,48 +242,57 @@ class UserResource(CustomResource):
         return g.user == obj
 
     def api_current(self):
+        """API to acquire the current logged in user information
+        """
         obj = auth.get_logged_in_user()
 
         if obj is None:
-            return jsonify(errno=2, error="Not logged in")
+            raise BusinessException("Not logged in", 2)
 
         return self.object_detail(obj)
 
     def api_relation(self):
+        """API to bind student ID and university ID
+
+        For back compatibility since member before 2013 may not have
+        university ID recorded
+        """
         data = request.data or request.form.get('data') or ''
 
         if not getattr(self, 'check_%s' % request.method.lower())():
             return self.response_forbidden()
+        data = self.data_precheck(data, RelationForm)
 
-        if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = RelationForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            try:
-                obj = User.select().where(User.student_id == data['student_id']).get()
-            except DoesNotExist:
-                return jsonify(errno=3, error="User not found")
-            if obj.university_id and obj.university_id == data['university_id']:
-                return self.response(self.serialize_object(obj))
-            if User.select().where(User.university_id == data['university_id']).exists():
-                return jsonify(errno=3, error="Duplicate University ID of other member")
-            obj.university_id = data['university_id']
-            obj.save()
-            Log.create(model='User', Type='edit', model_refer=obj.id, user_affected=obj, admin_involved=g.user, content="Bind student ID and University ID for user %s" % obj.itsc)
-        return self.response(self.serialize_object(obj))
+        try:
+            obj = User.select().where(User.student_id == data['student_id']).get()
+        except DoesNotExist:
+            return jsonify(errno=3, error="User not found")
+
+        # although bound before, return it
+        if obj.university_id and obj.university_id == data['university_id']:
+            return self.object_detail(obj))
+
+        # university id should be unique
+        if User.select().where(User.university_id == data['university_id']).exists():
+            return jsonify(errno=3, error="Duplicate University ID of other member")
+        
+        # apply change
+        obj.university_id = data['university_id']
+        obj.save()
+        Log.create(
+            model='User', log_type='edit', model_refer=obj.id,
+            user_affected=obj, admin_involved=g.user,
+            content="Bind student ID and University ID for user %s" % obj.itsc)
+        return self.object_detail(obj))
 
 
-class SimpleUserResource(CustomResource):
+class SimpleUserResource(HookedResource):
+    """Simple resource that will be used by other resources"""
     fields = ['id', 'itsc', 'student_id', 'university_id', 'full_name']
 
 
-class LogResource(CustomResource):
+class LogResource(HookedResource):
+    """API to acquire logs"""
     search = {
         'default': ['content']
     }
@@ -190,18 +305,35 @@ class LogResource(CustomResource):
         return g.user and g.user.admin
 
 
-class SimpleLogResource(CustomResource):
+class SimpleLogResource(HookedResource):
+    """For those only need create date and time"""
     fields = ['created_at']
 
 
-class DiskResource(CustomResource):
-    readonly = ['hold_by', 'reserved_by', 'borrow_cnt', 'rank', 'create_log']
+class DiskResource(LoggedRestResource):
+    """API of VCD/DVD Library
 
+    Features include borrow, reserve
+    """
+    log_model = "Disk"
+    validate_form = DiskForm
+
+    readonly = [
+        'hold_by', 'reserved_by',
+        'borrow_cnt', 'rank', 'create_log'
+    ]
+    # Internal use, not visible to anyone
     exclude = ['rank']
-    filter_exclude = ['rank', 'hold_by', 'due_at', 'reserved_by', 'create_log']
+
+    filter_exclude = [
+        'rank', 'hold_by', 'due_at', 'reserved_by', 'create_log'
+    ]
     search = {
         'default': ['title_en', 'title_ch'],
-        'fulltext': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
+        'fulltext': [
+            'title_en', 'title_ch', 'desc_en',
+            'desc_ch', 'director_en', 'director_ch', 'actors'
+        ],
         'actor': ['actors'],
         'tag': ['tags'],
         'director': ['director_ch', 'director_en']
@@ -214,6 +346,9 @@ class DiskResource(CustomResource):
     }
 
     def prepare_data(self, obj, data):
+        """Adding extra information of holder and filter information
+        from common members
+        """
         if g.user and (obj.reserved_by == g.user or obj.hold_by == g.user):
             data['user_held'] = True
         else:
@@ -223,227 +358,160 @@ class DiskResource(CustomResource):
             data.pop('reserved_by', None)
         return super(DiskResource, self).prepare_data(obj, data)
 
-    def validate_data(self, data, obj=None):
-        form = DiskForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
     def get_urls(self):
         return (
-            ('/<pk>/reservation/', self.require_method(self.api_reserve, ['POST', 'DELETE'])),
-            ('/<pk>/borrow/', self.require_method(self.api_borrow, ['POST', 'DELETE'])),
-            ('/<pk>/rate/', self.require_method(self.api_rate, ['GET', 'POST'])),
+            ('/<pk>/reservation/',
+                self.require_method(self.api_reserve, ['POST', 'DELETE'])),
+            ('/<pk>/borrow/',
+                self.require_method(self.api_borrow, ['POST', 'DELETE'])),
+            ('/<pk>/rate/',
+                self.require_method(self.api_rate, ['GET', 'POST'])),
             ('/rand/', self.require_method(self.api_rand, ['GET'])),
         ) + super(DiskResource, self).get_urls()
 
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = Disk.next_primary_key()
-            log = Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create disk %s" % (instance.disk_type + str(ref_id).ljust(4, '0')))
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "Disk", Log.model_refer == ref_id)
-            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
-        else:
-            ref_id = instance.id
-            Log.create(model="Disk", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s disk %s" % (g.modify_flag, instance.get_callnumber()))
-        return instance
-
-    def check_post(self, obj=None):
-        return g.user.admin
-
-    def check_put(self, obj):
-        return g.user.admin
-
-    def check_delete(self, obj):
-        return g.user.admin
-
-    def check_disable(self):
-        state = SiteSettings.select().where(SiteSettings.key == 'liba_state').get()
-        return state.value != "Open"
+    def get_log(self, instance, id):
+        callnumber = Disk.construct_callnumber(instance.disk_type, id)
+        return "%s disk %s" % (g.modify_flag, callnumber)
 
     def get_query(self):
+        """Hide drafts to common member"""
         if g.user and g.user.admin:
             return super(DiskResource, self).get_query()
         else:
             return self.model.select().where(self.model.avail_type != "Draft")
 
     def api_reserve(self, pk):
+        """API to reserve a disk"""
         obj = get_object_or_404(self.get_query(), self.pk == pk)
         data = request.data or request.form.get('data') or ''
 
-        new_log = Log(model='Disk', Type='reserve', model_refer=obj.id)
+        new_log = Log(model='Disk', log_type='reserve', model_refer=obj.id)
 
         if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = ReserveForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            if g.user.reserved.count() >= 2:
-                return jsonify(errno=3, error="A member can reserve at most 2 disks at the same time")
-            if obj.avail_type != 'Available':
-                return jsonify(errno=3, error="Disk not reservable")
-            if self.check_disable():
-                return jsonify(errno=3, error="VCD/DVD Library Closed")
-            obj.reserved_by = g.user
+            data = self.data_precheck(data, ReserveForm)
+
+            # reserve the disk
+            obj.reserve(g.user, data['form'])
             new_log.user_affected = g.user
 
             if data['form'] == 'Counter':
-                obj.avail_type = 'ReservedCounter'
-                new_log.content = "member %s reserves disk %s (counter)" % (g.user.itsc, obj.get_callnumber())
+                new_log.content = ("member %s reserves disk"
+                                    " %s (counter)") % \
+                                    (g.user.itsc, obj.get_callnumber())
             elif data['form'] == 'Hall':
-                obj.avail_type = 'Reserved'
-                new_log.content = "member %s reserves disk %s (Hall %d %s). remarks: %s" % (g.user.itsc, obj.get_callnumber(), data.get('hall', ''), data.get('room', ''), data.get('remarks', ''))
-                mail_content = render_template('exco_reserve.html', disk=obj, member=g.user, data=data, time=str(datetime.now()))
-                sq = Exco.select().where(Exco.hall_allocate % ("%%%d%%" % int(data.get('hall', '*'))))
-                send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Delivery Request", mail_content)
+                new_log.content = ("member %s reserves disk"
+                                    " %s (Hall %d %s). remarks: %s") %\
+                                    (
+                                        g.user.itsc,
+                                        obj.get_callnumber(),
+                                        data.get('hall', ''),
+                                        data.get('room', ''),
+                                        data.get('remarks', '')
+                                    )
+
+                # send email to reminder exco to deliver disk
+                mail_content = render_template(
+                    'exco_reserve.html', disk=obj, member=g.user,
+                    data=data, time=str(datetime.now()))
+                sq = Exco.select().where(
+                    Exco.hall_allocate % ("%%%d%%" % int(data.get('hall', '*'))))
+                send_email(
+                    ['su_film@ust.hk'] + [x.email for x in sq], [],
+                    "Delivery Request", mail_content)
 
         elif request.method == 'DELETE':
-            if not g.user.admin:
+            # clear reservation
+            if not self.check_delete(obj):
                 return self.response_forbidden()
-            if obj.avail_type not in ['Reserved', 'ReservedCounter', 'OnDelivery']:
-                return jsonify(errno=3, error="Disk is not reserved")
 
             new_log.content = "clear reservation for disk %s" % obj.get_callnumber()
             new_log.admin_involved = g.user
             new_log.user_affected = obj.reserved_by
-
-            obj.reserved_by = None
-            obj.avail_type = 'Available'
+            obj.clear_reservation()
 
         obj.save()
         new_log.save()
-        return self.response(self.serialize_object(obj))
+        return self.response({})
 
     def api_borrow(self, pk):
+        """API to borrow disk"""
         obj = get_object_or_404(self.get_query(), self.pk == pk)
         data = request.data or request.form.get('data') or ''
 
-        new_log = Log(model='Disk', Type='borrow', model_refer=obj.id)
+        new_log = Log(model='Disk', log_type='borrow', model_refer=obj.id)
 
         if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = SubmitUserForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            try:
-                req_user = User.select().where(User.id == data['id']).get()
-            except DoesNotExist:
-                return jsonify(errno=3, error="User not found")
+            data = self.data_precheck(data, SubmitUserForm)
+
+            # existence has been checked by SubmitUserForm
+            req_user = User.select().where(User.id == data['id']).get()
             if obj.avail_type == 'Borrowed':
+                # renew
+                # only admin or holder can renew
                 if obj.hold_by != req_user:
                     return jsonify(errno=3, error="Disk not borrowed by the user")
-                if (not g.user.admin) and req_user != g.user:
+                if not self.check_post(obj) and req_user != g.user:
                     return self.response_forbidden()
-                if obj.due_at < date.today():
-                    return jsonify(errno=3, error="Disk is overdue")
-                if self.check_disable():
-                    return jsonify(errno=3, error="VCD/DVD Library Closed")
-                # renew
-                last_log = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'borrow', Log.user_affected == req_user).order_by(Log.created_at.desc()).get()
-                if 'renew' in last_log.content:
-                    # renewed before
-                    return jsonify(errno=3, error="The disk can only be renewed once")
+                
                 # renew it
-                obj.due_at = date.today() + timedelta(7)
-                new_log.content = "member %s renews disk %s" % (req_user.itsc, obj.get_callnumber())
+                obj.renew()
+                new_log.content = ("member %s renews disk %s" %
+                                (req_user.itsc, obj.get_callnumber()))
                 new_log.user_affected = req_user
                 if g.user.admin:
                     new_log.admin_involved = g.user
             elif obj.avail_type == 'Reserved':
                 # taken to deliver
-                if not g.user.admin:
+                if not self.check_post(obj):
                     return self.response_forbidden()
-                if req_user.borrowed.count() >= 2:
-                    return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
-                if self.check_disable():
-                    return jsonify(errno=3, error="VCD/DVD Library Closed")
 
-                obj.avail_type = 'OnDelivery'
-                new_log.content = "take out disk %s for delivery" % (obj.get_callnumber())
+                obj.deliver()
+                new_log.content = ("take out disk %s for delivery" % 
+                                    obj.get_callnumber())
                 new_log.user_affected = req_user
                 new_log.admin_involved = g.user
 
             else:
                 # checkout
-                if not g.user.admin:
+                if not self.check_post(obj):
                     return self.response_forbidden()
-                if req_user.borrowed.count() >= 2:
-                    return jsonify(errno=3, error="A member can borrow at most 2 disks at the same time")
-                if self.check_disable():
-                    return jsonify(errno=3, error="VCD/DVD Library Closed")
-                success, error = obj.check_out(req_user)
-                if not success:
-                    return jsonify(errno=3, error=error)
-                try:
-                    due_date = SiteSettings.select().where(SiteSettings.key == 'due_date').get().value
-                    obj.due_at = datetime.strptime(due_date, '%Y-%m-%d').date()
-                except DoesNotExist:
-                    obj.due_at = date.today() + timedelta(7)
 
-                obj.borrow_cnt += 1
-                new_log.content = "check out disk %s for member %s" % (obj.get_callnumber(), req_user.itsc)
+                obj.check_out(req_user)
+                new_log.content = ("check out disk %s for member %s" %
+                                (obj.get_callnumber(), req_user.itsc))
                 new_log.user_affected = req_user
                 new_log.admin_involved = g.user
 
         elif request.method == 'DELETE':
-            if not g.user.admin:
+            if not self.check_delete(obj):
                 return self.response_forbidden()
 
-            success, error = obj.check_in()
-            if not success:
-                return jsonify(errno=3, error=error)
-
+            obj.check_in()
             new_log.content = "check in disk %s" % obj.get_callnumber()
             new_log.admin_involved = g.user
 
         obj.save()
         new_log.save()
-        return self.response(self.serialize_object(obj))
+        return self.response({})
 
     def api_rate(self, pk):
+        """API to acquire the ups and downs of a disk"""
         data = request.data or request.form.get('data') or ''
         obj = get_object_or_404(self.get_query(), self.pk == pk)
 
         if request.method == 'GET':
+            """Return the rates and whether a user has rated before"""
             ups, downs = obj.get_rate()
-            rated = g.user and Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
+            rated = g.user and Log.select().where(
+                Log.model == 'Disk', Log.model_refer == obj.id,
+                Log.log_type == 'rate', Log.user_affected == g.user).exists()
         elif request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = RateForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            if self.check_disable():
-                return jsonify(errno=3, error="VCD/DVD Library Closed")
-            rate = data['rate']
-            rated = Log.select().where(Log.model == 'Disk', Log.model_refer == obj.id, Log.Type == 'rate', Log.user_affected == g.user).count() > 0
-            if rated:
-                return jsonify(errno=3, error="You have rated this disk before")
-            new_log = Log(model='Disk', model_refer=obj.id, Type='rate', user_affected=g.user)
-            if rate == 'up':
-                new_log.content = "member %s rate +1 for disk %s" % (g.user.itsc, obj.get_callnumber())
-            elif rate == 'down':
-                new_log.content = "member %s rate -1 for disk %s" % (g.user.itsc, obj.get_callnumber())
+            data = self.data_precheck(data, RateForm)
+            if not g.user:
+                return self.response_forbidden()
 
+            obj.add_rate(data['rate'])
             rated = True
-            new_log.save()
             ups, downs = obj.get_rate()
 
         return self.response({
@@ -453,16 +521,26 @@ class DiskResource(CustomResource):
         })
 
     def api_rand(self):
-        if request.method == 'GET':
-            obj = self.model.select().where(
-                self.model.disk_type << ['B']
-            ).order_by(fn.Rand()).limit(1).get()
+        """API to return a random disk"""
+        obj = self.model.select().where(
+            self.model.disk_type << ['B']
+        ).order_by(fn.Rand()).limit(1).get()
 
-        return self.response(self.serialize_object(obj))
+        return self.object_detail(obj))
 
 
-class RegularFilmShowResource(CustomResource):
-    readonly = ['vote_cnt_1', 'vote_cnt_2', 'vote_cnt_3', 'participant_list']
+class RegularFilmShowResource(LoggedRestResource):
+    """API of Regular Film Show
+
+    Voting system is handled by this API
+    """
+    log_model = "RegularFilmShow"
+    validate_form = RegularFilmShowForm
+
+    readonly = [
+        'vote_cnt_1', 'vote_cnt_2',
+        'vote_cnt_3', 'participant_list'
+    ]
 
     include_resources = {
         'film_1': DiskResource,
@@ -472,84 +550,86 @@ class RegularFilmShowResource(CustomResource):
     }
 
     def get_query(self):
+        """Hide drafts to member"""
         if g.user and g.user.admin:
             return super(RegularFilmShowResource, self).get_query()
         else:
             return self.model.select().where(self.model.state != "Draft")
 
     def validate_data(self, data, obj=None):
-        form = RegularFilmShowForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
+        data = super(RegularFilmShow, self).validate_data(data, obj)
         if g.modify_flag == 'edit':
-            if obj.state != 'Draft' and data.get('film_1', obj.film_1.id) != obj.film_1.id:
-                return False, "Cannot modify Film 1 if not Draft"
-            if obj.state != 'Draft' and data.get('film_2', obj.film_2.id) != obj.film_2.id:
-                return False, "Cannot modify Film 2 if not Draft"
-            if obj.state != 'Draft' and data.get('film_3', obj.film_3.id) != obj.film_3.id:
-                return False, "Cannot modify Film 3 if not Draft"
-            if obj.state != 'Draft' and data.get('state', '') == 'Draft':
-                # Forbid such behaviour
-                return False, "Cannot turn back to Draft"
-        return True, ""
+            if obj.state != 'Draft':
+                # Published show
+                if data.get('film_1', obj.film_1.id) != obj.film_1.id or \
+                        data.get('film_2', obj.film_2.id) != obj.film_2.id or \
+                        data.get('film_3', obj.film_3.id) != obj.film_3.id:
+                    raise BusinessException(
+                        "Cannot modify candidate film if not Draft")
+                if data['state'] == 'Draft':
+                    # Forbid such behaviour
+                    raise BusinessException("Cannot turn back to Draft")
+            if obj.state != 'Open' and data['state'] == 'Open':
+                # settting a show to open
+                # there can only be one open show at any time
+                if RegularFilmShow.select().where(
+                            RegularFilmShow.state == 'Open'
+                        ).exists():
+                    raise BusinessException("There can be one Open show"
+                                            " at a time")
+
+        return data
 
     def prepare_data(self, obj, data):
         if not (g.user and g.user.admin):
             data.pop('participant_list', None)
         return data
 
+    def get_log(self, instance, id):
+        return "%s rfs id=%d" % (g.modify_flag, id)
+
     def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = RegularFilmShow.next_primary_key()
-            log = Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create rfs id=%d" % ref_id)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete.where(Log.model == "RegularFilmShow", Log.model_refer == ref_id)
-            Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
-        else:
-            ref_id = instance.id
-            Log.create(model="RegularFilmShow", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s rfs id=%d" % (g.modify_flag, instance.id))
+        instance = super(RegularFilmShow, self).before_save(instance)
+
         if instance.state == 'Open':
-            for disk in Disk.select().where(Disk.avail_type << ['Voting', 'OnShow']):
+            # clear other voting or onshow disk
+            sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
+            for disk in sq:
                 disk.avail_type = 'Available'
-                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
-                    setattr(disk, y, None)
                 disk.save()
+            # put disk on voting
             for x in [1, 2, 3]:
                 disk = getattr(instance, "film_%d" % x)
                 disk.avail_type = 'Voting'
-                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
+                for y in ['reserved_by', 'hold_by', 'due_at']:
                     setattr(disk, y, None)
                 disk.save()
-        elif instance.state == 'Pending':
-            largest = max([1, 2, 3], key=lambda o: getattr(instance, "vote_cnt_%d" % o))
-            for disk in Disk.select().where(Disk.avail_type << ['Voting', 'OnShow']):
-                disk.avail_type = 'Available'
-                for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
-                    setattr(disk, y, None)
-                disk.save()
-            disk = getattr(instance, "film_%d" % largest)
-            disk.avail_type = 'Onshow'
-            disk.save()
-        elif instance.state == 'Passed':
-            for x in [1, 2, 3]:
-                disk = getattr(instance, "film_%d" % x)
-                if disk.avail_type == 'Voting' or disk.avail_type == 'Onshow':
+
+        # set availability of corresponding disks
+        if instance.id == RegularFilmShow.get_recent().id:
+            # editing previous rfs will not change availability of disks
+            if instance.state == 'Pending':
+                # disk has the most vote
+                largest = max(
+                    [1, 2, 3],key=lambda o: getattr(instance, "vote_cnt_%d" % o))
+
+                # clear other disk
+                sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
+                for disk in sq:
                     disk.avail_type = 'Available'
-                    for y in ['reserved_by', 'hold_by', 'due_at', 'hold_by']:
-                        setattr(disk, y, None)
                     disk.save()
+
+                # set disk on show
+                disk = getattr(instance, "film_%d" % largest)
+                disk.avail_type = 'Onshow'
+                disk.save()
+            elif instance.state == 'Passed':
+                for x in [1, 2, 3]:
+                    disk = getattr(instance, "film_%d" % x)
+                    if disk.avail_type == 'Voting' or disk.avail_type == 'Onshow':
+                        disk.avail_type = 'Available'
+                        disk.save()
         return instance
-
-    def check_post(self, obj=None):
-        return g.user.admin
-
-    def check_put(self, obj):
-        return g.user.admin
-
-    def check_delete(self, obj):
-        return g.user.admin
 
     def get_urls(self):
         return (
@@ -558,67 +638,49 @@ class RegularFilmShowResource(CustomResource):
         ) + super(RegularFilmShowResource, self).get_urls()
 
     def api_vote(self, pk):
+        """API for Movote"""
         obj = get_object_or_404(self.get_query(), self.pk == pk)
         data = request.data or request.form.get("data") or ''
 
-        if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = VoteForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            if obj.state != 'Open':
-                return jsonify(errno=3, error="The show cannot be voted now")
-            vote_log = [x.content[len(x.content) - 1] for x in Log.select().where(Log.model == "RegularFilmShow", Log.model_refer == obj.id, Log.Type == "vote", Log.user_affected == g.user)]
-            if len(vote_log) >= 2:
-                return jsonify(errno=3, error="A member can vote at most twice")
-            if data['film_id'] in vote_log:
-                return jsonify(errno=3, error="You have voted before")
-            setattr(obj, "vote_cnt_%s" % data['film_id'], getattr(obj, "vote_cnt_%s" % data['film_id']) + 1)
-            obj.save()
-            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="vote", user_affected=g.user, content="member %s vote for film No. %s" % (g.user.itsc, data['film_id']))
-
-        return self.response(self.serialize_object(obj))
-
-    def api_particip(self, pk):
-        obj = get_object_or_404(self.get_query(), self.pk == pk)
-        data = request.data or request.form.get("data") or ''
-
-        if not getattr(self, 'check_%s' % request.method.lower())(obj):
+        data = self.data_precheck(data, VoteForm)
+        if not g.user:
             return self.response_forbidden()
 
-        if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = SubmitUserForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            if obj.state != 'Pending':
-                return jsonify(errno=3, error="The show is not in entry mode")
-            if data['id'] in obj.participant_list:
-                return jsonify(errno=3, error="Recorded before")
-            try:
-                user = User.select().where(User.id == data['id']).get()
-            except DoesNotExist:
-                return jsonify(errno=3, error="User not found")
-            user.rfs_count += 1
-            obj.participant_list.append(data['id'])
-            user.save()
-            obj.save()
-            Log.create(model="RegularFilmShow", model_refer=obj.id, Type="entry", user_affected=user, admin_involved=g.user, content="member %s enter RFS" % user.itsc)
+        obj.add_vote(g.user, data['film_id'])
+        obj.save()
+        return self.response({})
 
-        return self.response(self.serialize_object(obj))
+    def api_particip(self, pk):
+        """API to note down participants of a regular film show"""
+        obj = get_object_or_404(self.get_query(), self.pk == pk)
+        data = request.data or request.form.get("data") or ''
+
+        if not self.check_post(obj):
+            return self.response_forbidden()
+
+        data = self.data_precheck(data, SubmitUserForm)
+        # existence has been verified
+        user = User.select().where(User.id == data['id']).get()
+
+        obj.signin_user(user)
+        user.save()
+        obj.save()
+        Log.create(
+            model="RegularFilmShow", model_refer=obj.id,
+            log_type="entry", user_affected=user, admin_involved=g.user,
+            content="member %s enter RFS" % user.itsc)
+
+        return self.response({})
 
 
-class PreviewShowTicketResource(CustomResource):
+class PreviewShowTicketResource(LoggedRestResource):
+    """API of Preview Show Tickets
+
+    Features include apply
+    """
+    log_model = "PreviewShowTicket"
+    validate_form = PreviewShowTicketForm
+
     readonly = ['create_log']
 
     include_resources = {
@@ -626,7 +688,10 @@ class PreviewShowTicketResource(CustomResource):
         'create_log': SimpleLogResource,
     }
     search = {
-        'default': ['title_en', 'title_ch', 'desc_en', 'desc_ch', 'director_en', 'director_ch', 'actors'],
+        'default': [
+            'title_en', 'title_ch', 'desc_en',
+            'desc_ch', 'director_en', 'director_ch', 'actors'
+        ],
         'title': ['title_en', 'title_ch'],
     }
 
@@ -636,34 +701,8 @@ class PreviewShowTicketResource(CustomResource):
         else:
             return self.model.select().where(self.model.state != "Draft")
 
-    def validate_data(self, data, obj=None):
-        form = PreviewShowTicketForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = PreviewShowTicket.next_primary_key()
-            log = Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="create ticket id=%d" % ref_id)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "PreviewShowTicket", Log.model_refer == ref_id)
-            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id))
-        else:
-            ref_id = instance.id
-            Log.create(model="PreviewShowTicket", Type=g.modify_flag, model_refer=ref_id, user_affected=None, admin_involved=g.user, content="%s ticket id=%d" % (g.modify_flag, instance.id)) 
-        return instance
-
-    def check_post(self, obj=None):
-        return g.user.admin
-
-    def check_put(self, obj):
-        return g.user.admin
-
-    def check_delete(self, obj):
-        return g.user.admin
+    def get_log(self, instance, id):
+        return "%s ticket id=%d" % (g.modify_flag, id)
 
     def get_urls(self):
         return (
@@ -671,32 +710,31 @@ class PreviewShowTicketResource(CustomResource):
         ) + super(PreviewShowTicketResource, self).get_urls()
 
     def api_apply(self, pk):
+        """API to apply for a ticket"""
         obj = get_object_or_404(self.get_query(), self.pk == pk)
         data = request.data or request.form.get("data") or ''
 
-        if request.method == 'POST':
-            try:
-                data = json.loads(data)
-            except ValueError:
-                return self.response_bad_request()
-            # do validation first
-            form = ApplyTicketForm(MultiDict(data))
-            if not form.validate():
-                error = join([join(x, ', ') for x in form.errors.values()], ' | ')
-                return jsonify(errno=1, error=error)
-            if obj.state != 'Open':
-                return jsonify(errno=3, error="The ticket cannot be applied now")
-            if Log.select().where(Log.model == "PreviewShowTicket",Log.Type == 'apply', Log.model_refer == obj.id, Log.user_affected == g.user).exists():
-                return self.response({})
-            mail_content = render_template('ticket_apply.html', ticket=obj, member=g.user, data=data, time=str(datetime.now()))
-            sq = Exco.select().where(Exco.position == "External Vice-President")
-            send_email(['su_film@ust.hk'] + [x.email for x in sq], [], "Ticket Application", mail_content)
-            Log.create(model="PreviewShowTicket", Type='apply', model_refer=obj.id, user_affected=g.user, content="member %s apply for ticket id=%d" % (g.user.itsc, obj.id))
+        if not g.user:
+            return self.response_forbidden()
+        data = self.data_precheck(data, ApplyTicketForm)
+
+        obj.add_application(g.user, data)
+        Log.create(
+            model="PreviewShowTicket", log_type='apply',
+            model_refer=obj.id, user_affected=g.user,
+            content=("member %s apply for ticket id=%d" % 
+                (g.user.itsc, obj.id))
+        )
 
         return self.response({})
 
 
-class DiskReviewResource(CustomResource):
+class DiskReviewResource(LoggedRestResource):
+    """API of reviews on disks
+    """
+    log_model = "DiskReview"
+    validate_form = DiskReviewForm
+
     include_resources = {
         'create_log': SimpleLogResource,
         'poster': SimpleUserResource,
@@ -710,35 +748,51 @@ class DiskReviewResource(CustomResource):
             data.pop('poster', None)
         return data
 
-    def validate_data(self, data, obj=None):
-        form = DiskReviewForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
+    def get_log(self, instance, id):
+        return ("%s disk review of %s" %
+                (g.modify_flag, instance.disk.get_callnumber()))
 
     def before_save(self, instance):
+        """Document in log before saving the instance
+
+        :param instance:
+            The instance to be saved
+        """
+        ref_id = (self.model.next_primary_key()
+                    if g.modify_flag == 'create' else instance.id)
+        content = self.get_log(instance)
+
         if g.modify_flag == 'create':
-            ref_id = DiskReview.next_primary_key()
-            log = Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=g.user, content="create disk review of %s" % instance.disk.get_callnumber())
+            log = Log.create(
+                model=log_model, log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=g.user,
+                admin_involved=None, content=content)
             instance.create_log = log
-            instance.poster = g.user
         else:
             ref_id = instance.id
-            Log.delete().where(Log.model == "DiskReview", Log.model_refer == ref_id)
-            Log.create(model="DiskReview", Type=g.modify_flag, model_refer=ref_id, user_affected=instance.poster, admin_involved=g.user, content="%s disk review of %s" % (g.modify_flag, instance.disk.get_callnumber()))
+            # delete related logs
+            Log.delete().where(Log.model == log_model,
+                Log.model_refer == ref_id)
+            #create delete log
+            log = Log.create(
+                model=log_model, log_type=g.modify_flag,
+                model_refer=ref_id, user_affected=instance.poster,
+                admin_involved=g.user, content=content)
         return instance
 
     def check_post(self, obj=None):
-        return not obj
+        return g.user and not obj
 
     def check_put(self, obj):
         return False
 
-    def check_delete(self, obj):
-        return g.user.admin
 
+class NewsResource(LoggedRestResource):
+    """API of posting news
+    """
+    log_model = "News"
+    validate_form = NewsForm
 
-class NewsResource(CustomResource):
     include_resources = {
         'create_log': SimpleLogResource,
     }
@@ -746,28 +800,16 @@ class NewsResource(CustomResource):
         'default': ['title', 'content']
     }
 
-    def validate_data(self, data, obj=None):
-        form = NewsForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = News.next_primary_key()
-            log = Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create news %s" % instance.title)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "News", Log.model_refer == ref_id)
-            Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
-        else:
-            ref_id = instance.id
-            Log.create(model="News", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s news %s" % (g.modify_flag, instance.title))
-        return instance
+    def get_log(self, instance, id):
+        return "%s news %s" % (g.modify_flag, instance.title)
 
 
-class DocumentResource(CustomResource):
+class DocumentResource(LoggedRestResource):
+    """API of posting documet
+    """
+    log_model = "Document"
+    validate_form = DocumentForm
+
     include_resources = {
         'create_log': SimpleLogResource,
         'doc_url': FileResource,
@@ -776,28 +818,16 @@ class DocumentResource(CustomResource):
         'default': ['title']
     }
 
-    def validate_data(self, data, obj=None):
-        form = DocumentForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = Document.next_primary_key()
-            log = Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create document %s" % instance.title)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "Document", Log.model_refer == ref_id)
-            Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
-        else:
-            ref_id = instance.id
-            Log.create(model="Document", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s document %s" % (g.modify_flag, instance.title))
-        return instance
+    def get_log(self, instance, id):
+        return "%s document %s" % (g.modify_flag, instance.title)
 
 
-class PublicationResource(CustomResource):
+class PublicationResource(LoggedRestResource):
+    """API of posting publications
+    """
+    log_model = "Publication"
+    validate_form = PublicationForm
+
     include_resources = {
         'create_log': SimpleLogResource,
         'doc_url': FileResource,
@@ -807,32 +837,24 @@ class PublicationResource(CustomResource):
         'default': ['title']
     }
 
-    def validate_data(self, data, obj=None):
-        form = PublicationForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
+    def get_log(self, instance, id):
+        return "%s publication %s" % (g.modify_flag, instance.title)
 
     def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = Publication.next_primary_key()
-            log = Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create publication %s" % instance.title)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "Publication", Log.model_refer == ref_id)
-            Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
-        else:
-            ref_id = instance.id
-            Log.create(model="Publication", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s publication %s" % (g.modify_flag, instance.title))
-        if instance.Type == 'MicroMagazine':
+        instance = super(PublicationResource, self).before_save(instance)
+        if instance.pub_type == 'MicroMagazine':
             instance.doc_url = None
         else:
             instance.ext_doc_url = None
         return instance
 
 
-class SponsorResource(CustomResource):
+class SponsorResource(LoggedRestResource):
+    """API of posting sponsors
+    """
+    log_model = "Sponsor"
+    validate_form = SponsorForm
+
     include_resources = {
         'create_log': SimpleLogResource,
         'img_url': FileResource,
@@ -841,68 +863,46 @@ class SponsorResource(CustomResource):
         'default': ['name']
     }
 
-    def validate_data(self, data, obj=None):
-        form = SponsorForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = Sponsor.next_primary_key()
-            log = Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create sponsor %s" % instance.name)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "Sponsor", Log.model_refer == ref_id)
-            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
-        else:
-            ref_id = instance.id
-            Log.create(model="Sponsor", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s sponsor %s" % (g.modify_flag, instance.name))
-        return instance
+    def get_log(self, instance, id):
+        return "%s sponsor %s" % (g.modify_flag, instance.name)
 
 
-class ExcoResource(CustomResource):
+class ExcoResource(HookedResource):
+    """API of exco information
+    """
+    validate_form = ExcoForm
+
     readonly = ['position']
     include_resources = {
         'img_url': FileResource,
     }
 
-    def validate_data(self, data, obj=None):
-        form = ExcoForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
     def check_post(self, obj=None):
-        return obj
-
-    def check_put(self, obj):
-        return g.user and g.user.admin
+        return g.user and g.user.admin and obj
 
     def check_delete(self, obj):
         return False
 
 
-class SiteSettingsResource(CustomResource):
+class SiteSettingsResource(HookedResource):
+    """API of site settings
+    """
+    validate_form = SiteSettingsForm
     readonly = ['key']
 
-    def validate_data(self, data, obj=None):
-        form = SiteSettingsForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
     def check_post(self, obj=None):
-        return obj
-
-    def check_put(self, obj):
-        return g.user and g.user.admin
+        return g.user and g.admin and obj
 
     def check_delete(self, obj):
         return False
 
 
-class OneSentenceResource(CustomResource):
+class OneSentenceResource(LoggedRestResource):
+    """API of quotes from films
+    """
+    log_model = "OneSentence"
+    validate_form = OneSentenceForm
+
     search = {
         'default': ['film', 'content']
     }
@@ -910,25 +910,8 @@ class OneSentenceResource(CustomResource):
         'create_log': SimpleLogResource,
     }
 
-    def validate_data(self, data, obj=None):
-        form = OneSentenceForm(MultiDict(data))
-        if not form.validate():
-            return False, join([join(x, ', ') for x in form.errors.values()], ' | ')
-        return True, ""
-
-    def before_save(self, instance):
-        if g.modify_flag == 'create':
-            ref_id = OneSentence.next_primary_key()
-            log = Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="create one sentence id=%d" % ref_id)
-            instance.create_log = log
-        elif g.modify_flag == 'delete':
-            ref_id = instance.id
-            Log.delete().where(Log.model == "OneSentence", Log.model_refer == ref_id)
-            Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))
-        else:
-            ref_id = instance.id
-            Log.create(model="OneSentence", Type=g.modify_flag, model_refer=ref_id, admin_involved=g.user, content="%s one sentence id=%d" % (g.modify_flag, instance.id))
-        return instance
+    def get_log(self, instance, id):
+        return "%s one sentence id=%d" % (g.modify_flag, id)
 
     def check_get(self):
         return g.user and g.user.admin
@@ -939,10 +922,10 @@ class OneSentenceResource(CustomResource):
         ) + super(OneSentenceResource, self).get_urls()
 
     def api_rand(self):
-        if request.method == 'GET':
-            obj = self.model.select().order_by(fn.Rand()).limit(1).get()
+        """API of a rand quote"""
+        obj = self.model.select().order_by(fn.Rand()).limit(1).get()
 
-        return self.response(self.serialize_object(obj))
+        return self.object_detail(obj))
 
 # use a centered dirty generator
 # dirty map
@@ -958,6 +941,7 @@ dirty_map = [
     (True, "Exco", ['edit']),
     (True, "Sponsor", ['edit']),
 ]
+# return a list of modified items within a certain interval
 @app.route('/api/dirty/')
 def dirty():
     result = {}
@@ -969,7 +953,7 @@ def dirty():
             sq = Log.select().where(
                 Log.model == x[1],
                 Log.created_at > (datetime.now() - timedelta(minutes=6)),
-                Log.Type << x[2]
+                Log.log_type << x[2]
             )
             result[x[1].lower()] = [y.model_refer for y in sq]
     # response
@@ -978,12 +962,18 @@ def dirty():
     kwargs = {'separators': (',', ':')} if request.is_xhr else {'indent': 2}
     return Response(json.dumps(result, **kwargs), mimetype='application/json')
 
-user_auth = CustomAuthentication(auth)
-admin_auth = CustomAdminAuthentication(auth)
+
+# fit for common users
+user_auth = BaseAuthentication(auth)
+
+# fit for admin involved models
+admin_auth = AdminAuthentication(auth)
+
+# fit for system manipulated models
 read_auth = Authentication()
 
 # instantiate api object
-api = CustomRestAPI(app, default_auth=admin_auth)
+api = JSONRestAPI(app, default_auth=admin_auth)
 
 # register resources
 api.register(File, FileResource)

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--
+    ____________    __  ___
+   / ____/  _/ /   /  |/  /
+  / /_   / // /   / /|_/ / 
+ / __/ _/ // /___/ /  / /  
+/_/   /___/_____/_/  /_/   
+                           
+   _____ ____  ________________________  __
+  / ___// __ \/ ____/  _/ ____/_  __/\ \/ /
+  \__ \/ / / / /    / // __/   / /    \  / 
+ ___/ / /_/ / /____/ // /___  / /     / /  
+/____/\____/\____/___/_____/ /_/     /_/   
+-->
+<!-- You can view the License File at http://ihome.ust.hk/~su_film/LICENSE -->
+<html>
+<head>
+    <title>{% block title %}{% endblock %} | Film Society, HKUSTSU</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1280, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <base href="http://ihome.ust.hk/~su_film/">
+
+    <!-- site info -->
+    <meta name="description" content="Official Website of Film Society, HKUSTSU">
+    <meta name="keywords" content="Film Soc, HKUSTSU, Film Society, HKUST, HKUST society, UST, Movie, Film">
+    <meta name="author" content="John Tan">
+    <meta name="contact" content="johnmave126@gmail.com">
+
+    <!-- Search Engine info -->
+    <meta name="google" content="notranslate">
+    <meta name="fragment" content="!">
+
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="asset/css/FILM_FAVICON">
+    <link rel="bookmark" type="image/png" href="asset/css/FILM_FAVICON">
+    <link rel="shortcut icon" type="image/png" href="asset/css/FILM_FAVICON">
+
+    <!-- Google Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Parisienne|Simonetta' rel='stylesheet' type='text/css'>
+
+    <!-- stylesheets -->
+    <link rel="stylesheet" type="text/css" href="asset/css/screen.css">
+    <link rel="stylesheet" type="text/css" href="asset/css/ellipsis.css">
+    <link rel="stylesheet" type="text/css" href="asset/css/notification.css">
+    <link rel="stylesheet" type="text/css" href="asset/css/scrollbar.css">
+
+    <!-- Google Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-42627389-1');
+    ga('send', 'pageview');
+    </script>
+    <!-- End Google Analytics -->
+
+    <!-- All Scripts are loaded synchorously at the end of body due to the following bug -->
+    <!-- https://bugzilla.mozilla.org/show_bug.cgi?id=688580 -->
+
+    <!-- Clickjacking proof -->
+    <style type="text/css">
+    body {
+        display: none;
+    }
+    </style>
+</head>
+<body>
+    <!-- Clickjacking proof -->
+    <script type="text/javascript">
+    if(self == top) {
+        var theBody = document.getElementsByTagName('body')[0];
+        theBody.style.display = "block";
+    }
+    else {
+        top.location = self.location;
+    }
+    </script>
+    <div id="notification-wrapper">
+        <div id="notification">
+            <span>&nbsp;</span>
+            <span class="link"><span class="link-color"></span></span>
+        </div>
+    </div>
+    <div id="onesentence" tooltip=""><span>Loading...</span></div>
+    <div id="wrapper">
+        <div id="header">
+            <div id="logo"><img src="asset/css/logo.png" alt="Film Society Logo"></div>
+            <div id="user-wrapper">
+                <div class="user-action">
+                    <div><button class="link link-login">Login</button></div>
+                </div>
+                <div class="user-info">
+                    <div class="username">Guest</div>
+                    <div class="usertype">Non-Member</div>
+                </div>
+            </div>
+        </div>
+        <div id="content-wrapper">
+            {% block content %}
+            <div class="spinner">
+                <div class="item-0"><div></div><div></div></div>
+                <div class="item-1"><div></div><div></div></div>
+                <div class="item-2"><div></div><div></div></div>
+                <div class="item-3"><div></div><div></div></div>
+                <div class="item-4"><div></div><div></div></div>
+                <div class="item-5"><div></div><div></div></div>
+                <div class="item-6"><div></div><div></div></div>
+                <div class="item-7"><div></div><div></div></div>
+            </div>
+            {% endblock %}
+        </div>
+        <noscript id="noscript-wrapper">
+            <p>Film Society, HKUSTSU is a society aiming to promote film culture around the campus of HKUST (The Hong Kong University of Science and Technology).</p>
+            <p>We hold several regular functions including Regular Film Show, VCD/DVD Library, Preview Show Tickets which are free to our members. On top of these, we also have featured functions from time to time.</p>
+            <p>The website is designed under the powerful HTML5/CSS3 features. Please turn on your javascript for better performance</p>
+        </noscript>
+        <div id="orientation-wrapper">
+            <img src="asset/css/rotate.png" alt="Please rotate device">
+            <p>Please rotate your device to landscape mode.</p>
+        </div>
+        <div id="footer-helper"></div>
+    </div>
+    <div id="footer">
+        {% block footer %}
+        <a class="navigator selected" controls="news" href="#!home">Home</a>
+        <a class="navigator" controls="show" href="#!show/">Regular Film Show</a>
+        <a class="navigator" controls="library" href="#!library/">VCD/DVD Library</a>
+        <a class="navigator" controls="ticket" href="#!ticket/">Preview Show Tickets</a>
+        <a class="navigator" controls="document" href="#!document/">Documents</a>
+        <a class="navigator" controls="publication" href="#!publication/">Publications</a>
+        <a class="navigator" controls="sponsor" href="#!sponsor/">Sponsors</a>
+        <a class="navigator-last" controls="about" href="#!about/">About Us</a>
+        {% endblock %}
+    </div>
+
+    <!-- scripts -->
+    <script type="text/javascript" src="http://www.scribd.com/javascripts/scribd_api.js" defer></script>
+    <script type="text/javascript" src="asset/js/front/ziggurat.js"></script>
+    <script type="text/javascript" src="asset/js/application.min.js"></script>
+</body>
+</html>

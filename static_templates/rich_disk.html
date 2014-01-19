@@ -1,0 +1,24 @@
+<div class="richtext-disk" remote_id="{{disk.id}}">
+	<a class="button-link richtext-item-wrapper rich-pointer" href="#!library/{{disk.id}}/" alt="{{disk.title_en}} / {{disk.title_ch}}">
+		<div class="richtext-disk-cover">
+		</div>
+		<div class="richtext-disk-detail">
+			<div class="richtext-category">
+				Disk
+			</div>
+			<div class="richtext-disk-title">
+				{{disk.title_en}}<br>
+				{{disk.title_ch}}
+			</div>
+			<div class="richtext-disk-entry">
+				Director: {{disk.director_en}} / {{disk.director_ch}}
+			</div>
+			<div class="richtext-disk-entry">
+				Actors: {{disk | join(', ', attribute="actors")}}
+			</div>
+			<div class="richtext-disk-entry">
+				Tags: {{disk| join(', ', attribute="tags")}}
+			</div>
+		</div>
+	</a>
+</div>

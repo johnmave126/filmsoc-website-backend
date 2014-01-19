@@ -1,8 +1,17 @@
-from app import app
-from models import *
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
+
+# A little script to construct sitemap of the website.
+# Follow the specification of XML Sitemap
+# Very ugly now. Need further revision
+# The script should be set up as a scheduled task.
+
+from datetime import datetime
 import StringIO
 from ftplib import FTP
-from datetime import datetime
+
+from app import app
+from models import *
 
 def write_tag(output, url, img=None, lastmod=None, changefreq="yearly", priority=0.5):
     print >>output, '<url>'
@@ -28,7 +37,8 @@ def main():
     # home
     write_tag(output, "http://ihome.ust.hk/~su_film/", changefreq="daily", priority=1.0)
     write_tag(output, "http://ihome.ust.hk/~su_film/#!home", changefreq="daily", priority=1.0)
-    for news in News.select():
+    query = News.select()
+    for news in query:
         log = Log.select().where(Log.model == 'News', Log.model_refer == news.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
         delta = datetime.now() - news.create_log.created_at
@@ -39,7 +49,8 @@ def main():
 
     #liba
     write_tag(output, "http://ihome.ust.hk/~su_film/#!library", priority=0.8)
-    for disk in Disk.select():
+    query = Disk.select()
+    for disk in query:
         log = Log.select().where(Log.model == 'Disk', Log.model_refer == disk.id).get()
         log_time = log.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
         delta = datetime.now() - disk.create_log.created_at
