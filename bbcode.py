@@ -47,7 +47,7 @@ class BBCode(object):
     @staticmethod
     def parse_inlinedisk(matchobj):
         """display disk infomation inline"""
-        disk_id = int(matchobj.group(0))
+        disk_id = int(matchobj.group(1))
         try:
             disk = Disk.select().where(Disk.id == disk_id).get()
         except DoesNotExist:
@@ -58,7 +58,7 @@ class BBCode(object):
     @staticmethod
     def parse_disk(matchobj):
         """display disk infomation"""
-        disk_id = int(matchobj.group(0))
+        disk_id = int(matchobj.group(1))
         try:
             disk = Disk.select().where(Disk.id == disk_id).get()
         except DoesNotExist:
@@ -69,7 +69,7 @@ class BBCode(object):
     @staticmethod
     def parse_rfs(matchobj):
         """display rfs infomation"""
-        rfs_id = int(matchobj.group(0))
+        rfs_id = int(matchobj.group(1))
         try:
             rfs = RegularFilmShow.select().where(
                 RegularFilmShow.id == rfs_id).get()
@@ -81,7 +81,7 @@ class BBCode(object):
     @staticmethod
     def parse_ticket(matchobj):
         """display ticket infomation"""
-        ticket_id = int(matchobj.group(0))
+        ticket_id = int(matchobj.group(1))
         try:
             ticket = PreviewShowTicket.select().where(
                 PreviewShowTicket.id == ticket_id).get()
