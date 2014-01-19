@@ -14,7 +14,7 @@
 				Director: {{ticket.director_en}} / {{ticket.director_ch}}
 			</div>
 			<div class="richtext-disk-entry">
-				Actors: {{ticket | join(', ', attribute="actors")}}
+				Actors: {{ticket.actors | join(', ')}}
 			</div>
 			<div class="richtext-disk-entry">
 				Length: {{ticket.length}} min

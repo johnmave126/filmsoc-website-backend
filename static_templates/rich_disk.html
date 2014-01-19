@@ -14,10 +14,10 @@
 				Director: {{disk.director_en}} / {{disk.director_ch}}
 			</div>
 			<div class="richtext-disk-entry">
-				Actors: {{disk | join(', ', attribute="actors")}}
+				Actors: {{disk.actors | join(', ')}}
 			</div>
 			<div class="richtext-disk-entry">
-				Tags: {{disk| join(', ', attribute="tags")}}
+				Tags: {{disk.tags | join(', ')}}
 			</div>
 		</div>
 	</a>
