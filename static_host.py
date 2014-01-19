@@ -78,3 +78,7 @@ def static_news(news_id):
         abort(404)
 
     return render_template("news.html", news=news)
+
+
+# register Blueprint
+app.register_blueprint(static_host)

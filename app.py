@@ -5,9 +5,6 @@ from flask import Flask, redirect
 from flask_peewee.db import Database
 from db_ext import JSONField, SimpleListField
 
-#static page
-from static_host import static_host
-
 #app and database
 app = Flask(__name__)
 app.config.from_object('settings.Settings')
