@@ -39,7 +39,6 @@ def limit_source():
         abort(403)
 
 
-@static_host.route('/404')
 @static_host.errorhandler(404)
 def static_404():
     return render_template("error_page.html",
@@ -67,6 +66,10 @@ def static_news(news_id):
 
     return render_template("news.html", news=news)
 
+@static_host.route('/show/')
+def static_show():
+    show = RegularFilmShow.get_recent()
+    return render_template("rfs.html", show=show)
 
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')

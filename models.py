@@ -668,6 +668,11 @@ class PreviewShowTicket(LogModel):
             "Ticket Application", mail_content
         )
 
+    def to_show(self):
+        """Return the film that wins the Movote
+        """
+        return max([1, 2, 3],key=lambda o: getattr(self, "vote_cnt_%d" % o))
+
 
 
 class DiskReview(LogModel):

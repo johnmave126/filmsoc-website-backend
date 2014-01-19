@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Regular Film Show{% endblock %}
+{% block content %}
+<div class="rfs-wrapper">
+	<div class="spinner">
+		<div class="item-0"><div></div><div></div></div>
+		<div class="item-1"><div></div><div></div></div>
+		<div class="item-2"><div></div><div></div></div>
+		<div class="item-3"><div></div><div></div></div>
+		<div class="item-4"><div></div><div></div></div>
+		<div class="item-5"><div></div><div></div></div>
+		<div class="item-6"><div></div><div></div></div>
+		<div class="item-7"><div></div><div></div></div>
+	</div>
+	<div class="rfs-content-wrapper">
+		<div class="rfs-show {{show.state}}">
+			{% for f in [1, 2, 3] %}
+			{% set film = getattr(show, "film_%d" % f) %}
+			{% set vote = getattr(show, "vote_cnt_%d" % f) %}
+			<div class="rfs-film-strip {{film.avail_type}}" refer="1">
+				<div class="vote-bar"></div>
+				<a class="rfs-cover button-link" href="#!library/{{film.id}}/" alt="">
+					<div class="rfs-cover-title">
+						{{film.title_en}}<br>
+						{{film.title_ch}}
+					</div>
+				</a>
+				<div class="rfs-bottom">
+					<div class="rfs-vote-num">{{vote}} Vote<span {{'hidden' if vote <= 1}}>s</span></div>
+					<button class="rfs-vote-button clear-button" controls="vote" hidden>Vote</button>
+				</div>
+			</div>
+			{% endfor %}
+
+			<div class="info-tab light-scrollbar">
+				{% for f in [1, 2, 3] %}
+				{% set film = getattr(show, "film_%d" % f) %}
+				{% set vote = getattr(show, "vote_cnt_%d" % f) %}
+				<div class="rfs-film-info" refer="{{f}}">
+					<h1>{{film.title_en}}&nbsp;/&nbsp;{{film.title_ch}}<span class="year">&nbsp;({{film.show_year}})</span></h1>
+
+					<div class="warning" {{'hidden' if show.state != 'Open' or film.category !='III'}}>
+						This film is a <b>Category III</b> film. If this film wins the vote, we will need to check your <b>HK Identity Card</b> to ensure your are over <b>18 years old</b> when you enter the show.
+					</div>
+
+					<div><span class="key">Director:</span> {{film.director_en}}&nbsp;/&nbsp;{{film.director_ch}}</div>
+
+					<div><span class="key">Stars:</span> <span class="actors-wrapper"></span></div>
+
+					<div><span class="key">Category:</span> {{film.category or 'Unknown'}}</div>
+
+					<div><span class="key">Tags:</span> <span class="tags-wrapper"></span></div>
+
+					<div><span class="key">Length:</span> {{film.length or "Unknown"}} Minutes</div>
+
+					<div class="disk-desc">
+						<h2>Plot Summary</h2>
+						<div class="disk-desc-en">
+							{{film.desc_en|wrap}}
+						</div>
+						<div class="disk-desc-ch">
+							{{film.desc_ch|wrap}}
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+
+				<div class="rfs-remarks" selected>
+					<h1>Remarks</h1>
+					<div class="warning" {{'hidden' if show.state != 'Pending' or show.to_show().category != 'III'}}>
+						The film to be shown is a <b>Category III</b> film. We will need to check your <b>HK Identity Card</b> to ensure your are over <b>18 years old</b> when you enter the show.
+					</div>
+					{{show.remarks|wrap}}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

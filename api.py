@@ -608,8 +608,7 @@ class RegularFilmShowResource(LoggedRestResource):
             # editing previous rfs will not change availability of disks
             if instance.state == 'Pending':
                 # disk has the most vote
-                largest = max(
-                    [1, 2, 3],key=lambda o: getattr(instance, "vote_cnt_%d" % o))
+                largest = instance.to_show()
 
                 # clear other disk
                 sq = Disk.select().where(Disk.avail_type << ['Voting', 'OnShow'])
