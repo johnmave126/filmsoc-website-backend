@@ -1,8 +1,6 @@
-from string import join
 import uuid
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
-from werkzeug.datastructures import MultiDict
 from flask import g, jsonify, render_template, request, json, Response
 from peewee import DoesNotExist, fn
 from flask_peewee.rest import Authentication
@@ -270,7 +268,7 @@ class UserResource(HookedResource):
 
         # although bound before, return it
         if obj.university_id and obj.university_id == data['university_id']:
-            return self.object_detail(obj))
+            return self.object_detail(obj)
 
         # university id should be unique
         if User.select().where(User.university_id == data['university_id']).exists():
@@ -283,7 +281,7 @@ class UserResource(HookedResource):
             model='User', log_type='edit', model_refer=obj.id,
             user_affected=obj, admin_involved=g.user,
             content="Bind student ID and University ID for user %s" % obj.itsc)
-        return self.object_detail(obj))
+        return self.object_detail(obj)
 
 
 class SimpleUserResource(HookedResource):
@@ -526,7 +524,7 @@ class DiskResource(LoggedRestResource):
             self.model.disk_type << ['B']
         ).order_by(fn.Rand()).limit(1).get()
 
-        return self.object_detail(obj))
+        return self.object_detail(obj)
 
 
 class RegularFilmShowResource(LoggedRestResource):
@@ -925,7 +923,7 @@ class OneSentenceResource(LoggedRestResource):
         """API of a rand quote"""
         obj = self.model.select().order_by(fn.Rand()).limit(1).get()
 
-        return self.object_detail(obj))
+        return self.object_detail(obj)
 
 # use a centered dirty generator
 # dirty map
