@@ -69,7 +69,7 @@ def static_news(news_id):
 @static_host.route('/show/')
 def static_show():
     show = RegularFilmShow.get_recent()
-    return render_template("rfs.html", show=show)
+    return render_template("rfs.html", show=show, getattr=getattr)
 
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
