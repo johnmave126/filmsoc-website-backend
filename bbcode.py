@@ -21,7 +21,7 @@ class BBCode(object):
             {"pattern": r"\[big\](.+?)\[/big\]", "repl": r'<big>\1</big>'},
             {"pattern": r"\[small\](.+?)\[/small\]", "repl": r'<small>\1</small>'},
             {"pattern": r"\[color=([a-zA-Z]*|\#?[0-9a-fA-F]{6})\](.+?)\[/color\]",
-                "repl": '<span style="color:\1">\2</span>'},
+                "repl": r'<span style="color:\1">\2</span>'},
             {"pattern": (r"\[link=\s*((?:(?:ftp|https?)://)?"
                             "(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+"
                             "[A-Z]{2,6}\.?|localhost|"
