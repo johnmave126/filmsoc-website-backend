@@ -89,12 +89,12 @@ def static_library():
     prev_component = ["page=%d" % (page - 1)] if page > 1 else []
     if mode in ["popular", "rank"]:
         prev_component.append("mode=%s" % mode)
-    prev_url = ("?" + prev_component.join("&")).rstrip("?")
+    prev_url = ('?' + '&'.join(prev_component)).rstrip('?')
 
     next_component = ["page=%d" % (page + 1)] if page < disk_sq.get_pages() else []
     if mode in ["popular", "rank"]:
         next_component.append("mode=%s" % mode)
-    next_url = ("?" + next_component.join("&")).rstrip("?")
+    next_url = ('?' + '&'.join(next_component)).rstrip('?')
 
     return render_template("library_list.html",
                             disk_sq=disk_sq,
