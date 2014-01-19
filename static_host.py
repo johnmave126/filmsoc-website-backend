@@ -14,6 +14,7 @@ static_host = Blueprint('static_host',
                         __name__, template_folder='static_templates')
 
 
+@static_host.app_template_filter
 def file_location(file_):
     return "http://ihome.ust.hk/~su_film/asset/upload/%s" % file_.url
 
