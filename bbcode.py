@@ -1,4 +1,6 @@
 import re
+from markupsafe import Markup
+import functools
 
 from peewee import *
 from flask import render_template
@@ -90,6 +92,16 @@ class BBCode(object):
 
         return render_template("rich_ticket.html", ticket=ticket)
 
+    def markup_wrapper(f):
+        if isinstance(f, basestring):
+            return f
+
+        @functools.wraps(f)
+        def inner(*args, **kwargs):
+            return Markup(f(*args, **kwargs))
+
+        return inner
+
     def parse(self, text):
         """parse the text to convert to HTML
 
@@ -99,7 +111,8 @@ class BBCode(object):
         for parser in self.BBHandler:
             while True:
                 old_text = text
-                text = re.sub(parser["pattern"], parser["repl"],
+                text = re.sub(parser["pattern"],
+                                markup_wrapper(parser["repl"]),
                                 text, flags=re.I)
                 if old_text == text:
                     break

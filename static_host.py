@@ -1,5 +1,5 @@
 import socket
-from datetime import date, datetime
+from markupsafe import Markup
 
 from flask import Blueprint, g, render_template, request, Response, abort
 from peewee import *
@@ -27,7 +27,8 @@ def tobbcode(data):
 
 @static_host.app_template_filter('wrap')
 def towrap(data):
-    return '<p>' + data.replace('\n', '</p><p>') + '</p>'
+    return (Markup('<p>') + data.replace('\n', Markup('</p><p>')) +
+            Markup('</p>'))
 
 
 @static_host.before_request
