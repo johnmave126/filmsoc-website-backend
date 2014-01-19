@@ -81,4 +81,4 @@ def static_news(news_id):
 
 
 # register Blueprint
-app.register_blueprint(static_host)
+app.register_blueprint(static_host, url_prefix='/static')
