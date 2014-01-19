@@ -47,7 +47,7 @@ def static_home():
     cover_id = int(SiteSettings.get('header_image'))
     cover_url = file_location(
         File.select().where(File.id == cover_id).get())
-    news_sq = News.select().limit(20)
+    news_sq = News.select().limit(15)
     return render_template("home.html",
                             cover_url=cover_url, news_sq = news_sq)
 
