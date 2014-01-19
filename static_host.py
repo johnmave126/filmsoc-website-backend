@@ -25,6 +25,10 @@ def todatestring(data, format=""):
 def tobbcode(data):
     return BBCode().parse(data)
 
+@static_host.app_template_filter('wrap')
+def towrap(data):
+    return '<p>' + data.replace('\n', '</p><p>') + '</p>'
+
 
 @static_host.before_request
 def limit_source():

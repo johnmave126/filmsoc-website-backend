@@ -2,6 +2,16 @@
 {% block title %}{{news.title}}{% endblock %}
 {% block content %}
 <div class="news-wrapper">
+	<div class="spinner">
+		<div class="item-0"><div></div><div></div></div>
+		<div class="item-1"><div></div><div></div></div>
+		<div class="item-2"><div></div><div></div></div>
+		<div class="item-3"><div></div><div></div></div>
+		<div class="item-4"><div></div><div></div></div>
+		<div class="item-5"><div></div><div></div></div>
+		<div class="item-6"><div></div><div></div></div>
+		<div class="item-7"><div></div><div></div></div>
+	</div>
 	<div class="news-content-wrapper">
 		<div class="news-detail-wrapper">
 			<div class="top-navigation">
@@ -14,7 +24,7 @@
 				Published at {{news.create_log.created_at}}
 			</div>
 			<div class="news-content">
-				{{news.content|e|bbcode|safe}}
+				{{news.content|e|wrap|bbcode|safe}}
 			</div>
 		</div>
 	</div>
