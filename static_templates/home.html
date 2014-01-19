@@ -1,24 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="home-wrapper">
-	<div class="home-cover-wrapper">
-		<img class="home-cover" src="{{cover_url}}" alt="">
+<div class="news-wrapper">
+	<div class="spinner">
+		<div class="item-0"><div></div><div></div></div>
+		<div class="item-1"><div></div><div></div></div>
+		<div class="item-2"><div></div><div></div></div>
+		<div class="item-3"><div></div><div></div></div>
+		<div class="item-4"><div></div><div></div></div>
+		<div class="item-5"><div></div><div></div></div>
+		<div class="item-6"><div></div><div></div></div>
+		<div class="item-7"><div></div><div></div></div>
 	</div>
-	<div class="news-list-wrapper">
-		<h1>News</h1>
-		<div class="news-list">
-			{% for news in news_sq %}
-			<a class="home-list-item button-link" href="#!news/{{news.id}}/" alt="">
-				<div class="news-item-date">
-					{{news.create_log.created_at | todate(format="%b %d")}}
+	<div class="news-content-wrapper">
+		<div class="home-wrapper">
+			<div class="home-cover-wrapper">
+				<img class="home-cover" src="{{cover_url}}" alt="">
+			</div>
+			<div class="news-list-wrapper">
+				<h1>News</h1>
+				<div class="news-list">
+					{% for news in news_sq %}
+					<a class="home-list-item button-link" href="#!news/{{news.id}}/" alt="">
+						<div class="news-item-date">
+							{{news.create_log.created_at | todate(format="%b %d")}}
+						</div>
+						<div class="news-item-title">
+							{{news.title}}
+						</div>
+					</a>
+					{% endfor %}
 				</div>
-				<div class="news-item-title">
-					{{news.title}}
-				</div>
-			</a>
-			{% endfor %}
+			</div>
 		</div>
 	</div>
 </div>
+
 {% endblock %}
