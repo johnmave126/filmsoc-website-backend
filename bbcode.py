@@ -12,36 +12,37 @@ class BBCode(object):
     """A BBCode parser
     """
 
-    # predefined BB Code set
-    BBHandler = [
-        {"pattern": r"\[b\](.+?)\[/b\]", "repl": '<b>\1</b>'},
-        {"pattern": r"\[i\](.+?)\[/i\]", "repl": '<em>\1</em>'},
-        {"pattern": r"\[u\](.+?)\[/u\]", "repl": '<u>\1</u>'},
-        {"pattern": r"\[big\](.+?)\[/big\]", "repl": '<big>\1</big>'},
-        {"pattern": r"\[small\](.+?)\[/small\]", "repl": '<small>\1</small>'},
-        {"pattern": r"\[color=([a-zA-Z]*|\#?[0-9a-fA-F]{6})\](.+?)\[/color\]",
-            "repl": '<span style="color:\1">\2</span>'},
-        {"pattern": (r"\[link=\s*((?:(?:ftp|https?)://)?"
-                        "(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+"
-                        "[A-Z]{2,6}\.?|localhost|"
-                        "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
-                        "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.+?)\[/link\]"),
-            "repl": '<a href="\1" rel="nofollow" target="_blank">\2</a>'},
-        {"pattern": (r"\[img=\s*((?:(?:ftp|https?)://)?"
-                        "(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+"
-                        "[A-Z]{2,6}\.?|localhost|"
-                        "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
-                        "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.*?)\[/img\]"),
-            "repl": '<img src="\1" alt="\2" title="\2">'},
-        {"pattern": r"\[inlinedisk\](\d+)\[/inlinedisk\]",
-            "repl": BBCode.parse_inlinedisk},
-        {"pattern": r"\[disk\](\d+)\[/disk\]",
-            "repl": BBCode.parse_disk},
-        {"pattern": r"\[rfs\](\d+)\[/rfs\]",
-            "repl": BBCode.parse_rfs},
-        {"pattern": r"\[ticket\](\d+)\[/ticket\]",
-            "repl": BBCode.parse_ticket},
-    ]
+    def __init__(self):
+        # predefined BB Code set
+        self.BBHandler = [
+            {"pattern": r"\[b\](.+?)\[/b\]", "repl": '<b>\1</b>'},
+            {"pattern": r"\[i\](.+?)\[/i\]", "repl": '<em>\1</em>'},
+            {"pattern": r"\[u\](.+?)\[/u\]", "repl": '<u>\1</u>'},
+            {"pattern": r"\[big\](.+?)\[/big\]", "repl": '<big>\1</big>'},
+            {"pattern": r"\[small\](.+?)\[/small\]", "repl": '<small>\1</small>'},
+            {"pattern": r"\[color=([a-zA-Z]*|\#?[0-9a-fA-F]{6})\](.+?)\[/color\]",
+                "repl": '<span style="color:\1">\2</span>'},
+            {"pattern": (r"\[link=\s*((?:(?:ftp|https?)://)?"
+                            "(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+"
+                            "[A-Z]{2,6}\.?|localhost|"
+                            "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+                            "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.+?)\[/link\]"),
+                "repl": '<a href="\1" rel="nofollow" target="_blank">\2</a>'},
+            {"pattern": (r"\[img=\s*((?:(?:ftp|https?)://)?"
+                            "(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+"
+                            "[A-Z]{2,6}\.?|localhost|"
+                            "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+                            "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.*?)\[/img\]"),
+                "repl": '<img src="\1" alt="\2" title="\2">'},
+            {"pattern": r"\[inlinedisk\](\d+)\[/inlinedisk\]",
+                "repl": self.parse_inlinedisk},
+            {"pattern": r"\[disk\](\d+)\[/disk\]",
+                "repl": self.parse_disk},
+            {"pattern": r"\[rfs\](\d+)\[/rfs\]",
+                "repl": self.parse_rfs},
+            {"pattern": r"\[ticket\](\d+)\[/ticket\]",
+                "repl": self.parse_ticket},
+        ]
 
     @staticmethod
     def parse_inlinedisk(matchobj):
