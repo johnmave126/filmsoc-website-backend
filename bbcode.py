@@ -112,7 +112,7 @@ class BBCode(object):
             while True:
                 old_text = text
                 text = re.sub(parser["pattern"],
-                                markup_wrapper(parser["repl"]),
+                                self.markup_wrapper(parser["repl"]),
                                 text, flags=re.I)
                 if old_text == text:
                     break
