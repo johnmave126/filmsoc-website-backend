@@ -615,7 +615,7 @@ class InstanceExist(object):
             raise ValidationError(self.message)
 
 
-class IntegerField(f.IntegerField):
+class FormIntegerField(f.IntegerField):
     """Catch TypeError
     """
     def process_formdata(self, valuelist):
@@ -630,7 +630,7 @@ class IntegerField(f.IntegerField):
                 raise ValueError(self.gettext('Not a valid integer'))
 
 
-class DateTimeField(f.DateTimeField):
+class FormDateTimeField(f.DateTimeField):
     """Catch TypeError
     """
     def process_formdata(self, valuelist):
@@ -646,7 +646,7 @@ class DateTimeField(f.DateTimeField):
                 raise ValueError(self.gettext('Not a valid datetime value'))
 
 
-class DateField(f.DateField):
+class FormDateField(f.DateField):
     """Catch TypeError
     """
     def process_formdata(self, valuelist):
@@ -669,12 +669,12 @@ class Converter(ModelConverter):
         BlobField: f.TextAreaField,
         BooleanField: f.BooleanField,
         CharField: f.TextField,
-        DateField: DateField,
-        DateTimeField: DateTimeField,
+        DateField: FormDateField,
+        DateTimeField: FormDateTimeField,
         DecimalField: f.DecimalField,
         DoubleField: f.FloatField,
         FloatField: f.FloatField,
-        IntegerField: IntegerField,
+        IntegerField: FormIntegerField,
         PrimaryKeyField: f.HiddenField,
         TextField: f.TextAreaField,
         TimeField: WPTimeField,
