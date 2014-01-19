@@ -1,0 +1,115 @@
+{% extends "library_base.html" %}
+{% block title %}{{disk.title_en}} {{disk.title_ch}}{% endblock %}
+{% block library_content %}
+<div class="library-disk">
+	<div class="spinner">
+		<div class="item-0"><div></div><div></div></div>
+		<div class="item-1"><div></div><div></div></div>
+		<div class="item-2"><div></div><div></div></div>
+		<div class="item-3"><div></div><div></div></div>
+		<div class="item-4"><div></div><div></div></div>
+		<div class="item-5"><div></div><div></div></div>
+		<div class="item-6"><div></div><div></div></div>
+		<div class="item-7"><div></div><div></div></div>
+	</div>
+	<div class="rate-box">
+		<button class="rate-up-button" tooltip="This disk is awesome and worth watching"></button>
+		<div class="rate-num {{"positive" if ups > downs else "negative" if ups < downs}}">{{ups - downs}}</div>
+		<button class="rate-down-button" tooltip="This disk is not satisfying"></button>
+	</div>
+	<div class="disk-wrapper">
+		<div class="disk-detail">
+			<div class="top-navigation">
+				<button class="link link-goback">Go Back</button>
+			</div>
+			<h2 class="disk-title">
+				{{disk.title_en}}&nbsp;/&nbsp;{{disk.title_ch}}<span class="year">&nbsp;({{disk.show_year}})</span>
+			</h2>
+			<div class="disk-brief">
+				<div class="disk-cover">
+				</div>
+				<div class="disk-info-1">
+
+					<div><span class="key">Director:</span> <span class="link link-search" tag="director">{{disk.director_en}}</span>&nbsp;/&nbsp;<span class="link link-search" tag="director">{{disk.director_ch}}</span></div>
+
+					<div><span class="key">Stars:</span> <span class="actors-wrapper"></span></div>
+
+					<div><span class="key">Category:</span> {{disk.category or 'Unknown'}}</div>
+
+					<div><span class="key">Tags:</span> <span class="tags-wrapper"></span></div>
+
+					<div><span class="key">Length:</span> {{disk.length or "Unknown"}} Minutes</div>
+
+					<div {{'hidden' if not disk.imdb_url}}><span class="key">IMDB Link:</span> <a href="http://www.imdb.com/title/{{disk.imdb_url}}/" alt="IMDB Link" target="_blank">{{disk.imdb_url}}</a></div>
+
+					<div><span class="key">Call Number:</span> {{disk.get_callnumber()}}</div>
+
+					<div><span class="key">Disk Type:</span> {{"VCD" if disk.disk_type == "A" else "DVD"}}</div>
+
+					<div><span class="key">Borrowed:</span> {{disk.borrow_cnt}} time<span {{"hidden" if disk.borrow_cnt <= 1}}>s</span></div>
+
+					<div><span class="key">Disk State:</span> <span class="disk-state darken-state {{disk.avail_type}}">{{"Reserved" if disk.avail_type in ["ReservedCounter", "OnDelivery"] else disk.avail_type}}</span></div>
+
+					<div {{'hidden' if disk.avail_type != 'Borrowed'}}><span class="key">Due At:</span> {{disk.due_at}}</div>
+
+				</div>
+			</div>
+			<div class="disk-action">
+				<button controls="reserve" hidden>Reserve</button>
+				<button controls="renew" hidden>Renew</button>
+			</div>
+			<div class="disk-desc">
+				<h3>Plot</h3>
+				<div class="disk-desc-en">
+					{{disk.desc_en|wrap}}
+				</div>
+				<div class="disk-desc-ch">
+					{{disk.desc_ch|wrap}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="diskreview-wrapper">
+		<div class="diskreview-entry-wrapper">
+			<div class="diskreview-inner-wrapper">
+				<div class="diskreview-title">Disk Reviews</div>
+				{% for review in reviews %}
+				<div class="diskreview-entry">
+					<div class="diskreview-time">@{{review.create_log.created_at}}</div>
+					<div class="diskreview-content">{{review.content|wrap}}</div>
+				</div>
+				{% endblock %}
+			</div>
+		</div>
+		<div class="diskreview-input-box">
+			<textarea name="review" rows="3" placeholder="Leave your feelings here..." hidden></textarea>
+			<div class="diskreview-action" hidden>
+				<button class="clear-button" controls="submit">Post</button>
+			</div>
+			<div class="diskreview-loggin">
+				Please login to leave comments
+			</div>
+		</div>
+	</div>
+	<div class="popup-overlay loading" hidden>
+		<div class="popup-box">
+			<div class="close-button"></div>
+			<h1>&nbsp;</h1>
+			<div class="content">
+			</div>
+			<div class="spinner">
+				<div class="item-0"><div></div><div></div></div>
+				<div class="item-1"><div></div><div></div></div>
+				<div class="item-2"><div></div><div></div></div>
+				<div class="item-3"><div></div><div></div></div>
+				<div class="item-4"><div></div><div></div></div>
+				<div class="item-5"><div></div><div></div></div>
+				<div class="item-6"><div></div><div></div></div>
+				<div class="item-7"><div></div><div></div></div>
+			</div>
+			<div class="popup-box-cover">
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}VCD/DVD Library{% endblock %}
+{% block content %}
+<div class="library-wrapper">
+	<div class="left-panel">
+		<div class="wrapper">
+			<div class="library-search">
+				<input type="text" name="search_term" placeholder="Seach Disk..." autocomplete="off" spellcheck="false">
+				<button class="search_button" controls="search"></button>
+				<div class="search-suggestion" hidden>
+				</div>
+			</div>
+			<div class="search-tips">
+				Tips: You may use syntax like <u>director:(Nolan)</u> to search movies whose director is Nolan. Support Terms: fulltext, actor, tag, director.
+			</div>
+			<a class="button-link library-button" controls="random" href="#!library/rand/" alt="Pick Random Disk" rel="nofollow">
+				Lucky Random
+			</a>
+			<a class="button-link library-button" controls="popular" href="#!library/?mode=popular" alt="View Popular Disks" rel="nofollow">
+				Top Popular
+			</a>
+			<a class="button-link library-button" controls="rank" href="#!library/?mode=rank" alt="View Disks with High Rank" rel="nofollow">
+				Top Ranked
+			</a>
+		</div>
+	</div>
+	<div class="right-panel" hidden>
+		{% block library_content %}{% endblock %}
+	</div>
+</div>
+{% endblock %}

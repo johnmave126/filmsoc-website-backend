@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
+{% block library_content %}
+<div class="library-list loading">
+	<div class="spinner">
+		<div class="item-0"><div></div><div></div></div>
+		<div class="item-1"><div></div><div></div></div>
+		<div class="item-2"><div></div><div></div></div>
+		<div class="item-3"><div></div><div></div></div>
+		<div class="item-4"><div></div><div></div></div>
+		<div class="item-5"><div></div><div></div></div>
+		<div class="item-6"><div></div><div></div></div>
+		<div class="item-7"><div></div><div></div></div>
+	</div>
+	<a href="{{prev_url}}" alt="previous_page"><button class="prev-button" hidden>&lt;</button></a>
+	<div class="list-item-wrapper">
+		{% for disk in disk_sq %}
+		<div class="list-item">
+			<div class="disk-wrapper">
+				<div class="disk-cover">
+					<div class="disk-cover-border" style="background-image: url({{disk.cover_url | file_location}});">
+					</div>
+				</div>
+				<div class="disk-info">
+					<div class="disk-title">
+						{{disk.title_en}}<br>
+						{{disk.title_ch}}
+					</div>
+					<div class="disk-state {{disk.avail_type}}">
+						{{"Reserved" if disk.avail_type in ["ReservedCounter", "OnDelivery"] else disk.avail_type}}
+					</div>
+					<a class="button-link disk-detail-button" href="#!library/{{disk.id}}/" alt="View Detail">View Detail</a>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<a href="{{next_url}}" alt="next_page"><button class="next-button" hidden>&gt;</button></a>
+</div>
+{% endblock %}
