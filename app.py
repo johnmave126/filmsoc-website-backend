@@ -23,8 +23,6 @@ if not app.debug:
     ))
     app.logger.addHandler(file_handler)
 
-app.register_blueprint(static_host)
-
 @app.route('/')
 def index():
     return redirect(app.config['FRONT_SERVER'])
