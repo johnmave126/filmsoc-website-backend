@@ -12,6 +12,7 @@ class BBCode(object):
     """A BBCode parser
     """
 
+    # predefined BB Code set
     BBHandler = [
         {"pattern": r"\[b\](.+?)\[/b\]", "repl": '<b>\1</b>'},
         {"pattern": r"\[i\](.+?)\[/i\]", "repl": '<em>\1</em>'},
@@ -33,13 +34,13 @@ class BBCode(object):
                         "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.*?)\[/img\]"),
             "repl": '<img src="\1" alt="\2" title="\2">'},
         {"pattern": r"\[inlinedisk\](\d+)\[/inlinedisk\]",
-            "repl": parse_inlinedisk},
+            "repl": self.parse_inlinedisk},
         {"pattern": r"\[disk\](\d+)\[/disk\]",
-            "repl": parse_disk},
+            "repl": self.parse_disk},
         {"pattern": r"\[rfs\](\d+)\[/rfs\]",
-            "repl": parse_rfs},
+            "repl": self.parse_rfs},
         {"pattern": r"\[ticket\](\d+)\[/ticket\]",
-            "repl": parse_ticket},
+            "repl": self.parse_ticket},
     ]
 
     def parse_inlinedisk(matchobj):
@@ -85,6 +86,11 @@ class BBCode(object):
         return render_template("rich_ticket.html", ticket=ticket)
 
     def parse(self, text):
+        """parse the text to convert to HTML
+
+        :param text:
+            The text to convert
+        """
         for parser in self.BBHandler:
             while True:
                 old_text = text
