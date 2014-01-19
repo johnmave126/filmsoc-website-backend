@@ -555,7 +555,7 @@ class RegularFilmShowResource(LoggedRestResource):
             return self.model.select().where(self.model.state != "Draft")
 
     def validate_data(self, data, obj=None):
-        data = super(RegularFilmShow, self).validate_data(data, obj)
+        data = super(RegularFilmShowResource, self).validate_data(data, obj)
         if g.modify_flag == 'edit':
             if obj.state != 'Draft':
                 # Published show
@@ -587,7 +587,7 @@ class RegularFilmShowResource(LoggedRestResource):
         return "%s rfs id=%d" % (g.modify_flag, id)
 
     def before_save(self, instance):
-        instance = super(RegularFilmShow, self).before_save(instance)
+        instance = super(RegularFilmShowResource, self).before_save(instance)
 
         if instance.state == 'Open':
             # clear other voting or onshow disk
