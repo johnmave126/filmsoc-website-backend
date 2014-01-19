@@ -34,15 +34,16 @@ class BBCode(object):
                         "(?::\d+)?(?:/?|[/?]\S+?))\s*\](.*?)\[/img\]"),
             "repl": '<img src="\1" alt="\2" title="\2">'},
         {"pattern": r"\[inlinedisk\](\d+)\[/inlinedisk\]",
-            "repl": self.parse_inlinedisk},
+            "repl": BBCode.parse_inlinedisk},
         {"pattern": r"\[disk\](\d+)\[/disk\]",
-            "repl": self.parse_disk},
+            "repl": BBCode.parse_disk},
         {"pattern": r"\[rfs\](\d+)\[/rfs\]",
-            "repl": self.parse_rfs},
+            "repl": BBCode.parse_rfs},
         {"pattern": r"\[ticket\](\d+)\[/ticket\]",
-            "repl": self.parse_ticket},
+            "repl": BBCode.parse_ticket},
     ]
 
+    @staticmethod
     def parse_inlinedisk(matchobj):
         """display disk infomation inline"""
         disk_id = int(matchobj.group(0))
@@ -53,6 +54,7 @@ class BBCode(object):
 
         return render_template("rich_inlinedisk.html", disk=disk)
 
+    @staticmethod
     def parse_disk(matchobj):
         """display disk infomation"""
         disk_id = int(matchobj.group(0))
@@ -63,6 +65,7 @@ class BBCode(object):
 
         return render_template("rich_disk.html", disk=disk)
 
+    @staticmethod
     def parse_rfs(matchobj):
         """display rfs infomation"""
         rfs_id = int(matchobj.group(0))
@@ -74,6 +77,7 @@ class BBCode(object):
 
         return render_template("rich_rfs.html", rfs=rfs)
 
+    @staticmethod
     def parse_ticket(matchobj):
         """display ticket infomation"""
         ticket_id = int(matchobj.group(0))
