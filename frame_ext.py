@@ -198,7 +198,7 @@ class BaseAuthentication(Authentication):
     """Readable for anyone. Writable for any logged in user
     """
     def __init__(self, auth, protected_methods=None):
-        super(CustomAuthentication, self).__init__(protected_methods)
+        super(BaseAuthentication, self).__init__(protected_methods)
         self.auth = auth
 
     def authorize(self):
@@ -219,7 +219,7 @@ class AdminAuthentication(BaseAuthentication):
         return user.admin
 
     def authorize(self):
-        res = super(CustomAdminAuthentication, self).authorize()
+        res = super(AdminAuthentication, self).authorize()
 
         if (not res) and g.user:
             return self.verify_user(g.user)
