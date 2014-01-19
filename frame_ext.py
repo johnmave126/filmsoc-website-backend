@@ -452,7 +452,8 @@ class HookedResource(RestResource):
         """
         data = request.data or request.form.get('data') or ''
         g.modify_flag = 'edit'
-        data = self.validate_data(data)
+        data = self.validate_data(data, obj)
+
 
         for key in self._readonly:
             data.pop(key, None)
