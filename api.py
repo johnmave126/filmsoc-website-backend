@@ -60,22 +60,22 @@ class LoggedRestResource(HookedResource):
 
         if g.modify_flag == 'create':
             log = Log.create(
-                model=log_model, log_type=g.modify_flag,
+                model=self.log_model, log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=None,
                 admin_involved=g.user, content=content)
             instance.create_log = log
         elif g.modify_flag == 'delete':
             # delete related logs
-            Log.delete().where(Log.model == log_model,
+            Log.delete().where(Log.model == self.log_model,
                 Log.model_refer == ref_id)
             #create delete log
             log = Log.create(
-                model=log_model, log_type=g.modify_flag,
+                model=self.log_model, log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=None,
                 admin_involved=g.user, content=content)
         else:
             log = Log.create(
-                model=log_model, log_type=g.modify_flag,
+                model=self.log_model, log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=None,
                 admin_involved=g.user, content=content)
         return instance
