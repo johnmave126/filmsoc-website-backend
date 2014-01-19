@@ -19,7 +19,7 @@
 			{% set vote = getattr(show, "vote_cnt_%d" % f) %}
 			<div class="rfs-film-strip {{film.avail_type}}" refer="1">
 				<div class="vote-bar"></div>
-				<a class="rfs-cover button-link" href="#!library/{{film.id}}/" alt="">
+				<a class="rfs-cover button-link" href="#!library/{{film.id}}/" alt="" style="background-image: url({{film.cover_url|file_location}});">
 					<div class="rfs-cover-title">
 						{{film.title_en}}<br>
 						{{film.title_ch}}
