@@ -55,7 +55,7 @@
 				<div class="ticket-action">
 					<button controls="apply" hidden>Apply For Ticket</button>
 				</div>
-				<div class="ticket-applicants-wrapper" {{'hidden' if ticket.state != 'Closed'}}>
+				<div class="ticket-applicants-wrapper" {{'hidden' if display_ticket.state != 'Closed'}}>
 					<h3>Successful Applicants</h3>
 					<div class="ticket-applicants">{{display_ticket.successful_applicant|wrap}}</div>
 				</div>
