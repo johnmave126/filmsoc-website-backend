@@ -37,7 +37,7 @@
 							{% set actor_cnt = 0 %}
 							{% for actor in disk.actors %}
 							<span class="link link-search" tag="actor">actor</span>
-							{% if not actor_cnt is equalto 0 %}
+							{% if actor_cnt != 0 %}
 							<span class="space"></span>
 							{% endif %}
 							{% set actor_cnt = actor_cnt + 1 %}
@@ -52,7 +52,7 @@
 							{% set tag_cnt = 0 %}
 							{% for tag in disk.tags %}
 							<span class="link link-search" tag="tag">tag</span>
-							{% if not tag_cnt is equalto 0 %}
+							{% if tag_cnt != 0 %}
 							<span class="space"></span>
 							{% endif %}
 							{% set tag_cnt = tag_cnt + 1 %}
