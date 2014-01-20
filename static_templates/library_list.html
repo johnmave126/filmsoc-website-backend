@@ -12,7 +12,7 @@
 		<div class="item-6"><div></div><div></div></div>
 		<div class="item-7"><div></div><div></div></div>
 	</div>
-	<a href="{{prev_url}}" alt="previous_page"><button class="prev-button" hidden>&lt;</button></a>
+	<a href="{{prev_url}}" alt="previous_page"><button class="prev-button" {{"hidden" if page <= 1}}>&lt;</button></a>
 	<div class="list-item-wrapper">
 		{% set cnt = 0 %}
 		{% for disk in disk_sq %}
@@ -37,6 +37,6 @@
 		{% set cnt = cnt + 1 %}
 		{% endfor %}
 	</div>
-	<a href="{{next_url}}" alt="next_page"><button class="next-button" hidden>&gt;</button></a>
+	<a href="{{next_url}}" alt="next_page"><button class="next-button" {{"hidden" if page >= total}}>&gt;</button></a>
 </div>
 {% endblock %}

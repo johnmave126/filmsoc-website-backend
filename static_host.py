@@ -94,18 +94,19 @@ def static_library():
     prev_component = ["page=%d" % (page - 1)] if page > 1 else []
     if mode in ["popular", "rank"]:
         prev_component.append("mode=%s" % mode)
-    prev_url = ('ihome.ust.hk/~su_film/#!library/?' +
+    prev_url = ('#!library/?' +
                 '&'.join(prev_component)).rstrip('?')
 
     next_component = ["page=%d" % (page + 1)] if page < total_page else []
     if mode in ["popular", "rank"]:
         next_component.append("mode=%s" % mode)
-    next_url = ('ihome.ust.hk/~su_film/#!library/?' +
+    next_url = ('#!library/?' +
                 '&'.join(next_component)).rstrip('?')
 
     return render_template("library_list.html",
                             disk_sq=disk_sq, title=title,
-                            prev_url=prev_url, next_url=next_url)
+                            prev_url=prev_url, next_url=next_url,
+                            page=page, total=total_page)
 
 @static_host.route('/library/<int:disk_id>/')
 def static_disk(disk_id):
