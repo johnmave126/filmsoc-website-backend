@@ -31,25 +31,15 @@
 					<div class="ticket-cover" style="background-image: url({{display_ticket.cover_url|file_location}});">
 					</div>
 					<div class="ticket-info-1">
-
 						<div><span class="key">Director:</span> {{display_ticket.director_en}}&nbsp;/&nbsp;{{display_ticket.director_ch}}</div>
-
 						<div><span class="key">Stars:</span> {{display_ticket.actors | join(', ')}}</div>
-
 						<div><span class="key">Length:</span> {{display_ticket.length or "Unknown"}} Minutes</div>
-
 						<div><span class="key">Language:</span> {{display_ticket.language or "Unknown"}}</div>
-
 						<div><span class="key">Subtitle:</span> {{display_ticket.subtitle or "Unknown"}}</div>
-
 						<div><span class="key">Time:</span> {{display_ticket.show_time or "Unknown"}}</div>
-
 						<div><span class="key">Venue:</span> {{display_ticket.venue or "Unknown"}}</div>
-
 						<div><span class="key">Apply Deadline:</span> {{display_ticket.apply_deadline}}</div>
-			 
 						<div><span class="key">Quantity:</span> {{display_ticket.quantity}}</div>
-
 					</div>
 				</div>
 				<div class="ticket-action">

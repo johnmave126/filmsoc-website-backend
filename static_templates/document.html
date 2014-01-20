@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Document{% endblock %}
+{% block content %}
+<div class="doc-wrapper">
+	<div class="left-panel">
+		<div class="doc-list-wrapper">
+			{% for doc in doc_sq %}
+			<button class="document-button">
+				{{doc.title}}
+			</button>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="right-panel">
+		<div class="spinner">
+			<div class="item-0"><div></div><div></div></div>
+			<div class="item-1"><div></div><div></div></div>
+			<div class="item-2"><div></div><div></div></div>
+			<div class="item-3"><div></div><div></div></div>
+			<div class="item-4"><div></div><div></div></div>
+			<div class="item-5"><div></div><div></div></div>
+			<div class="item-6"><div></div><div></div></div>
+			<div class="item-7"><div></div><div></div></div>
+		</div>
+		<div class="doc-content-wrapper">
+			<div class="doc-detail">
+				<header>
+					<h2 class="doc-title">
+						{{display_doc.title}}
+					</h2>
+					<div class="doc-action">
+						<a href="{{display_doc.doc_url|file_location}}?force_download=true&dn_name={{display_doc.name}}" alt="Download">Download</a>
+						<a href="{{display_doc.doc_url|file_location}}" target="_blank" alt="View in New Window">View in New Window</a>
+					</div>
+				</header>
+				<div class="doc-content">
+					<iframe class="doc-file" src="http://docs.google.com/viewer?url={{display_doc.doc_url|file_location|}}&embedded=true" sandbox="allow-scripts allow-same-origin"></iframe>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

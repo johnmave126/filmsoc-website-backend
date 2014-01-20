@@ -132,5 +132,13 @@ def static_tickets():
                             ticket_sq=ticket_sq, display_ticket=display_ticket)
 
 
+@static_host.route('/document/')
+def static_document():
+    doc_sq = Document.select()
+    display_doc = doc_sq.get()
+
+    return render_template("document.html",
+                            doc_sq=doc_sq, display_doc=display_doc)
+
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
