@@ -80,10 +80,13 @@ def static_library():
     disk_sq = Disk.select()
     if mode == "popular":
         disk_sq = disk_sq.order_by(Disk.borrow_cnt.desc())
+        title = "Top Popular"
     elif mode == "rank":
         disk_sq = disk_sq.order_by(Disk.rank.desc())
+        title = "Top Rank"
     else:
         disk_sq = disk_sq.order_by(Disk.id.desc())
+        title = "VCD/DVD Library"
 
     disk_sq = disk_sq.paginate(page, 6)
     total_page = int(math.ceil(float(disk_sq.count()) / 6))
@@ -101,7 +104,7 @@ def static_library():
                 '&'.join(next_component)).rstrip('?')
 
     return render_template("library_list.html",
-                            disk_sq=disk_sq,
+                            disk_sq=disk_sq, title=title,
                             prev_url=prev_url, next_url=next_url)
 
 @static_host.route('/library/<int:disk_id>/')
