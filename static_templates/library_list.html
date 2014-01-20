@@ -1,7 +1,7 @@
 {% extends "library_base.html" %}
 {% block title %}{{title}}{% endblock %}
 {% block library_content %}
-<div class="library-list loading">
+<div class="library-list">
 	<div class="spinner">
 		<div class="item-0"><div></div><div></div></div>
 		<div class="item-1"><div></div><div></div></div>
@@ -14,8 +14,9 @@
 	</div>
 	<a href="{{prev_url}}" alt="previous_page"><button class="prev-button" hidden>&lt;</button></a>
 	<div class="list-item-wrapper">
+		{% set cnt = 0 %}
 		{% for disk in disk_sq %}
-		<div class="list-item">
+		<div class="list-item item-{{cnt}}">
 			<div class="disk-wrapper">
 				<div class="disk-cover">
 					<div class="disk-cover-border" style="background-image: url({{disk.cover_url | file_location}});">
@@ -33,6 +34,7 @@
 				</div>
 			</div>
 		</div>
+		{% set cnt = cnt + 1 %}
 		{% endfor %}
 	</div>
 	<a href="{{next_url}}" alt="next_page"><button class="next-button" hidden>&gt;</button></a>
