@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Preview Show Tickets{% endblock %}
+{% block content %}
+<div class="ticket-wrapper">
+	<div class="left-panel light-scrollbar">
+		<div class="ticket-list-wrapper">
+			{% for ticket in ticket_sq %}
+			<div class="ticket-list-item">
+				<div class="ticket-item-wrapper">
+					<div class="item-cover" style="background-image: url({{ticket.cover_url|file_location}});">
+					</div>
+					<div class="item-info">
+						{{ticket.title_en}}<hr>
+						{{ticket.title_ch}}<hr>
+					</div>
+					<div class="item-state {{ticket.state}}">
+						{{ticket.state}}
+					</div>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="right-panel">
+		<div class="ticket-detail-wrapper">
+			<div class="ticket-detail">
+				<h2 class="ticket-title">
+					{{display_ticket.title_en}}&nbsp;/&nbsp;{{display_ticket.title_ch}}
+				</h2>
+				<div class="ticket-brief">
+					<div class="ticket-cover">
+					</div>
+					<div class="ticket-info-1">
+
+						<div><span class="key">Director:</span> {{display_ticket.director_en}}&nbsp;/&nbsp;{{ticket.director_ch}}</div>
+
+						<div><span class="key">Stars:</span> {{display_ticket.actors | join(', ')}}</div>
+
+						<div><span class="key">Length:</span> {{display_ticket.length or "Unknown"}} Minutes</div>
+
+						<div><span class="key">Language:</span> {{display_ticket.language or "Unknown"}}</div>
+
+						<div><span class="key">Subtitle:</span> {{display_ticket.subtitle or "Unknown"}}</div>
+
+						<div><span class="key">Time:</span> {{display_ticket.show_time or "Unknown"}}</div>
+
+						<div><span class="key">Venue:</span> {{display_ticket.venue or "Unknown"}}</div>
+
+						<div><span class="key">Apply Deadline:</span> {{display_ticket.apply_deadline}}</div>
+			 
+						<div><span class="key">Quantity:</span> {{display_ticket.quantity}}</div>
+
+					</div>
+				</div>
+				<div class="ticket-action">
+					<button controls="apply" hidden>Apply For Ticket</button>
+				</div>
+				<div class="ticket-applicants-wrapper" {{'hidden' if ticket.state != 'Closed'}}>
+					<h3>Successful Applicants</h3>
+					<div class="ticket-applicants">{{display_ticket.successful_applicant|wrap}}</div>
+				</div>
+				<div class="ticket-remarks-wrapper">
+					<h3>Remarks</h3>
+					<div class="ticket-remarks">{{display_ticket.remarks or "No remarks yet"|wrap}}</div>
+				</div>
+				<div class="ticket-desc">
+					<h3>Plot</h3>
+					<div class="ticket-desc-en">
+						{{display_ticket.desc_en|wrap}}
+					</div>
+					<div class="ticket-desc-ch">
+						{{display_ticket.desc_ch|wrap}}
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="spinner">
+			<div class="item-0"><div></div><div></div></div>
+			<div class="item-1"><div></div><div></div></div>
+			<div class="item-2"><div></div><div></div></div>
+			<div class="item-3"><div></div><div></div></div>
+			<div class="item-4"><div></div><div></div></div>
+			<div class="item-5"><div></div><div></div></div>
+			<div class="item-6"><div></div><div></div></div>
+			<div class="item-7"><div></div><div></div></div>
+		</div>
+	</div>
+	<div class="popup-overlay loading" hidden>
+		<div class="popup-box">
+			<div class="close-button"></div>
+			<h1>&nbsp;</h1>
+			<div class="content">
+			</div>
+			<div class="spinner">
+				<div class="item-0"><div></div><div></div></div>
+				<div class="item-1"><div></div><div></div></div>
+				<div class="item-2"><div></div><div></div></div>
+				<div class="item-3"><div></div><div></div></div>
+				<div class="item-4"><div></div><div></div></div>
+				<div class="item-5"><div></div><div></div></div>
+				<div class="item-6"><div></div><div></div></div>
+				<div class="item-7"><div></div><div></div></div>
+			</div>
+			<div class="popup-box-cover">
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

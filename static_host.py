@@ -122,5 +122,15 @@ def static_disk(disk_id):
                             disk=disk, ups=ups, downs=downs,
                             reviews=reviews)
 
+
+@static_host.route('/ticket/')
+def static_tickets():
+    ticket_sq = PreviewShowTicket.select().limit(20)
+    display_ticket = ticket_sq.get()
+
+    return render_template("ticket.html",
+                            ticket_sq=ticket_sq, display_ticket=display_ticket)
+
+
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
