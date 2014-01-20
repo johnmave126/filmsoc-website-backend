@@ -34,14 +34,13 @@
 
 					<div><span class="key">Stars:</span>
 						<span class="actors-wrapper">
-							{% set actor_cnt = 0 %}
-							{% for actor in disk.actors %}
-							{% if actor_cnt != 0 %}
+							{%- set actor_cnt = 0 -%}
+							{%- for actor in disk.actors -%}
+							{%- if actor_cnt != 0 -%}
 							<span class="space"></span>
-							{% endif %}
-							<span class="link link-search" tag="actor">{{actor}}</span>
-							{% set actor_cnt = actor_cnt + 1 %}
-							{% endfor %}
+							{%- endif %}<span class="link link-search" tag="actor">{{actor}}</span>
+							{%- set actor_cnt = actor_cnt + 1 -%}
+							{%- endfor -%}
 						</span>
 					</div>
 
@@ -49,14 +48,13 @@
 
 					<div><span class="key">Tags:</span>
 						<span class="tags-wrapper">
-							{% set tag_cnt = 0 %}
-							{% for tag in disk.tags %}
-							{% if tag_cnt != 0 %}
+							{%- set tag_cnt = 0 -%}
+							{%- for tag in disk.tags -%}
+							{%- if tag_cnt != 0 -%}
 							<span class="space"></span>
-							{% endif %}
-							<span class="link link-search" tag="tag">{{tag}}</span>
-							{% set tag_cnt = tag_cnt + 1 %}
-							{% endfor %}
+							{%- endif -%}<span class="link link-search" tag="tag">{{tag}}</span>
+							{%- set tag_cnt = tag_cnt + 1 -%}
+							{%- endfor -%}
 						</span>
 					</div>
 
