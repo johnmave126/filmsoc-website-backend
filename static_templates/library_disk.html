@@ -32,11 +32,33 @@
 
 					<div><span class="key">Director:</span> <span class="link link-search" tag="director">{{disk.director_en}}</span>&nbsp;/&nbsp;<span class="link link-search" tag="director">{{disk.director_ch}}</span></div>
 
-					<div><span class="key">Stars:</span> <span class="actors-wrapper"></span></div>
+					<div><span class="key">Stars:</span>
+						<span class="actors-wrapper">
+							{% set actor_cnt = 0 %}
+							{% for actor in disk.actors %}
+							<span class="link link-search" tag="actor">actor</span>
+							{% if not actor_cnt is euqalto 0 %}
+							<span class="space"></span>
+							{% endif %}
+							{% set actor_cnt = actor_cnt + 1 %}
+							{% endfor %}
+						</span>
+					</div>
 
 					<div><span class="key">Category:</span> {{disk.category or 'Unknown'}}</div>
 
-					<div><span class="key">Tags:</span> <span class="tags-wrapper"></span></div>
+					<div><span class="key">Tags:</span>
+						<span class="tags-wrapper">
+							{% set tag_cnt = 0 %}
+							{% for tag in disk.tags %}
+							<span class="link link-search" tag="tag">tag</span>
+							{% if not tag_cnt is euqalto 0 %}
+							<span class="space"></span>
+							{% endif %}
+							{% set tag_cnt = tag_cnt + 1 %}
+							{% endfor %}
+						</span>
+					</div>
 
 					<div><span class="key">Length:</span> {{disk.length or "Unknown"}} Minutes</div>
 
