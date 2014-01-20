@@ -85,16 +85,19 @@ def static_library():
         disk_sq = disk_sq.order_by(Disk.id.desc())
 
     disk_sq = disk_sq.paginate(page, 6)
+    total_page = int(math.ceil(float(disk_sq.count()) / 6))
 
     prev_component = ["page=%d" % (page - 1)] if page > 1 else []
     if mode in ["popular", "rank"]:
         prev_component.append("mode=%s" % mode)
-    prev_url = ('?' + '&'.join(prev_component)).rstrip('?')
+    prev_url = ('ihome.ust.hk/~su_film/#!library/?' +
+                '&'.join(prev_component)).rstrip('?')
 
-    next_component = ["page=%d" % (page + 1)] if page < disk_sq.get_pages() else []
+    next_component = ["page=%d" % (page + 1)] if page < total_page else []
     if mode in ["popular", "rank"]:
         next_component.append("mode=%s" % mode)
-    next_url = ('?' + '&'.join(next_component)).rstrip('?')
+    next_url = ('ihome.ust.hk/~su_film/#!library/?' +
+                '&'.join(next_component)).rstrip('?')
 
     return render_template("library_list.html",
                             disk_sq=disk_sq,
