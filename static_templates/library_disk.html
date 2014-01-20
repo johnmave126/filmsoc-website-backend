@@ -36,10 +36,10 @@
 						<span class="actors-wrapper">
 							{% set actor_cnt = 0 %}
 							{% for actor in disk.actors %}
-							<span class="link link-search" tag="actor">{{actor}}</span>
 							{% if actor_cnt != 0 %}
 							<span class="space"></span>
 							{% endif %}
+							<span class="link link-search" tag="actor">{{actor}}</span>
 							{% set actor_cnt = actor_cnt + 1 %}
 							{% endfor %}
 						</span>
@@ -51,10 +51,10 @@
 						<span class="tags-wrapper">
 							{% set tag_cnt = 0 %}
 							{% for tag in disk.tags %}
-							<span class="link link-search" tag="tag">{{tag}}</span>
 							{% if tag_cnt != 0 %}
 							<span class="space"></span>
 							{% endif %}
+							<span class="link link-search" tag="tag">{{tag}}</span>
 							{% set tag_cnt = tag_cnt + 1 %}
 							{% endfor %}
 						</span>
