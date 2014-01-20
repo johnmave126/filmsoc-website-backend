@@ -83,7 +83,7 @@ def static_library():
         title = "Top Popular"
     elif mode == "rank":
         disk_sq = disk_sq.order_by(Disk.rank.desc())
-        title = "Top Rank"
+        title = "Top Ranked"
     else:
         disk_sq = disk_sq.order_by(Disk.id.desc())
         title = "VCD/DVD Library"
