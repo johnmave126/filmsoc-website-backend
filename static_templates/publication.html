@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Publication{% endblock %}
+{% block content %}
+<div class="publication-wrapper">
+	<div class="left-panel">
+		<div class="top-face">
+			<div class="top-navigation">
+				<button class="btn-rotate-left">&lt;</button>
+				Magazine
+				<button class="btn-rotate-right">&gt;</button>
+			</div>
+			<div class="publication-magazine-list-wrapper">
+				{% for publication in sq["Magazine"] %}
+				<div class="publication-list-item">
+					<div class="publication-cover" style="background-image:url({{publication.cover_url|file_location}}">
+						<div class="publication-title">{{publication.title}}</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="left-face">
+			<div class="top-navigation">
+				<button class="btn-rotate-left">&lt;</button>
+				Micro Magazine
+				<button class="btn-rotate-right">&gt;</button>
+			</div>
+			<div class="publication-micromagazine-list-wrapper">
+				{% for publication in sq["MicroMagazine"] %}
+				<div class="publication-list-item">
+					<div class="publication-cover" style="background-image:url({{publication.cover_url|file_location}}">
+						<div class="publication-title">{{publication.title}}</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="right-face">
+			<div class="top-navigation">
+				<button class="btn-rotate-left">&lt;</button>
+				Podcast
+				<button class="btn-rotate-right">&gt;</button>
+			</div>
+			<div class="publication-podcast-list-wrapper">
+				{% for publication in sq["Podcast"] %}
+				<div class="publication-list-item">
+					<div class="publication-cover" style="background-image:url({{publication.cover_url|file_location}}">
+						<div class="publication-title">{{publication.title}}</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	<div class="right-panel">
+		<div class="spinner">
+			<div class="item-0"><div></div><div></div></div>
+			<div class="item-1"><div></div><div></div></div>
+			<div class="item-2"><div></div><div></div></div>
+			<div class="item-3"><div></div><div></div></div>
+			<div class="item-4"><div></div><div></div></div>
+			<div class="item-5"><div></div><div></div></div>
+			<div class="item-6"><div></div><div></div></div>
+			<div class="item-7"><div></div><div></div></div>
+		</div>
+		<div class="publication-content-wrapper">
+			<div class="publication-detail">
+				<header>
+					<h2 class="publication-title">
+						{{display_pub.title}}
+					</h2>
+					<div class="publication-action">
+						<a href="{{display_pub.doc_url|file_location}}?force_download=true&dn_name={{display_pub.doc_url.name}}" alt="Download">Download</a>
+						<a href="{{display_pub.doc_url|file_location}}" target="_blank" alt="View in New Window">View in New Window</a>
+					</div>
+				</header>
+				<div id="embedded_pub_0" class="publication-content">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block callback %}
+<script type="text/javascript">
+    var pub_url = {{display_pub.doc_url|file_location|tojson|safe}},
+        pub_title = {{display_pub.title|tojson|safe}},
+        scribd_doc = scribd.Document.getDocFromUrl(pub_url, cr.settings.scribd_id);
+    scribd_doc.addParam('jsapi_version', 2);
+    scribd_doc.addParam('title', pub_title);
+    scribd_doc.addParam('public', true);
+    scribd_doc.addParam('mode', 'list');
+    scribd_doc.write("embedded_pub_0");
+</script>
+{% endblock %}

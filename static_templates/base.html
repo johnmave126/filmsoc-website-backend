@@ -124,7 +124,6 @@
         <div id="footer-helper"></div>
     </div>
     <div id="footer">
-        {% block footer %}
         <a class="navigator selected" controls="news" href="#!home">Home</a>
         <a class="navigator" controls="show" href="#!show/">Regular Film Show</a>
         <a class="navigator" controls="library" href="#!library/">VCD/DVD Library</a>
@@ -133,13 +132,14 @@
         <a class="navigator" controls="publication" href="#!publication/">Publications</a>
         <a class="navigator" controls="sponsor" href="#!sponsor/">Sponsors</a>
         <a class="navigator-last" controls="about" href="#!about/">About Us</a>
-        {% endblock %}
     </div>
 
     <!-- scripts -->
     <script type="text/javascript" src="http://www.scribd.com/javascripts/scribd_api.js" defer></script>
     <script type="text/javascript" src="asset/js/front/ziggurat.js"></script>
     <script type="text/javascript" src="asset/js/application.min.js"></script>
+    {% block callback %}
+    {% endblock %}
     <script>routerManager.push = routerManager.parseHash = function(){}</script>
 </body>
 </html>

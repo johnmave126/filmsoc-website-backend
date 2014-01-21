@@ -1,3 +1,6 @@
+# This file declares several static pages identical to frontend
+# for googlebot to crawl the pages
+
 import math
 import socket
 from markupsafe import Markup, escape
@@ -122,7 +125,6 @@ def static_disk(disk_id):
                             disk=disk, ups=ups, downs=downs,
                             reviews=reviews)
 
-
 @static_host.route('/ticket/')
 def static_tickets():
     ticket_sq = PreviewShowTicket.select().limit(20)
@@ -131,7 +133,6 @@ def static_tickets():
     return render_template("ticket.html",
                             ticket_sq=ticket_sq, display_ticket=display_ticket)
 
-
 @static_host.route('/document/')
 def static_document():
     doc_sq = Document.select()
@@ -139,6 +140,16 @@ def static_document():
 
     return render_template("document.html",
                             doc_sq=doc_sq, display_doc=display_doc)
+
+@static_host.route('/publication/')
+def static_publication():
+    sq = {}
+    for pub_type in ["Magazine", "MicroMagazine", "Podcast"]:
+        sq[pub_type] = Publication.select().where(Publication.pub_type == pub_type).limit(20)
+
+    display_pub = Publication.select().where(Publication.pub_type == "Magazine").get()
+
+    return render_template("publication.html", sq=sq, display_pub=display_pub)
 
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
