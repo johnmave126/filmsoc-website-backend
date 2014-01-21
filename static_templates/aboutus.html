@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}About Us{% endblock %}
+{% block content %}
+<div class="aboutus-wrapper">
+	<div class="left-panel">
+		<div class="spinner">
+			<div class="item-0"><div></div><div></div></div>
+			<div class="item-1"><div></div><div></div></div>
+			<div class="item-2"><div></div><div></div></div>
+			<div class="item-3"><div></div><div></div></div>
+			<div class="item-4"><div></div><div></div></div>
+			<div class="item-5"><div></div><div></div></div>
+			<div class="item-6"><div></div><div></div></div>
+			<div class="item-7"><div></div><div></div></div>
+		</div>
+		<div class="item-info-wrapper">
+			{% include "aboutus_society.html" %}
+		</div>
+	</div>
+	<div class="right-panel">
+		<div class="aboutus-list-wrapper">
+			<div class="aboutus-list-item">
+				<header>Film Society</header>
+				<div class="aboutus-item-body">
+					Session {{session}}
+				</div>
+			</div>
+			{% for exco in exco_sq %}
+			<div class="aboutus-list-item">
+				<header>{{exco.position}}</header>
+				<div class="aboutus-item-body">
+					{{exco.name_ch}}<br>
+					{{exco.name_en}}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		<div class="aboutus-list-spacer"></div>
+	</div>
+</div>
+{% endblock %}

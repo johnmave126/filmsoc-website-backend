@@ -72,11 +72,6 @@ def main():
         tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
         write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
 
-    #sponsor
-    tlog = Log.select().where(Log.model == 'Sponsor').get()
-    tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!document", lastmod=tlog_time, priority=0.3)
-
     #aboutus
     write_tag(output, "http://ihome.ust.hk/~su_film/#!aboutus", priority=0.7)
 

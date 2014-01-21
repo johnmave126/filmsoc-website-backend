@@ -151,5 +151,17 @@ def static_publication():
 
     return render_template("publication.html", sq=sq, display_pub=display_pub)
 
+# not included in search engine
+@static_host.route('/sponsor/')
+def static_sponsor():
+    return "Sponsor"
+
+@static_host.route('/aboutus/')
+def static_aboutus():
+    exco_sq = Exco.select()
+
+    return render_template("aboutus.html", exco_sq=exco_sq,
+                            session="2013-2014")
+
 # register Blueprint
 app.register_blueprint(static_host, url_prefix='/static')
