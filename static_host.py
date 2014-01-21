@@ -156,7 +156,7 @@ def static_publication():
 def static_sponsor():
     return "Sponsor"
 
-@static_host.route('/aboutus/')
+@static_host.route('/about/')
 def static_aboutus():
     exco_sq = Exco.select()
 
