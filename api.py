@@ -162,7 +162,8 @@ class UserResource(HookedResource):
             Log.model == 'Disk',
             Log.user_affected == obj,
             Log.content % "check out%").group_by(Log.model_refer).limit(10)
-        data['borrow_history'] = map(self.disk_wrapper, history_sq)
+        data['borrow_history'] = map(self.disk_wrapper,
+                                        (x.model_refer for x in history_sq))
         return super(UserResource, self).prepare_data(obj, data)
 
     def validate_data(self, data, obj=None):
