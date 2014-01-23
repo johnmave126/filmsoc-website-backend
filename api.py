@@ -756,7 +756,7 @@ class DiskReviewResource(LoggedRestResource):
         """
         ref_id = (self.model.next_primary_key()
                     if g.modify_flag == 'create' else instance.id)
-        content = self.get_log(instance)
+        content = self.get_log(instance, ref_id)
 
         if g.modify_flag == 'create':
             log = Log.create(
