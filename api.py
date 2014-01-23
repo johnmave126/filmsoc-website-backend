@@ -149,7 +149,7 @@ class UserResource(HookedResource):
             Log.log_type == 'borrow',
             Log.model == 'Disk',
             Log.user_affected == obj,
-            Log.content % "check out%").group_by(Log.model_refer)
+            Log.content % "check out%").group_by(Log.model_refer).limit(10)
         data['borrow_history'] = [x.model_refer for x in history_sq]
         return super(UserResource, self).prepare_data(obj, data)
 
