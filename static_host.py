@@ -20,7 +20,9 @@ static_host = Blueprint('static_host',
 
 @static_host.app_template_filter('file_location')
 def file_location(file_):
-    return "http://ihome.ust.hk/~su_film/asset/upload/%s" % file_.url
+    return ("http://ihome.ust.hk/~su_film/asset/" +
+            ("upload/%s" % file_.url if file_ is not None
+                else "css/question.png"))
 
 @static_host.app_template_filter('todate')
 def todatestring(data, format=""):
