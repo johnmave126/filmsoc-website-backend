@@ -139,18 +139,29 @@ class UserResource(HookedResource):
         'default': ['full_name', 'student_id', 'itsc']
     }
 
+    def disk_wrapper(self, disk):
+        """Wrap disk information a little bit"""
+        if isinstance(disk, int):
+            disk = Disk.select().where(Disk.id == disk).get()
+        return {
+            "id": disk.id,
+            "cover_url": disk.cover_url.url,
+            "title_en": disk.title_en,
+            "title_ch": disk.title_ch
+        }
+
     def prepare_data(self, obj, data):
         """Adding extra information of disk holding information
         """
-        data['borrowed'] = [x.id for x in obj.borrowed]
-        data['reserved'] = [x.id for x in obj.reserved]
+        data['borrowed'] = map(disk_wrapper, obj.borrowed)
+        data['reserved'] = map(disk_wrapper, obj.reserved)
 
         history_sq = Log.select().where(
             Log.log_type == 'borrow',
             Log.model == 'Disk',
             Log.user_affected == obj,
             Log.content % "check out%").group_by(Log.model_refer).limit(10)
-        data['borrow_history'] = [x.model_refer for x in history_sq]
+        data['borrow_history'] = map(disk_wrapper, history_sq)
         return super(UserResource, self).prepare_data(obj, data)
 
     def validate_data(self, data, obj=None):
