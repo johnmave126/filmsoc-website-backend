@@ -139,7 +139,8 @@ class UserResource(HookedResource):
         'default': ['full_name', 'student_id', 'itsc']
     }
 
-    def disk_wrapper(self, disk):
+    @staticmethod
+    def disk_wrapper(disk):
         """Wrap disk information a little bit"""
         if isinstance(disk, int):
             disk = Disk.select().where(Disk.id == disk).get()
@@ -153,15 +154,15 @@ class UserResource(HookedResource):
     def prepare_data(self, obj, data):
         """Adding extra information of disk holding information
         """
-        data['borrowed'] = map(disk_wrapper, obj.borrowed)
-        data['reserved'] = map(disk_wrapper, obj.reserved)
+        data['borrowed'] = map(self.disk_wrapper, obj.borrowed)
+        data['reserved'] = map(self.disk_wrapper, obj.reserved)
 
         history_sq = Log.select().where(
             Log.log_type == 'borrow',
             Log.model == 'Disk',
             Log.user_affected == obj,
             Log.content % "check out%").group_by(Log.model_refer).limit(10)
-        data['borrow_history'] = map(disk_wrapper, history_sq)
+        data['borrow_history'] = map(self.disk_wrapper, history_sq)
         return super(UserResource, self).prepare_data(obj, data)
 
     def validate_data(self, data, obj=None):
