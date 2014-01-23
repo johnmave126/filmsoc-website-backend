@@ -764,6 +764,7 @@ class DiskReviewResource(LoggedRestResource):
                 model_refer=ref_id, user_affected=g.user,
                 admin_involved=None, content=content)
             instance.create_log = log
+            instance.poster = g.user
         else:
             ref_id = instance.id
             # delete related logs
