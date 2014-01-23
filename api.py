@@ -760,18 +760,18 @@ class DiskReviewResource(LoggedRestResource):
 
         if g.modify_flag == 'create':
             log = Log.create(
-                model=log_model, log_type=g.modify_flag,
+                model=self.log_model, log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=g.user,
                 admin_involved=None, content=content)
             instance.create_log = log
         else:
             ref_id = instance.id
             # delete related logs
-            Log.delete().where(Log.model == log_model,
+            Log.delete().where(Log.model == self.log_model,
                 Log.model_refer == ref_id)
             #create delete log
             log = Log.create(
-                model=log_model, log_type=g.modify_flag,
+                model=self.log_model, log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=instance.poster,
                 admin_involved=g.user, content=content)
         return instance
