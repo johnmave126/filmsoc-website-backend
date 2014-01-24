@@ -561,6 +561,12 @@ class RegularFilmShow(LogModel):
         user.rfs_count += 1
         self.participant_list.append(user.id)
 
+    def to_show(self):
+        """Return the disk that wins the Movote
+        """
+        idx = max([1, 2, 3],key=lambda o: getattr(self, "vote_cnt_%d" % o))
+        return getattr(self, "film_%d" % idx)
+
 
 class PreviewShowTicket(LogModel):
     """Model to store preview show tickets
@@ -668,13 +674,6 @@ class PreviewShowTicket(LogModel):
             ['su_film@ust.hk'] + [x.email for x in sq], [],
             "Ticket Application", mail_content
         )
-
-    def to_show(self):
-        """Return the disk that wins the Movote
-        """
-        idx = max([1, 2, 3],key=lambda o: getattr(self, "vote_cnt_%d" % o))
-        return getattr(self, "film_%d" % idx)
-
 
 
 class DiskReview(LogModel):
