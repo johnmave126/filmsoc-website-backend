@@ -541,10 +541,10 @@ class RegularFilmShow(LogModel):
             raise BusinessException("You have voted before", 3)
         # add vote count
         setattr(self,
-                "vote_cnt_%s" % vote, getattr(obj, "vote_cnt_%s" % vote) + 1)
+                "vote_cnt_%s" % vote, getattr(self, "vote_cnt_%s" % vote) + 1)
         # add log
         Log.create(
-            model="RegularFilmShow", model_refer=obj.id,
+            model="RegularFilmShow", model_refer=self.id,
             log_type="vote", user_affected=g.user,
             content="member %s vote for film No. %s" % (user.itsc, vote))
 
