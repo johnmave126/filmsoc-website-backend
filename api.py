@@ -225,8 +225,9 @@ class UserResource(HookedResource):
     def before_save(self, instance):
         """Create Log and update mailing list on deletion
         """
+        ref_id = (self.model.next_primary_key()
+                    if g.modify_flag == 'create' else instance.id)
         if g.modify_flag == 'delete':
-            ref_id = instance.id
             # delete related logs
             Log.delete().where(Log.user_affected == instance)
             # insert deletion log
@@ -236,7 +237,6 @@ class UserResource(HookedResource):
                 content="delete member " + instance.itsc)
         else:
             # create or edit
-            ref_id = instance.id
             Log.create(
                 model="User", log_type=g.modify_flag,
                 model_refer=ref_id, user_affected=instance,
