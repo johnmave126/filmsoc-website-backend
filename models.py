@@ -391,7 +391,7 @@ class Disk(LogModel):
         # check renew times
         last_log = Log.select().where(
                 Log.model == 'Disk', Log.model_refer == self.id,
-                Log.log_type == 'borrow', Log.user_affected == req_user
+                Log.log_type == 'borrow', Log.user_affected == self.hold_by
             ).order_by(Log.created_at.desc()).get()
         if 'renew' in last_log.content:
             # renewed before
