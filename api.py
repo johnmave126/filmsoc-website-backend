@@ -456,7 +456,7 @@ class DiskResource(LoggedRestResource):
 
         obj.save()
         new_log.save()
-        return self.response({})
+        return self.object_detail(obj)
 
     def api_borrow(self, pk):
         """API to borrow disk"""
@@ -517,7 +517,7 @@ class DiskResource(LoggedRestResource):
 
         obj.save()
         new_log.save()
-        return self.response({})
+        return self.object_detail(obj)
 
     def api_rate(self, pk):
         """API to acquire the ups and downs of a disk"""
