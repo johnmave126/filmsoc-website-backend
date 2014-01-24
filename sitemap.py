@@ -73,7 +73,7 @@ def main():
         write_tag(output, "http://ihome.ust.hk/~su_film/#!publication", lastmod=tlog_time, changefreq="monthly", priority=0.7)
 
     #aboutus
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!aboutus", priority=0.7)
+    write_tag(output, "http://ihome.ust.hk/~su_film/#!about/", priority=0.7)
 
     print >>output, "</urlset>"
 
