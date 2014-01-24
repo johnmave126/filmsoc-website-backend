@@ -228,7 +228,7 @@ class UserResource(HookedResource):
         if g.modify_flag == 'delete':
             ref_id = instance.id
             # delete related logs
-            Log.delete.where(Log.user_affected == instance)
+            Log.delete().where(Log.user_affected == instance)
             # insert deletion log
             Log.create(
                 model="User", log_type=g.modify_flag,
