@@ -448,14 +448,14 @@ class Disk(LogModel):
                 Log.model == 'Disk', Log.model_refer == self.id,
                 Log.log_type == 'rate', Log.user_affected == user).exists():
             raise BusinessException("You have rated this disk before", 3)
-        new_log = Log(model='Disk', model_refer=obj.id,
+        new_log = Log(model='Disk', model_refer=self.id,
                         log_type='rate', user_affected=g.user)
         if rate == 'up':
             new_log.content = ("member %s rate +1 for disk %s" % 
-                                (g.user.itsc, obj.get_callnumber()))
+                                (g.user.itsc, self.get_callnumber()))
         else:
             new_log.content = ("member %s rate -1 for disk %s" % 
-                                (g.user.itsc, obj.get_callnumber()))
+                                (g.user.itsc, self.get_callnumber()))
 
         new_log.save()
 
