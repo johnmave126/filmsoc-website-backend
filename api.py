@@ -146,7 +146,7 @@ class UserResource(HookedResource):
             disk = Disk.select().where(Disk.id == disk).get()
         return {
             "id": disk.id,
-            "cover_url": disk.cover_url.url,
+            "cover_url": disk.cover_url.url if disk.cover_url else None,
             "title_en": disk.title_en,
             "title_ch": disk.title_ch
         }

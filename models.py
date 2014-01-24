@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from flask import render_template
+from flask import render_template, g
 from peewee import *
 
 from frame_ext import IterableModel, BusinessException
