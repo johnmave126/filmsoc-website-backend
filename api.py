@@ -535,7 +535,7 @@ class DiskResource(LoggedRestResource):
             if not g.user:
                 return self.response_forbidden()
 
-            obj.add_rate(data['rate'])
+            obj.add_rate(g.user, data['rate'])
             rated = True
             ups, downs = obj.get_rate()
 
