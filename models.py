@@ -442,7 +442,7 @@ class Disk(LogModel):
         :param rate:
             'up' or 'down' indicating the user's preference
         """
-        if self.check_enable():
+        if not self.check_enable():
             raise BusinessException("VCD/DVD Library Closed", 3)
         if Log.select().where(
                 Log.model == 'Disk', Log.model_refer == self.id,
