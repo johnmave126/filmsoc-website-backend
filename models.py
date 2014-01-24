@@ -322,7 +322,8 @@ class Disk(LogModel):
             raise BusinessException("VCD/DVD Library Closed", 3)
 
         self.reserved_by = g.user
-        self.avail_type = "Reserve" + reserve_type
+        self.avail_type = ("Reserved" if reserve_type == "Hall"
+                            else "ReservedCounter")
 
     def clear_reservation(self):
         """Clear the reservation of the disk"""
