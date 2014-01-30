@@ -59,7 +59,7 @@ def main():
     #ticket
     tlog = Log.select().where(Log.model == 'PreviewShowTicket').get()
     tlog_time = tlog.created_at.strftime('%Y-%m-%dT%H:%M:%S+08:00')
-    write_tag(output, "http://ihome.ust.hk/~su_film/#!ticket", lastmod=tlog_time, changefreq="weekly", priority=0.8)
+    write_tag(output, "http://ihome.ust.hk/~su_film/#!ticket", lastmod=tlog_time, changefreq="daily", priority=0.8)
 
     #document
     tlog = Log.select().where(Log.model == 'Document').get()
