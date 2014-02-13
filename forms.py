@@ -303,7 +303,7 @@ class ReserveForm(Form):
     ])
     room = f.TextField(u'room', [
         Optional(),
-        Regexp('^\d{3}[ULRulr]?$', message="Invalid room number")
+        Regexp('^\d{3,4}[ULRBulrb]?$', message="Invalid room number")
     ])
     remarks = f.TextField(u'remarks', [
         Optional()
