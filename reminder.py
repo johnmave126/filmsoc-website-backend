@@ -31,7 +31,7 @@ def main():
         last_log = Log.select().where(
                 Log.model == 'Disk',
                 Log.model_refer == disk.id,
-                Log.Type == 'borrow',
+                Log.log_type == 'borrow',
                 Log.user_affected == disk.hold_by
             ).order_by(Log.created_at.desc()).get()
         if 'renew' not in last_log.content:
@@ -73,7 +73,7 @@ def main():
         reserve_log = Log.select().where(
                 Log.model == 'Disk',
                 Log.model_refer == disk.id,
-                Log.Type == 'reserve',
+                Log.log_type == 'reserve',
                 Log.user_affected == disk.reserved_by
             ).order_by(Log.created_at.desc()).get()
         if date.today() - reserve_log.created_at.date() > timedelta(2):
@@ -83,7 +83,7 @@ def main():
             Log.create(
                 model="Disk",
                 model_refer=disk.id,
-                Type="reserve",
+                log_type="reserve",
                 content="clear reservation for disk %s(automatically)" % 
                 disk.get_callnumber())
 
