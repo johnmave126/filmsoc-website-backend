@@ -284,8 +284,8 @@ class HookedResource(RestResource):
         # do validation first
         form = formclass(MultiDict(data))
         if not form.validate():
-            error = join(
-                [join(x, ', ') for x in form.errors.values()], ' | ')
+            error = ' | '.join(
+                [', '.join(x) for x in form.errors.values()])
             raise BusinessException(error, 1)
 
         return data
