@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block desc %}Regular Film Show of this week from Film Society, HKUSTSU. Candidate Films are {% for f in [1, 2, 3] %}{% set film = getattr(show, "film_%d" % f) %}{{film.title_en}}/{{film.title_ch}}&nbsp;{% endfor %}{% endblock %}
 {% block title %}Regular Film Show{% endblock %}
 {% block content %}
 <div class="rfs-wrapper">
