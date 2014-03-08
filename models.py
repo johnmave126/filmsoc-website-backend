@@ -262,7 +262,7 @@ class Disk(LogModel):
     avail_type = CharField(max_length=16)
 
     borrow_cnt = IntegerField(default=0)
-    rank = DecimalField(default=0)
+    rank = DecimalField(default=0, auto_round=True)
 
     class Meta:
         order_by = ('-id',)
